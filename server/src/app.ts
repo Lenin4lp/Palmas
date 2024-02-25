@@ -3,6 +3,7 @@ import express, { urlencoded } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import { connectionDB } from "./connection/connection";
 
 const app = express();
 
@@ -22,5 +23,5 @@ const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });
-
+connectionDB();
 export default app;
