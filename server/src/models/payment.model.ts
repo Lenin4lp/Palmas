@@ -16,13 +16,13 @@ import { Month } from "./month.model";
 })
 export class Payment extends Model {
   @Column({
-    type: DataType.STRING(10),
+    type: DataType.INTEGER,
     primaryKey: true,
     field: "id_pago",
     allowNull: false,
     unique: true,
   })
-  payment_id!: string;
+  payment_id!: number;
 
   @Column({
     type: DataType.STRING(15),

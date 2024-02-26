@@ -50,6 +50,13 @@ export class User extends Model {
   })
   user_password!: string;
 
+  @Column({
+    type: DataType.STRING(15),
+    allowNull: true,
+    field: "telefono",
+  })
+  user_phone!: string;
+
   @BeforeCreate
   static async automatizateId(user: User) {
     const generatedUuid = uuidv4().substring(0, 10);
