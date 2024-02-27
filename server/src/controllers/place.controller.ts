@@ -47,7 +47,7 @@ export const createPlace = async (req: Request, res: Response) => {
     }
     const newPlace = await Place.create({
       place_name,
-      pending_value,
+      pending_value: pending_value ?? 0,
       placeType_id,
     });
     res.json(newPlace);

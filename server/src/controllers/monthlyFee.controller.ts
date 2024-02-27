@@ -65,6 +65,20 @@ export const createMonthlyFee = async (req: Request, res: Response) => {
   }
 };
 
+// ? Update a monthly fee
+export const updateMonthlyFee = async (req: Request, res: Response) => {
+  const { monthlyFee_amount } = req.body;
+  const monthlyFee = await MonthlyFee.findByPk(req.params.id);
+  if (monthlyFee) {
+    await monthlyFee.update({
+      monthlyFee_amount,
+    });
+  } else {
+    return res.status(404).json(["Alicuota no encontrada"]);
+  }
+  res.json({ monthlyFee });
+};
+
 // ? Delete a monthly fee
 export const deleteMonthlyFee = async (req: Request, res: Response) => {
   const monthlyFee = await MonthlyFee.findByPk(req.params.id);
