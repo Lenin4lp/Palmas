@@ -59,6 +59,15 @@ export const login = async (req: Request, res: Response) => {
     });
 
     res.cookie("token", token);
+
+    res.json({
+      message: "Ingreso Exitoso",
+      id: userFound.user_id,
+      user_name: userFound.user_name,
+      user_email: userFound.user_email,
+      user_lastname: userFound.user_lastname,
+      token,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json(["Ha ocurrido un error con el servidor"]);

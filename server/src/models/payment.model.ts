@@ -32,6 +32,20 @@ export class Payment extends Model {
   deposit!: string;
 
   @Column({
+    type: DataType.STRING(15),
+    allowNull: true,
+    field: "transferencia",
+  })
+  transfer!: string;
+
+  @Column({
+    type: DataType.DECIMAL(6, 2),
+    allowNull: true,
+    field: "valor",
+  })
+  value!: number;
+
+  @Column({
     type: DataType.BOOLEAN,
     allowNull: true,
     field: "efectivo",
@@ -60,11 +74,6 @@ export class Payment extends Model {
   })
   place_id!: number;
 
-  @ForeignKey(() => Month)
-  @Column({
-    type: DataType.STRING(15),
-    field: "id_mes",
-    allowNull: false,
-  })
-  month_id!: string;
+  @BelongsTo(() => Place)
+  place!: Place;
 }

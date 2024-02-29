@@ -13,6 +13,7 @@ import { Year } from "./year.model";
 import { Payment } from "./payment.model";
 import { MonthlyFee } from "./monthlyFee.model";
 import { Place } from "./place.model";
+import { MonthlyDebtors } from "./montlyDebtors.model";
 
 @Table({
   tableName: "month",
@@ -33,6 +34,13 @@ export class Month extends Model {
   })
   month!: string;
 
+  @Column({
+    type: DataType.DATE,
+    allowNull: false,
+    field: "dia_pago",
+  })
+  pay_day!: Date;
+
   @ForeignKey(() => Year)
   @Column({
     type: DataType.STRING(4),
@@ -49,7 +57,7 @@ export class Month extends Model {
   })
   monthlyFee_id!: number;
 
-  @BelongsToMany(() => Place, () => Payment)
+  @BelongsToMany(() => Place, () => MonthlyDebtors)
   places!: Place[];
 
   @BelongsTo(() => MonthlyFee)

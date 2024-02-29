@@ -13,12 +13,7 @@ const router = Router();
 
 router.post("/login", validateSchema(loginSchema), login);
 router.get("/logout", logout);
-router.post(
-  "/register",
-  authRequired,
-  validateSchema(registerSchema),
-  userRegister
-);
+router.post("/register", validateSchema(registerSchema), userRegister);
 router.get("/verify", verifyToken);
 
 export default router;

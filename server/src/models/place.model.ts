@@ -15,6 +15,7 @@ import { Payment } from "./payment.model";
 import { Month } from "./month.model";
 import { Neighbor } from "./neighbor.model";
 import { NeighborPlace } from "./neighborPlace.model";
+import { MonthlyDebtors } from "./montlyDebtors.model";
 
 @Table({
   tableName: "inmueble",
@@ -39,7 +40,7 @@ export class Place extends Model {
   place_name!: string;
 
   @Column({
-    type: DataType.DECIMAL(4, 2),
+    type: DataType.DECIMAL(6, 2),
     field: "valor_pendiente",
     allowNull: false,
   })
@@ -59,6 +60,9 @@ export class Place extends Model {
   @BelongsToMany(() => Neighbor, () => NeighborPlace)
   neighbors!: Neighbor[];
 
-  @BelongsToMany(() => Month, () => Payment)
+  @BelongsToMany(() => Month, () => MonthlyDebtors)
   months!: Month[];
+
+  @HasMany(() => Payment)
+  payments!: Payment[];
 }
