@@ -56,6 +56,13 @@ export class Neighbor extends Model {
   })
   neighbor_phone!: string;
 
+  @Column({
+    type: DataType.STRING(10),
+    allowNull: false,
+    field: "documento_identidad",
+  })
+  identity_document!: string;
+
   @ForeignKey(() => NeighborRole)
   @Column({
     type: DataType.INTEGER,

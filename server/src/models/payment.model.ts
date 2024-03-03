@@ -74,6 +74,14 @@ export class Payment extends Model {
   })
   place_id!: number;
 
+  @ForeignKey(() => Month)
+  @Column({
+    type: DataType.STRING(15),
+    field: "id_mes",
+    allowNull: false,
+  })
+  month_id!: string;
+
   @BelongsTo(() => Place)
   place!: Place;
 }

@@ -15,7 +15,7 @@ import { Payment } from "./payment.model";
 import { Month } from "./month.model";
 import { Neighbor } from "./neighbor.model";
 import { NeighborPlace } from "./neighborPlace.model";
-import { MonthlyDebtors } from "./montlyDebtors.model";
+import { Vehicle } from "./vehicle.model";
 
 @Table({
   tableName: "inmueble",
@@ -60,9 +60,9 @@ export class Place extends Model {
   @BelongsToMany(() => Neighbor, () => NeighborPlace)
   neighbors!: Neighbor[];
 
-  @BelongsToMany(() => Month, () => MonthlyDebtors)
+  @BelongsToMany(() => Month, () => Payment)
   months!: Month[];
 
-  @HasMany(() => Payment)
-  payments!: Payment[];
+  @HasMany(() => Vehicle)
+  vehicles!: Vehicle[];
 }

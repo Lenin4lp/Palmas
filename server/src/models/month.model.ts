@@ -13,7 +13,6 @@ import { Year } from "./year.model";
 import { Payment } from "./payment.model";
 import { MonthlyFee } from "./monthlyFee.model";
 import { Place } from "./place.model";
-import { MonthlyDebtors } from "./montlyDebtors.model";
 
 @Table({
   tableName: "month",
@@ -57,7 +56,7 @@ export class Month extends Model {
   })
   monthlyFee_id!: number;
 
-  @BelongsToMany(() => Place, () => MonthlyDebtors)
+  @BelongsToMany(() => Place, () => Payment)
   places!: Place[];
 
   @BelongsTo(() => MonthlyFee)
