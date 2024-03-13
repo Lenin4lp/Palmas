@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { NeighborPlace } from "../models/neighborPlace.model";
+import { connection } from "../connection/connection";
 
 // ? Register a neighborPlace
 export const createNeighborPlace = async (req: Request, res: Response) => {

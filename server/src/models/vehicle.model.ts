@@ -18,12 +18,13 @@ export class Vehicle extends Model {
     type: DataType.STRING(10),
     primaryKey: true,
     field: "placa",
+    unique: true,
   })
   plate!: string;
 
   @ForeignKey(() => Place)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.STRING(11),
     allowNull: false,
     field: "id_inmueble",
   })

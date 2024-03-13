@@ -5,6 +5,11 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import { connectionDB } from "./connection/connection";
 import authRoutes from "./routes/auth.routes";
+import neighborRoutes from "./routes/neighbor.routes";
+import placeRoutes from "./routes/place.routes";
+import neighborPlaceRoutes from "./routes/neighborPlace.routes";
+import monthlyFeeRoutes from "./routes/monthlyFee.routes";
+import yearRoutes from "./routes/year.routes";
 
 const app = express();
 
@@ -18,6 +23,11 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api", authRoutes);
+app.use("/api", neighborRoutes);
+app.use("/api", placeRoutes);
+app.use("/api", neighborPlaceRoutes);
+app.use("/api", monthlyFeeRoutes);
+app.use("/api", yearRoutes);
 
 app.get("/", (_req, res) => {
   res.send("Hola mundo");

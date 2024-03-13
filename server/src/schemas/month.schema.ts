@@ -18,8 +18,8 @@ export const monthRegisterSchema = z.object({
     .min(2, {
       message: "El mes debe tener al menos 2 caracteres",
     })
-    .max(2, {
-      message: "El mes debe tener como maximo 2 caracteres",
+    .max(20, {
+      message: "El mes debe tener como maximo 20 caracteres",
     }),
   monthlyFee_id: z.number({
     required_error: "La alicuota es requerida",

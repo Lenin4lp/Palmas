@@ -5,6 +5,7 @@ import {
   Column,
   AutoIncrement,
   HasMany,
+  AfterSync,
 } from "sequelize-typescript";
 import { Neighbor } from "./neighbor.model";
 
@@ -32,4 +33,29 @@ export class NeighborRole extends Model {
 
   @HasMany(() => Neighbor)
   neighbors!: Neighbor[];
+
+  @AfterSync
+  static createDefaultRoles = async () => {
+    const defaultRoles = [
+      {
+        role_name: "Propietario",
+      },
+      {
+        role_name: "Arrendatario",
+      },
+    ];
+    try {
+      for (const singleRole of defaultRoles) {
+        await NeighborRole.findOrCreate({
+          where: {
+            role_name: singleRole.role_name,
+          },
+          defaults: singleRole,
+        });
+      }
+      console.log("Roles por defecto creados exitosamente");
+    } catch (error) {
+      console.log("Oops, algo malio sal: ", error);
+    }
+  };
 }

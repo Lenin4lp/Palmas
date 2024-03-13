@@ -12,6 +12,7 @@ import { Payment } from "../models/payment.model";
 import { NeighborPlace } from "../models/neighborPlace.model";
 import { Vehicle } from "../models/vehicle.model";
 import { VehicleType } from "../models/vehicleType.model";
+import { MonthlyDebt } from "../models/monthlyDebt.model";
 
 export const connection = new Sequelize({
   dialect: "mysql",
@@ -29,12 +30,13 @@ export const connection = new Sequelize({
     PlaceType,
     Month,
     Year,
+    MonthlyDebt,
     MonthlyFee,
     Payment,
     Vehicle,
     VehicleType,
   ],
-  sync: { force: true },
+  sync: { alter: true },
 });
 
 export async function connectionDB() {

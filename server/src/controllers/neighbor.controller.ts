@@ -8,9 +8,7 @@ import { Month } from "../models/month.model";
 export const getNeighbors = async (req: Request, res: Response) => {
   try {
     const neighbors = await Neighbor.findAll({
-      include: [
-        { model: Place, include: [{ model: Payment, include: [Month] }] },
-      ],
+      include: [{ model: Place }],
     });
     res.json(neighbors);
   } catch (error) {
@@ -32,12 +30,17 @@ export const getNeighbor = async (req: Request, res: Response) => {
 
 // ? Create a neighbor
 export const createNeighbor = async (req: Request, res: Response) => {
-  const { neighbor_name, neighbor_lastname, neighbor_email, neighbor_phone } =
-    req.body;
+  const {
+    neighbor_name,
+    neighbor_lastname,
+    neighbor_email,
+    neighbor_phone,
+    identity_document,
+    role_id,
+  } = req.body;
   try {
     const neighborFound = await Neighbor.findOne({
       where: {
-        neighbor_email: neighbor_email,
         neighbor_name: neighbor_name,
         neighbor_lastname: neighbor_lastname,
       },
@@ -50,6 +53,8 @@ export const createNeighbor = async (req: Request, res: Response) => {
       neighbor_lastname,
       neighbor_email,
       neighbor_phone,
+      identity_document,
+      role_id,
     });
     res.json(newNeighbor);
   } catch (error) {
@@ -60,8 +65,13 @@ export const createNeighbor = async (req: Request, res: Response) => {
 
 // ? Update a neighbor
 export const updateNeighbor = async (req: Request, res: Response) => {
-  const { neighbor_name, neighbor_lastname, neighbor_email, neighbor_phone } =
-    req.body;
+  const {
+    neighbor_name,
+    neighbor_lastname,
+    neighbor_email,
+    neighbor_phone,
+    role_id,
+  } = req.body;
   const neighbor = await Neighbor.findByPk(req.params.id);
   if (neighbor) {
     await neighbor.update({
@@ -69,6 +79,7 @@ export const updateNeighbor = async (req: Request, res: Response) => {
       neighbor_lastname,
       neighbor_email,
       neighbor_phone,
+      role_id,
     });
   } else {
     return res.status(404).json(["Vecino no encontrado"]);

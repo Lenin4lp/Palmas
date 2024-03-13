@@ -1,4 +1,12 @@
-import { Model, DataType, Table, Column, HasMany } from "sequelize-typescript";
+import {
+  Model,
+  DataType,
+  Table,
+  Column,
+  HasMany,
+  AfterSync,
+  AutoIncrement,
+} from "sequelize-typescript";
 import { Vehicle } from "./vehicle.model";
 
 @Table({
@@ -6,12 +14,14 @@ import { Vehicle } from "./vehicle.model";
   timestamps: false,
 })
 export class VehicleType extends Model {
+  @AutoIncrement
   @Column({
     type: DataType.INTEGER,
     primaryKey: true,
     field: "id_tipo_vehiculo",
+    allowNull: false,
   })
-  vehicleType_id!: string;
+  vehicleType_id!: number;
 
   @Column({
     type: DataType.STRING(40),
@@ -22,4 +32,29 @@ export class VehicleType extends Model {
 
   @HasMany(() => Vehicle)
   vehicles!: Vehicle[];
+
+  @AfterSync
+  static createDefaultTypes = async () => {
+    const defaultTypes = [
+      {
+        vehicleType: "Automóvil",
+      },
+      {
+        vehicleType: "Motocicleta",
+      },
+    ];
+    try {
+      for (const singleType of defaultTypes) {
+        await VehicleType.findOrCreate({
+          where: {
+            vehicleType: singleType.vehicleType,
+          },
+          defaults: singleType,
+        });
+      }
+      console.log("Tipos de vehículo por defecto creados exitosamente");
+    } catch (error) {
+      console.log("Oops, algo malio sal:", error);
+    }
+  };
 }

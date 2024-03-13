@@ -9,6 +9,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { Place } from "./place.model";
 import { Month } from "./month.model";
+import { MonthlyDebt } from "./monthlyDebt.model";
 
 @Table({
   tableName: "pago_alicuota",
@@ -66,22 +67,14 @@ export class Payment extends Model {
   })
   date!: string;
 
-  @ForeignKey(() => Place)
-  @Column({
-    type: DataType.INTEGER,
-    field: "id_inmueble",
-    allowNull: false,
-  })
-  place_id!: number;
-
-  @ForeignKey(() => Month)
+  @ForeignKey(() => MonthlyDebt)
   @Column({
     type: DataType.STRING(15),
-    field: "id_mes",
     allowNull: false,
+    field: "id_deuda",
   })
-  month_id!: string;
+  monthlyDebt_id!: string;
 
-  @BelongsTo(() => Place)
-  place!: Place;
+  @BelongsTo(() => MonthlyDebt)
+  monthlyDebt!: MonthlyDebt;
 }

@@ -2,10 +2,9 @@ import { z } from "zod";
 
 export const placeRegisterSchema = z.object({
   place_name: z
-    .string({
-      required_error: "El nombre es requerido",
-    })
-    .min(3, "El nombre debe tener al menos 3 caracteres"),
+    .string()
+    .min(3, "El nombre debe tener al menos 3 caracteres")
+    .optional(),
   pending_value: z
     .number()
     .min(0, "El valor pendiente debe ser mayor o igual a 0")

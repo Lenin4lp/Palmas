@@ -43,7 +43,6 @@ export class Neighbor extends Model {
 
   @Column({
     type: DataType.STRING(40),
-    allowNull: false,
     field: "correo_vecino",
     unique: true,
   })
@@ -51,13 +50,13 @@ export class Neighbor extends Model {
 
   @Column({
     type: DataType.STRING(10),
-    allowNull: false,
+    allowNull: true,
     field: "telefono",
   })
   neighbor_phone!: string;
 
   @Column({
-    type: DataType.STRING(10),
+    type: DataType.STRING(11),
     allowNull: false,
     field: "documento_identidad",
   })

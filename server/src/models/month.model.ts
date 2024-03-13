@@ -13,6 +13,7 @@ import { Year } from "./year.model";
 import { Payment } from "./payment.model";
 import { MonthlyFee } from "./monthlyFee.model";
 import { Place } from "./place.model";
+import { MonthlyDebt } from "./monthlyDebt.model";
 
 @Table({
   tableName: "month",
@@ -21,7 +22,7 @@ import { Place } from "./place.model";
 export class Month extends Model {
   @Column({
     type: DataType.STRING(15),
-    allowNull: false,
+    allowNull: true,
     field: "id_mes",
   })
   month_id!: string;
@@ -34,11 +35,18 @@ export class Month extends Model {
   month!: string;
 
   @Column({
-    type: DataType.DATE,
-    allowNull: false,
+    type: DataType.INTEGER,
+    allowNull: true,
     field: "dia_pago",
   })
-  pay_day!: Date;
+  pay_day!: number;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: true,
+    field: "estado",
+  })
+  month_status!: boolean;
 
   @ForeignKey(() => Year)
   @Column({
@@ -56,7 +64,7 @@ export class Month extends Model {
   })
   monthlyFee_id!: number;
 
-  @BelongsToMany(() => Place, () => Payment)
+  @BelongsToMany(() => Place, () => MonthlyDebt)
   places!: Place[];
 
   @BelongsTo(() => MonthlyFee)

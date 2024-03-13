@@ -8,12 +8,7 @@ import { Month } from "../models/month.model";
 // ? Obtain all places
 export const getPlaces = async (req: Request, res: Response) => {
   try {
-    const places = await Place.findAll({
-      include: [
-        { model: NeighborPlace, include: [{ model: Neighbor }] },
-        { model: Payment, include: [Month] },
-      ],
-    });
+    const places = await Place.findAll();
     res.json(places);
   } catch (error) {
     console.log(error);
@@ -23,30 +18,16 @@ export const getPlaces = async (req: Request, res: Response) => {
 
 // ? Obtain a place
 export const getPlace = async (req: Request, res: Response) => {
-  const place = await Place.findByPk(req.params.id, {
-    include: [
-      { model: NeighborPlace, include: [{ model: Neighbor }] },
-      { model: Payment, include: [Month] },
-    ],
-  });
+  const place = await Place.findByPk(req.params.id);
   if (!place) return res.status(404).json(["Lugar no encontrado"]);
   res.json({ place });
 };
 
 // ? Create a place
 export const createPlace = async (req: Request, res: Response) => {
-  const { place_id, place_name, pending_value, placeType_id } = req.body;
+  const { pending_value, placeType_id } = req.body;
   try {
-    const placeFound = await Place.findOne({
-      where: {
-        place_id: place_id,
-      },
-    });
-    if (placeFound) {
-      return res.status(400).json(["Ya existe un lugar con este id"]);
-    }
     const newPlace = await Place.create({
-      place_name,
       pending_value: pending_value ?? 0,
       placeType_id,
     });

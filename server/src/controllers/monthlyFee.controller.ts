@@ -47,16 +47,16 @@ export const getMonthlyFee = async (req: Request, res: Response) => {
 
 // ? Create a monthly fee
 export const createMonthlyFee = async (req: Request, res: Response) => {
-  const { monthlyFee_amount } = req.body;
+  const { monthlyFee_value } = req.body;
   try {
     const monthlyFeeFound = await MonthlyFee.findOne({
-      where: { monthlyFee_amount: monthlyFee_amount },
+      where: { monthlyFee_value: monthlyFee_value },
     });
     if (monthlyFeeFound) {
       return res.status(500).json(["Ya existe una alicuota con este monto"]);
     }
     const newMonth = await MonthlyFee.create({
-      monthlyFee_amount,
+      monthlyFee_value,
     });
     res.json(newMonth);
   } catch (error) {
@@ -67,11 +67,11 @@ export const createMonthlyFee = async (req: Request, res: Response) => {
 
 // ? Update a monthly fee
 export const updateMonthlyFee = async (req: Request, res: Response) => {
-  const { monthlyFee_amount } = req.body;
+  const { monthlyFee_value } = req.body;
   const monthlyFee = await MonthlyFee.findByPk(req.params.id);
   if (monthlyFee) {
     await monthlyFee.update({
-      monthlyFee_amount,
+      monthlyFee_value,
     });
   } else {
     return res.status(404).json(["Alicuota no encontrada"]);

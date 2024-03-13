@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Year } from "../models/year.model";
 import { Month } from "../models/month.model";
+import { MonthlyFee } from "../models/monthlyFee.model";
 
 // ? Obtain all years
 export const getYears = async (req: Request, res: Response) => {
@@ -34,7 +35,7 @@ export const getYear = async (req: Request, res: Response) => {
 
 // ? Create a year
 export const createYear = async (req: Request, res: Response) => {
-  const { year } = req.body;
+  const { year, monthlyFee_id } = req.body;
   try {
     const yearFound = await Year.findOne({
       where: { year: year },
@@ -45,7 +46,35 @@ export const createYear = async (req: Request, res: Response) => {
     const newYear = await Year.create({
       year,
     });
-    res.json(newYear);
+
+    const monthlyFeeCount = await MonthlyFee.count();
+
+    if (monthlyFeeCount > 0) {
+      const months = [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+      ];
+      for (const month of months) {
+        await Month.create({
+          month,
+          month_year: newYear.year,
+          monthlyFee_id: monthlyFee_id ?? 1,
+        });
+      }
+      res.json(newYear);
+    } else {
+      res.status(400).json(["No hay alicuotas creadas"]);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json(["Error al crear el año"]);

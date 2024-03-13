@@ -5,7 +5,7 @@ import {
   Column,
   AutoIncrement,
   HasMany,
-  HasOne,
+  AfterSync,
 } from "sequelize-typescript";
 import { Place } from "./place.model";
 
@@ -33,4 +33,29 @@ export class PlaceType extends Model {
 
   @HasMany(() => Place)
   places!: Place[];
+
+  @AfterSync
+  static createDefaultTypes = async () => {
+    const defaultTypes = [
+      {
+        placetype_name: "Casa",
+      },
+      {
+        placetype_name: "Local",
+      },
+    ];
+    try {
+      for (const singleType of defaultTypes) {
+        await PlaceType.findOrCreate({
+          where: {
+            placetype_name: singleType.placetype_name,
+          },
+          defaults: singleType,
+        });
+      }
+      console.log("Tipos de inmueble por defecto creados exitosamente");
+    } catch (error) {
+      console.log("Oops, algo malio sal: ", error);
+    }
+  };
 }

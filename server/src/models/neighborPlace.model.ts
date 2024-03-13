@@ -26,9 +26,9 @@ export class NeighborPlace extends Model {
 
   @ForeignKey(() => Place)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.STRING(11),
     field: "id_inmueble",
     allowNull: false,
   })
-  place_id!: number;
+  place_id!: string;
 }
