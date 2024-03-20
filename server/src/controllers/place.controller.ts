@@ -4,11 +4,22 @@ import { NeighborPlace } from "../models/neighborPlace.model";
 import { Neighbor } from "../models/neighbor.model";
 import { Payment } from "../models/payment.model";
 import { Month } from "../models/month.model";
+import { Sequelize } from "sequelize-typescript";
 
 // ? Obtain all places
 export const getPlaces = async (req: Request, res: Response) => {
   try {
-    const places = await Place.findAll();
+    const places = await Place.findAll({
+      order: [
+        ["placeType_id", "ASC"],
+        [
+          Sequelize.literal(
+            "CAST(SUBSTRING_INDEX(place_name, ' ', -1) AS UNSIGNED)"
+          ),
+          "ASC",
+        ],
+      ],
+    });
     res.json(places);
   } catch (error) {
     console.log(error);

@@ -9,6 +9,7 @@ export const getNeighbors = async (req: Request, res: Response) => {
   try {
     const neighbors = await Neighbor.findAll({
       include: [{ model: Place }],
+      order: [["neighbor_lastname", "ASC"]],
     });
     res.json(neighbors);
   } catch (error) {
@@ -20,9 +21,7 @@ export const getNeighbors = async (req: Request, res: Response) => {
 // ? Obtain a neighbor
 export const getNeighbor = async (req: Request, res: Response) => {
   const neighbor = await Neighbor.findByPk(req.params.id, {
-    include: [
-      { model: Place, include: [{ model: Payment, include: [Month] }] },
-    ],
+    include: [{ model: Place }],
   });
   if (!neighbor) return res.status(404).json(["Vecino no encontrado"]);
   res.json({ neighbor });

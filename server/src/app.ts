@@ -10,6 +10,7 @@ import placeRoutes from "./routes/place.routes";
 import neighborPlaceRoutes from "./routes/neighborPlace.routes";
 import monthlyFeeRoutes from "./routes/monthlyFee.routes";
 import yearRoutes from "./routes/year.routes";
+import rolesRoutes from "./routes/neighborRoles.routes";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/api", placeRoutes);
 app.use("/api", neighborPlaceRoutes);
 app.use("/api", monthlyFeeRoutes);
 app.use("/api", yearRoutes);
+app.use("/api", rolesRoutes);
 
 app.get("/", (_req, res) => {
   res.send("Hola mundo");

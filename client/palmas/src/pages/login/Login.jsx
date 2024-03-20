@@ -18,13 +18,13 @@ const Login = () => {
     logout,
   } = useAuth();
 
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" />;
-  }
-
   const onSubmit = handleSubmit((data) => {
     signin(data);
   });
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" />;
+  }
   return (
     <div className=" font-mono h-screen w-screen flex justify-center items-center bg-white md:bg-gradient-to-br from-[#852655] to-[#8f0e2a]">
       <div className=" h-full w-full md:h-[500px] md:w-[800px] bg-white rounded-md grid grid-cols-1 md:grid-cols-2 md:m-3">
