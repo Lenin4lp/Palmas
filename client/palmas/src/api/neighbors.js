@@ -12,5 +12,5 @@ export const getRoles = () => axios.get("/roles");
 export const getRole = (id) => axios.get(`/role/${id}`);
 
 // ? Neighbor places
-export const addPlaceFromNeighbor = (neighborId, placeId) =>
-  axios.post(`/placeNeighbor/${neighborId}`, { placeId });
+export const addPlaceFromNeighbor = (id, place_id) =>
+  axios.post(`/placeNeighbor/${id}`, { place_id });

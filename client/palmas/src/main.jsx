@@ -65,9 +65,16 @@ const router = createBrowserRouter([
       {
         path: "/vecinos/modificar/:id",
         element: <ModifyNeighbor />,
-        loader: ({ params }) => {
+        loader: async ({ params }) => {
           const { id } = params;
-          return getNeighbor(id);
+          const neighborPromise = getNeighbor(id);
+          const rolePromise = getRoles();
+
+          const [neighborData, roleData] = await Promise.all([
+            neighborPromise,
+            rolePromise,
+          ]);
+          return { neighbor: neighborData, roles: roleData };
         },
       },
       {
