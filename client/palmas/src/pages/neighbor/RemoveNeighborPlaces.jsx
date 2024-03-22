@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import ContentComponent from "../../components/ContentComponent";
 import { useLoaderData, useNavigation, Link } from "react-router-dom";
-import { addPlaceFromNeighbor } from "../../api/neighbors";
+import {
+  addPlaceFromNeighbor,
+  deletePlaceFromNeighbor,
+} from "../../api/neighbors";
 import { Toaster, toast } from "sonner";
 import PlaceButton from "../../components/PlaceButton";
 import Modal from "../../components/Modal";
 
-function NeighborPlaces() {
+function RemoveNeighborPlaces() {
   const neighborData = useLoaderData();
   const neighbor = neighborData.neighbor.data.neighbor;
   const places = neighborData.places.data;
@@ -17,8 +20,19 @@ function NeighborPlaces() {
   const [placesTable, setPlacesTable] = useState([]);
   const [open, setOpen] = useState(false);
 
+  const removePlace = async (id, placeIds) => {
+    try {
+      const res = await deletePlaceFromNeighbor(id, placeIds);
+      if (res.status === 204) {
+        toast.success("Inmueble(s) desvinculado(s) con éxito");
+      }
+    } catch (error) {
+      error.response.data.map((err) => toast.error(err));
+    }
+  };
+
   const filteredPlaces = places.filter((place) => {
-    return !place.neighbors.some(
+    return place.neighbors.some(
       (neighborModel) => neighborModel.neighbor_id === neighbor.neighbor_id
     );
   });
@@ -53,20 +67,11 @@ function NeighborPlaces() {
       }
     }
   };
-  const addPlace = async (neighborId, placeIds) => {
-    try {
-      const res = await addPlaceFromNeighbor(neighborId, placeIds);
-      if (res.status !== 200) {
-        toast.success("Inmueble(s) agregado(s) con éxito");
-      }
-    } catch (error) {
-      error.response.data.map((err) => toast.error(err));
-    }
-  };
 
   if (navigation.state === "loading") {
     return <div>Cargando</div>;
   }
+
   return (
     <ContentComponent>
       <div className=" flex  justify-center items-center">
@@ -79,7 +84,7 @@ function NeighborPlaces() {
             </div>
             <div className=" my-3">
               <h1 className=" text-center text-white text-base font-medium">
-                ¿Estás seguro de agregar el/los inmueble(s)?
+                ¿Estás seguro de desvincular el/los inmueble(s)?
               </h1>
             </div>
             <div className=" flex justify-center items-center">
@@ -89,14 +94,14 @@ function NeighborPlaces() {
                     onClick={() =>
                       Promise.all(
                         selectedPlaces.map((selectedPlace) => {
-                          return addPlace(
+                          return removePlace(
                             neighbor.neighbor_id,
-                            `${selectedPlace}`
+                            selectedPlace
                           );
                         })
                       )
                         .then(() => {
-                          toast.success("Se agregaron los inmuebles");
+                          toast.success("Se desvincularon los inmuebles");
                           // Todas las operaciones se completaron con éxito
                           setTimeout(() => {
                             window.location.href = "/vecinos";
@@ -158,7 +163,7 @@ function NeighborPlaces() {
           <div className=" mt-2 md:mt-5 w-screen h-fit bg-gradient-to-b from-[#852655] to-[#8f0e2a]">
             <div className=" md:mx-[70px] p-10">
               <h1 className=" text-center text-[13px] md:text-base text-white">
-                Selecciona los inmuebles relacionados al vecino
+                Selecciona los inmuebles a desvincular
               </h1>
             </div>
           </div>
@@ -245,7 +250,7 @@ function NeighborPlaces() {
                           <PlaceButton
                             color={
                               selectedPlaces.includes(place.place_id)
-                                ? "bg-[#4eba6d]"
+                                ? "bg-black"
                                 : "bg-[#8f0e2a]"
                             }
                             svg={
@@ -256,23 +261,26 @@ function NeighborPlaces() {
                                   fill="none"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                                  <g
+                                    id="SVGRepo_bgCarrier"
+                                    stroke-width="0"
+                                  ></g>
                                   <g
                                     id="SVGRepo_tracerCarrier"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
                                   ></g>
                                   <g id="SVGRepo_iconCarrier">
                                     {" "}
-                                    <g id="Navigation / House_Check">
+                                    <g id="Navigation / House_Remove">
                                       {" "}
                                       <path
                                         id="Vector"
-                                        d="M15 11.0001L11 15.0001L9 13.0001M4 16.8002V11.4522C4 10.9179 4 10.6506 4.06497 10.4019C4.12255 10.1816 4.21779 9.97307 4.3457 9.78464C4.49004 9.57201 4.69064 9.39569 5.09277 9.04383L9.89436 4.84244C10.6398 4.19014 11.0126 3.86397 11.4324 3.73982C11.8026 3.63035 12.1972 3.63035 12.5674 3.73982C12.9875 3.86406 13.3608 4.19054 14.1074 4.84383L18.9074 9.04383C19.3096 9.39569 19.5102 9.57201 19.6546 9.78464C19.7825 9.97307 19.877 10.1816 19.9346 10.4019C19.9995 10.6506 20 10.9179 20 11.4522V16.8037C20 17.9216 20 18.4811 19.7822 18.9086C19.5905 19.2849 19.2837 19.5906 18.9074 19.7823C18.48 20.0001 17.921 20.0001 16.8031 20.0001H7.19691C6.07899 20.0001 5.5192 20.0001 5.0918 19.7823C4.71547 19.5906 4.40973 19.2849 4.21799 18.9086C4 18.4807 4 17.9203 4 16.8002Z"
+                                        d="M9 13.0001H15M4 16.8002V11.4522C4 10.9179 4 10.6506 4.06497 10.4019C4.12255 10.1816 4.21779 9.97307 4.3457 9.78464C4.49004 9.57201 4.69064 9.39569 5.09277 9.04383L9.89436 4.84244C10.6398 4.19014 11.0126 3.86397 11.4324 3.73982C11.8026 3.63035 12.1972 3.63035 12.5674 3.73982C12.9875 3.86406 13.3608 4.19054 14.1074 4.84383L18.9074 9.04383C19.3096 9.39569 19.5102 9.57201 19.6546 9.78464C19.7825 9.97307 19.877 10.1816 19.9346 10.4019C19.9995 10.6506 20 10.9179 20 11.4522V16.8037C20 17.9216 20 18.4811 19.7822 18.9086C19.5905 19.2849 19.2837 19.5906 18.9074 19.7823C18.48 20.0001 17.921 20.0001 16.8031 20.0001H7.19691C6.07899 20.0001 5.5192 20.0001 5.0918 19.7823C4.71547 19.5906 4.40973 19.2849 4.21799 18.9086C4 18.4807 4 17.9203 4 16.8002Z"
                                         className=" stroke-white"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
                                       ></path>{" "}
                                     </g>{" "}
                                   </g>
@@ -325,7 +333,7 @@ function NeighborPlaces() {
                           <PlaceButton
                             color={
                               selectedPlaces.includes(place.place_id)
-                                ? "bg-[#4eba6d]"
+                                ? "bg-black"
                                 : "bg-[#8f0e2a]"
                             }
                             svg={
@@ -336,23 +344,26 @@ function NeighborPlaces() {
                                   fill="none"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                                  <g
+                                    id="SVGRepo_bgCarrier"
+                                    stroke-width="0"
+                                  ></g>
                                   <g
                                     id="SVGRepo_tracerCarrier"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
                                   ></g>
                                   <g id="SVGRepo_iconCarrier">
                                     {" "}
-                                    <g id="Navigation / House_Check">
+                                    <g id="Navigation / House_Remove">
                                       {" "}
                                       <path
                                         id="Vector"
-                                        d="M15 11.0001L11 15.0001L9 13.0001M4 16.8002V11.4522C4 10.9179 4 10.6506 4.06497 10.4019C4.12255 10.1816 4.21779 9.97307 4.3457 9.78464C4.49004 9.57201 4.69064 9.39569 5.09277 9.04383L9.89436 4.84244C10.6398 4.19014 11.0126 3.86397 11.4324 3.73982C11.8026 3.63035 12.1972 3.63035 12.5674 3.73982C12.9875 3.86406 13.3608 4.19054 14.1074 4.84383L18.9074 9.04383C19.3096 9.39569 19.5102 9.57201 19.6546 9.78464C19.7825 9.97307 19.877 10.1816 19.9346 10.4019C19.9995 10.6506 20 10.9179 20 11.4522V16.8037C20 17.9216 20 18.4811 19.7822 18.9086C19.5905 19.2849 19.2837 19.5906 18.9074 19.7823C18.48 20.0001 17.921 20.0001 16.8031 20.0001H7.19691C6.07899 20.0001 5.5192 20.0001 5.0918 19.7823C4.71547 19.5906 4.40973 19.2849 4.21799 18.9086C4 18.4807 4 17.9203 4 16.8002Z"
+                                        d="M9 13.0001H15M4 16.8002V11.4522C4 10.9179 4 10.6506 4.06497 10.4019C4.12255 10.1816 4.21779 9.97307 4.3457 9.78464C4.49004 9.57201 4.69064 9.39569 5.09277 9.04383L9.89436 4.84244C10.6398 4.19014 11.0126 3.86397 11.4324 3.73982C11.8026 3.63035 12.1972 3.63035 12.5674 3.73982C12.9875 3.86406 13.3608 4.19054 14.1074 4.84383L18.9074 9.04383C19.3096 9.39569 19.5102 9.57201 19.6546 9.78464C19.7825 9.97307 19.877 10.1816 19.9346 10.4019C19.9995 10.6506 20 10.9179 20 11.4522V16.8037C20 17.9216 20 18.4811 19.7822 18.9086C19.5905 19.2849 19.2837 19.5906 18.9074 19.7823C18.48 20.0001 17.921 20.0001 16.8031 20.0001H7.19691C6.07899 20.0001 5.5192 20.0001 5.0918 19.7823C4.71547 19.5906 4.40973 19.2849 4.21799 18.9086C4 18.4807 4 17.9203 4 16.8002Z"
                                         className=" stroke-white"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
                                       ></path>{" "}
                                     </g>{" "}
                                   </g>
@@ -413,4 +424,4 @@ function NeighborPlaces() {
   );
 }
 
-export default NeighborPlaces;
+export default RemoveNeighborPlaces;

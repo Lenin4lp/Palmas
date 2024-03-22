@@ -11,6 +11,7 @@ import neighborPlaceRoutes from "./routes/neighborPlace.routes";
 import monthlyFeeRoutes from "./routes/monthlyFee.routes";
 import yearRoutes from "./routes/year.routes";
 import rolesRoutes from "./routes/neighborRoles.routes";
+import placeTypesRoutes from "./routes/placeTypes.routes";
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/api", neighborPlaceRoutes);
 app.use("/api", monthlyFeeRoutes);
 app.use("/api", yearRoutes);
 app.use("/api", rolesRoutes);
+app.use("/api", placeTypesRoutes);
 
 app.get("/", (_req, res) => {
   res.send("Hola mundo");

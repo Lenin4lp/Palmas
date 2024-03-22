@@ -4,6 +4,8 @@ import ContentComponent from "../../components/ContentComponent";
 import { useForm } from "react-hook-form";
 import { Toaster, toast } from "sonner";
 import RoleCard from "../../components/RoleCard";
+import Modal from "../../components/Modal";
+import { updateNeighbor } from "../../api/neighbors";
 
 function ModifyNeighbor() {
   const { id } = useParams();
@@ -12,30 +14,171 @@ function ModifyNeighbor() {
   const roles = neighborData.roles.data;
   const navigation = useNavigation();
   const [roleId, setRoleId] = useState(neighbor.role_id);
+  const [open, setOpen] = useState(false);
 
   const { register, handleSubmit } = useForm();
 
   console.log(neighbor);
-  const modifyNeighbor = async (id, data) => {
+  const modifyNeighbor = async (id, neighbor) => {
     try {
-      const res = await modifyNeighbor(id, data);
+      const res = await updateNeighbor(id, neighbor);
       if (res.status === 200) {
         toast.success("Vecino modificado con éxito");
         setTimeout(() => {
           window.location.href = `/vecinos/`;
-        });
+        }, 2000);
       }
     } catch (error) {
-      error.response.data.map((err) => toast.error(err));
+      error.response?.data.map((err) => toast.error(err));
     }
   };
-  const onSubmit = handleSubmit((data) => {});
+  const onSubmit = handleSubmit((data) => {
+    const modifiedData = {};
+
+    data.role_id = roleId;
+
+    if (data.role_id === neighbor.role_id) {
+      data.role_id = "";
+    } else {
+      if (data.role_id === "1") {
+        data.role_id = 1;
+      } else if (data.role_id === "2") {
+        data.role_id = 2;
+      }
+    }
+
+    for (const key in data) {
+      if (data[key] !== "") {
+        modifiedData[key] = data[key];
+      }
+    }
+
+    modifyNeighbor(id, modifiedData);
+  });
 
   if (navigation.state === "loading") {
     return <div>Cargando</div>;
   }
   return (
     <ContentComponent>
+      <Modal open={open} onClose={() => setOpen(false)}>
+        <div className=" block m-3">
+          <div className=" flex justify-center items-center">
+            <svg
+              className=" h-[100px] w-auto fill-white"
+              version="1.1"
+              id="Capa_1"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 29.536 29.536"
+              xml:space="preserve"
+            >
+              <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+              <g
+                id="SVGRepo_tracerCarrier"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              ></g>
+              <g id="SVGRepo_iconCarrier">
+                {" "}
+                <g>
+                  {" "}
+                  <path d="M14.768,0C6.611,0,0,6.609,0,14.768c0,8.155,6.611,14.767,14.768,14.767s14.768-6.612,14.768-14.767 C29.535,6.609,22.924,0,14.768,0z M14.768,27.126c-6.828,0-12.361-5.532-12.361-12.359c0-6.828,5.533-12.362,12.361-12.362 c6.826,0,12.359,5.535,12.359,12.362C27.127,21.594,21.594,27.126,14.768,27.126z"></path>{" "}
+                  <path d="M14.385,19.337c-1.338,0-2.289,0.951-2.289,2.34c0,1.336,0.926,2.339,2.289,2.339c1.414,0,2.314-1.003,2.314-2.339 C16.672,20.288,15.771,19.337,14.385,19.337z"></path>{" "}
+                  <path d="M14.742,6.092c-1.824,0-3.34,0.513-4.293,1.053l0.875,2.804c0.668-0.462,1.697-0.772,2.545-0.772 c1.285,0.027,1.879,0.644,1.879,1.543c0,0.85-0.67,1.697-1.494,2.701c-1.156,1.364-1.594,2.701-1.516,4.012l0.025,0.669h3.42 v-0.463c-0.025-1.158,0.387-2.162,1.311-3.215c0.979-1.08,2.211-2.366,2.211-4.321C19.705,7.968,18.139,6.092,14.742,6.092z"></path>{" "}
+                  <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g>{" "}
+                  <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g>{" "}
+                  <g> </g>{" "}
+                </g>{" "}
+              </g>
+            </svg>
+          </div>
+
+          <div className=" my-5">
+            <h1 className=" text-center text-white text-base font-medium">
+              ¿Qué acción desea realizar con los inmuebles?
+            </h1>
+          </div>
+          <div className=" flex justify-center items-center">
+            <div className=" my-2 grid grid-cols-2">
+              <div className=" mx-4">
+                <button
+                  onClick={() =>
+                    (window.location.href = `/vecinos/${id}/inmuebles`)
+                  }
+                  className=" flex group p-2 active:transform active:scale-90 border border-white bg-white rounded-lg hover:bg-[#146898] text-black font-semibold hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  <svg
+                    className=" h-[25px] mr-[7px] w-auto"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      {" "}
+                      <g id="Edit / Add_Plus_Circle">
+                        {" "}
+                        <path
+                          id="Vector"
+                          d="M8 12H12M12 12H16M12 12V16M12 12V8M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z"
+                          className=" stroke-[#146898] group-hover:stroke-white transition duration-300 "
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>{" "}
+                      </g>{" "}
+                    </g>
+                  </svg>
+                  <h1>Añadir</h1>
+                </button>
+              </div>
+              <div className=" mx-4">
+                <button
+                  onClick={() =>
+                    (window.location.href = `/vecinos/${id}/inmuebles/remove`)
+                  }
+                  className=" p-2 group flex active:transform active:scale-90 border border-gray-400 rounded-lg hover:bg-[#ad283a] bg-white text-black hover:text-white text-[12px] md:text-sm lg:text-base font-bold duration-500"
+                >
+                  <svg
+                    className=" h-[25px] mr-[7px] w-auto"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      {" "}
+                      <g id="Edit / Remove_Minus_Circle">
+                        {" "}
+                        <path
+                          id="Vector"
+                          d="M8 12H16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z"
+                          className=" stroke-[#ad283a] group-hover:stroke-white transition duration-300 "
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>{" "}
+                      </g>{" "}
+                    </g>
+                  </svg>
+                  <h1>Quitar</h1>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
       <div className="block">
         <div className=" h-[70px] sm:h-[100px] w-screen md:px-[70px] bg-gradient-to-r from-[#852655] to-[#8f0e2a]">
           <div className=" flex h-full justify-start px-10 items-center">
@@ -71,7 +214,10 @@ function ModifyNeighbor() {
             </h1>
           </div>
           <div className="  ">
-            <button className=" p-2 mx-5 md:mx-0 my-3 md:my-0 text-sm md:text-base bg-[#8f0e2a] hover:bg-[#852655] transition duration-300 text-white rounded-lg">
+            <button
+              onClick={() => setOpen(true)}
+              className=" p-2 mx-5 md:mx-0 my-3 md:my-0 text-sm md:text-base bg-[#8f0e2a] hover:bg-[#852655] transition duration-300 text-white rounded-lg"
+            >
               Modificar inmuebles
             </button>
           </div>
@@ -150,7 +296,7 @@ function ModifyNeighbor() {
                         placeholder={neighbor.neighbor_name}
                         type="text"
                         {...register("neighbor_name", {
-                          required: true,
+                          required: false,
                         })}
                         className=" w-[250px] lg:w-[300px] bg-gray-200 text-[#8f0e2a] border border-[#8f0e2a] rounded py-2 px-4 mb-3"
                       />
@@ -165,7 +311,7 @@ function ModifyNeighbor() {
                         placeholder={neighbor.neighbor_lastname}
                         type="text"
                         {...register("neighbor_lastname", {
-                          required: true,
+                          required: false,
                         })}
                         className=" w-[250px] lg:w-[300px] bg-gray-200 text-[#8f0e2a] border border-[#8f0e2a] rounded py-2 px-4 mb-3"
                       />
@@ -181,7 +327,7 @@ function ModifyNeighbor() {
                         placeholder={neighbor.identity_document}
                         type="text"
                         {...register("identity_document", {
-                          required: true,
+                          required: false,
                         })}
                         className=" w-[250px] lg:w-[300px] bg-gray-200 text-[#8f0e2a] border border-[#8f0e2a] rounded py-2 px-4 mb-3"
                       />
@@ -201,7 +347,7 @@ function ModifyNeighbor() {
                         }
                         type="text"
                         {...register("neighbor_phone", {
-                          required: true,
+                          required: false,
                         })}
                         className=" w-[250px] lg:w-[300px] bg-gray-200 text-[#8f0e2a] border border-[#8f0e2a] rounded py-2 px-4 mb-3"
                       />
@@ -220,7 +366,7 @@ function ModifyNeighbor() {
                         }
                         type="text"
                         {...register("neighbor_email", {
-                          required: true,
+                          required: false,
                         })}
                         className=" w-[250px] lg:w-[300px] bg-gray-200 text-[#8f0e2a] border border-[#8f0e2a] rounded py-2 px-4 mb-3"
                       />

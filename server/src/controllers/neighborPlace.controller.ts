@@ -59,3 +59,23 @@ export const addPlaceFromNeighbor = async (req: Request, res: Response) => {
     res.status(500).json(["Error al registrar el vecino en el inmueble"]);
   }
 };
+
+// ? Delete a neighborPlace
+export const deletePlaceFromNeighbor = async (req: Request, res: Response) => {
+  const { id: neighbor_id, place_id: place_id } = req.params;
+  try {
+    const neighborFound = await NeighborPlace.findOne({
+      where: {
+        neighbor_id: neighbor_id,
+        place_id: place_id,
+      },
+    });
+    if (!neighborFound) return res.status(404).json(["Vecino no encontrado"]);
+
+    await neighborFound.destroy();
+    res.status(204).json(["Vecino eliminado del inmueble"]);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(["Error al eliminar el vecino del inmueble"]);
+  }
+};

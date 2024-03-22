@@ -21,7 +21,11 @@ import NeighborInfo from "./pages/neighbor/NeighborInfo.jsx";
 import RegisterNeighbor from "./pages/neighbor/RegisterNeighbor.jsx";
 import ModifyNeighbor from "./pages/neighbor/ModifyNeighbor.jsx";
 import NeighborPlaces from "./pages/neighbor/NeighborPlaces.jsx";
-import { getPlaces } from "./api/places.js";
+import { getPlaces, getPlaceTypes } from "./api/places.js";
+import RemoveNeighborPlaces from "./pages/neighbor/RemoveNeighborPlaces.jsx";
+import HouseOutlet from "./middlewares/HouseOutlet.jsx";
+import HouseRegister from "./pages/houses/HouseRegister.jsx";
+import HouseExtras from "./pages/houses/HouseExtras.jsx";
 
 const router = createBrowserRouter([
   {
@@ -42,7 +46,24 @@ const router = createBrowserRouter([
       },
       {
         path: "/casas",
-        element: <Houses />,
+        element: <HouseOutlet />,
+        children: [
+          {
+            path: "/casas",
+            element: <Houses />,
+            loader: () => getPlaces(),
+          },
+          {
+            path: "/casas/registrar",
+            element: <HouseRegister />,
+            loader: () => getPlaceTypes(),
+          },
+          {
+            path: "/casas/configuracion",
+            element: <HouseExtras />,
+            loader: () => getPlaceTypes(),
+          },
+        ],
       },
       {
         path: "/vecinos",
@@ -80,6 +101,22 @@ const router = createBrowserRouter([
       {
         path: "/vecinos/:id/inmuebles",
         element: <NeighborPlaces />,
+        loader: async ({ params }) => {
+          const { id } = params;
+          const neighborPromise = getNeighbor(id);
+          const placesPromise = getPlaces();
+
+          const [neighborData, placesData] = await Promise.all([
+            neighborPromise,
+            placesPromise,
+          ]);
+
+          return { neighbor: neighborData, places: placesData };
+        },
+      },
+      {
+        path: "/vecinos/:id/inmuebles/remove",
+        element: <RemoveNeighborPlaces />,
         loader: async ({ params }) => {
           const { id } = params;
           const neighborPromise = getNeighbor(id);

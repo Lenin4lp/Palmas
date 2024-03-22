@@ -14,3 +14,5 @@ export const getRole = (id) => axios.get(`/role/${id}`);
 // ? Neighbor places
 export const addPlaceFromNeighbor = (id, place_id) =>
   axios.post(`/placeNeighbor/${id}`, { place_id });
+export const deletePlaceFromNeighbor = (id, place_id) =>
+  axios.delete(`/placeNeighbor/${id}/${place_id}`);

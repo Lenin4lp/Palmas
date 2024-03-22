@@ -64,26 +64,31 @@ export const createNeighbor = async (req: Request, res: Response) => {
 
 // ? Update a neighbor
 export const updateNeighbor = async (req: Request, res: Response) => {
-  const {
-    neighbor_name,
-    neighbor_lastname,
-    neighbor_email,
-    neighbor_phone,
-    role_id,
-  } = req.body;
-  const neighbor = await Neighbor.findByPk(req.params.id);
-  if (neighbor) {
-    await neighbor.update({
+  try {
+    const {
       neighbor_name,
       neighbor_lastname,
       neighbor_email,
       neighbor_phone,
       role_id,
-    });
-  } else {
-    return res.status(404).json(["Vecino no encontrado"]);
+    } = req.body;
+    const neighbor = await Neighbor.findByPk(req.params.id);
+    if (neighbor) {
+      await neighbor.update({
+        neighbor_name,
+        neighbor_lastname,
+        neighbor_email,
+        neighbor_phone,
+        role_id,
+      });
+    } else {
+      return res.status(404).json(["Vecino no encontrado"]);
+    }
+    res.json({ neighbor });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(["Error al actualizar el vecino"]);
   }
-  res.json({ neighbor });
 };
 
 // ? Delete a neighbor

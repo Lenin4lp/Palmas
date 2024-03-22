@@ -10,6 +10,7 @@ import { Sequelize } from "sequelize-typescript";
 export const getPlaces = async (req: Request, res: Response) => {
   try {
     const places = await Place.findAll({
+      include: [{ model: Neighbor }],
       order: [
         ["placeType_id", "ASC"],
         [
@@ -29,7 +30,9 @@ export const getPlaces = async (req: Request, res: Response) => {
 
 // ? Obtain a place
 export const getPlace = async (req: Request, res: Response) => {
-  const place = await Place.findByPk(req.params.id);
+  const place = await Place.findByPk(req.params.id, {
+    include: [{ model: Neighbor }],
+  });
   if (!place) return res.status(404).json(["Lugar no encontrado"]);
   res.json({ place });
 };
