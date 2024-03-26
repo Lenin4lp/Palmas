@@ -134,7 +134,7 @@ const SideBar = ({ children }) => {
               <span className=" absolute top-0 left-14 hidden lg:flex scale-0 transition-all rounded bg-gray-800 p-2 text-xs text-white group-hover:scale-100 ">
                 Inmuebles
               </span>
-              <Link to={"/casas"}>
+              <Link to={"/inmuebles"}>
                 <svg
                   className=" hover:cursor-pointer h-[30px] lg:h-[30px] w-auto"
                   viewBox="0 0 24 24"

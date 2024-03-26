@@ -26,6 +26,8 @@ import RemoveNeighborPlaces from "./pages/neighbor/RemoveNeighborPlaces.jsx";
 import HouseOutlet from "./middlewares/HouseOutlet.jsx";
 import HouseRegister from "./pages/houses/HouseRegister.jsx";
 import HouseExtras from "./pages/houses/HouseExtras.jsx";
+import VehicleTypes from "./pages/houses/VehicleTypes.jsx";
+import PlaceTypes from "./pages/houses/PlaceTypes.jsx";
 
 const router = createBrowserRouter([
   {
@@ -45,23 +47,40 @@ const router = createBrowserRouter([
         element: <Wallet />,
       },
       {
-        path: "/casas",
+        path: "/inmuebles",
         element: <HouseOutlet />,
         children: [
           {
-            path: "/casas",
+            path: "/inmuebles",
             element: <Houses />,
-            loader: () => getPlaces(),
+            loader: async () => {
+              const typesPromise = getPlaceTypes();
+              const placesPromise = getPlaces();
+
+              const [typesData, placesData] = await Promise.all([
+                typesPromise,
+                placesPromise,
+              ]);
+              return { types: typesData, places: placesData };
+            },
           },
           {
-            path: "/casas/registrar",
+            path: "/inmuebles/registrar",
             element: <HouseRegister />,
             loader: () => getPlaceTypes(),
           },
           {
-            path: "/casas/configuracion",
+            path: "/inmuebles/config",
             element: <HouseExtras />,
             loader: () => getPlaceTypes(),
+          },
+          {
+            path: "/inmuebles/config/tipos_de_vehiculo",
+            element: <VehicleTypes />,
+          },
+          {
+            path: "/inmuebles/config/tipos_de_inmueble",
+            element: <PlaceTypes />,
           },
         ],
       },
