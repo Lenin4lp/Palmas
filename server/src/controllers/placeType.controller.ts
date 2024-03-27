@@ -1,10 +1,18 @@
 import { Request, Response } from "express";
 import { PlaceType } from "../models/placeType.model";
+import { Place } from "../models/place.model";
 
 // ? Obtain all placeTypes
 export const getPlaceTypes = async (req: Request, res: Response) => {
   try {
-    const placeTypes = await PlaceType.findAll();
+    const placeTypes = await PlaceType.findAll({
+      include: [
+        {
+          model: Place,
+        },
+      ],
+      order: [["placetype_id", "ASC"]],
+    });
     res.json(placeTypes);
   } catch (error) {
     console.log(error);
@@ -14,7 +22,13 @@ export const getPlaceTypes = async (req: Request, res: Response) => {
 
 // ? Obtain a placeType
 export const getPlaceType = async (req: Request, res: Response) => {
-  const placeType = await PlaceType.findByPk(req.params.id);
+  const placeType = await PlaceType.findByPk(req.params.id, {
+    include: [
+      {
+        model: Place,
+      },
+    ],
+  });
   if (!placeType)
     return res.status(404).json(["Tipo de inmueble no encontrado"]);
   res.json({ placeType });
@@ -26,7 +40,7 @@ export const createPlaceType = async (req: Request, res: Response) => {
   try {
     const placeTypeFound = await PlaceType.findOne({
       where: {
-        placetype_id: placetype_id,
+        placetype_name: placetype_name,
       },
     });
     if (placeTypeFound) {

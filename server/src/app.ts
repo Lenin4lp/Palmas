@@ -12,6 +12,7 @@ import monthlyFeeRoutes from "./routes/monthlyFee.routes";
 import yearRoutes from "./routes/year.routes";
 import rolesRoutes from "./routes/neighborRoles.routes";
 import placeTypesRoutes from "./routes/placeTypes.routes";
+import vehicleTypeRoutes from "./routes/vehicleTypes.routes";
 
 const app = express();
 
@@ -32,7 +33,7 @@ app.use("/api", monthlyFeeRoutes);
 app.use("/api", yearRoutes);
 app.use("/api", rolesRoutes);
 app.use("/api", placeTypesRoutes);
-
+app.use("/api", vehicleTypeRoutes);
 app.get("/", (_req, res) => {
   res.send("Hola mundo");
 });

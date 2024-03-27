@@ -40,7 +40,7 @@ export class Payment extends Model {
   transfer!: string;
 
   @Column({
-    type: DataType.DECIMAL(6, 2),
+    type: DataType.DECIMAL(8, 2),
     allowNull: true,
     field: "valor",
   })

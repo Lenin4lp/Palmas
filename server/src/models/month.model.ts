@@ -8,6 +8,7 @@ import {
   HasMany,
   BelongsToMany,
   BeforeCreate,
+  BeforeUpdate,
 } from "sequelize-typescript";
 import { Year } from "./year.model";
 import { Payment } from "./payment.model";
@@ -79,5 +80,19 @@ export class Month extends Model {
     const year = month.month_year;
     monthName.toUpperCase();
     month.month_id = `${monthName}${year}`;
+  }
+
+  @BeforeUpdate
+  static async generateDebtIfStatusFalse(month: Month) {
+    if (month.changed("month_status") && month.month_status === false) {
+      const placeIds = month.places.map((place) => place.place_id);
+      await MonthlyDebt.bulkCreate(
+        placeIds.map((placeId) => ({
+          month_id: month.month_id,
+          place_id: placeId,
+          // Otros campos necesarios para la deuda
+        }))
+      );
+    }
   }
 }

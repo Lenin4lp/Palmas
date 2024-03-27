@@ -7,7 +7,7 @@ const Options = [
     name: "Edición de tipos de inmueble",
     icon: (
       <svg
-        className=" fill-none h-[200px] w-auto"
+        className=" fill-none h-[150px] lg:h-[200px] w-auto"
         viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -36,7 +36,7 @@ const Options = [
     name: "Edición de tipos de vehículo",
     icon: (
       <svg
-        className=" fill-none h-[200px] w-auto"
+        className=" fill-none h-[150px] lg:h-[200px] w-auto"
         viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -61,17 +61,17 @@ const Options = [
 
 function HouseExtras() {
   return (
-    <div className=" flex-wrap h-screen w-screen bg-gradient-to-br from-[#852655] to-[#8f0e2a]">
-      <div className=" md:pl-[70px] grid grid-cols-2">
+    <div className=" flex-wrap min-h-screen w-screen bg-gradient-to-br from-[#852655] to-[#8f0e2a]">
+      <div className=" pb-[90px] md:py-0 md:pl-[70px] grid grid-cols-1 md:grid-cols-2">
         {Options.map((option) => (
           <Link key={option.id} to={option.link}>
-            <div className="  flex justify-center items-center h-screen w-full border-[1px] hover:bg-[#339494] transition duration-300 cursor-pointer border-white">
+            <div className="  flex justify-center items-center h-[450px] md:h-screen w-full border-[1px] hover:bg-[#339494] transition duration-300 cursor-pointer border-white">
               <div className="block">
                 <div className=" flex justify-center items-center">
                   {option.icon}
                 </div>
                 <div className=" my-5 flex justify-center items-center">
-                  <h1 className=" text-xl text-white font-bold">
+                  <h1 className=" text-lg px-2 text-center md:text-xl text-white font-bold">
                     {option.name}
                   </h1>
                 </div>

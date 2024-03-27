@@ -1,10 +1,18 @@
 import { Request, Response } from "express";
 import { VehicleType } from "../models/vehicleType.model";
+import { Vehicle } from "../models/vehicle.model";
 
 // ? Obtain all vehicle types
 export const getVehicleTypes = async (req: Request, res: Response) => {
   try {
-    const vehicleTypes = await VehicleType.findAll();
+    const vehicleTypes = await VehicleType.findAll({
+      order: [["vehicleType_id", "ASC"]],
+      include: [
+        {
+          model: Vehicle,
+        },
+      ],
+    });
     res.json(vehicleTypes);
   } catch (error) {
     console.log(error);

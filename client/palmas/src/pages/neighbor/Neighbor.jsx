@@ -35,10 +35,12 @@ function Neighbor() {
     if (neighbor.places?.length === 0) return "N/A";
 
     const totalDebt = neighbor.places?.reduce(
-      (acc, place) => acc + place.pending_value,
+      (acc, place) => acc + parseFloat(place.pending_value),
       0
     );
-    const statusText = totalDebt > 0 ? `Deuda: ${totalDebt}` : "Al día";
+    const formattedTotalDebt = totalDebt.toFixed(2);
+    const statusText =
+      formattedTotalDebt > 0 ? `Deuda: ${totalDebt}` : "Al día";
     return statusText;
   }
 

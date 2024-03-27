@@ -26,7 +26,7 @@ export class PlaceType extends Model {
   @Column({
     type: DataType.STRING(30),
     field: "nombre_tipo",
-    allowNull: false,
+    allowNull: true,
     unique: true,
   })
   placetype_name!: string;

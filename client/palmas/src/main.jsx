@@ -28,6 +28,7 @@ import HouseRegister from "./pages/houses/HouseRegister.jsx";
 import HouseExtras from "./pages/houses/HouseExtras.jsx";
 import VehicleTypes from "./pages/houses/VehicleTypes.jsx";
 import PlaceTypes from "./pages/houses/PlaceTypes.jsx";
+import { getVehicleTypes } from "./api/vehicles.js";
 
 const router = createBrowserRouter([
   {
@@ -77,10 +78,12 @@ const router = createBrowserRouter([
           {
             path: "/inmuebles/config/tipos_de_vehiculo",
             element: <VehicleTypes />,
+            loader: () => getVehicleTypes(),
           },
           {
             path: "/inmuebles/config/tipos_de_inmueble",
             element: <PlaceTypes />,
+            loader: () => getPlaceTypes(),
           },
         ],
       },
