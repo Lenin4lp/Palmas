@@ -118,9 +118,9 @@ const Login = () => {
                 {/* <!--Username input--> */}
                 <input
                   className="w-full bg-gray-200 text-black border border-gray-200 rounded py-3 px-4 mb-3"
-                  name="email"
-                  type="email"
-                  {...register("user_email", {
+                  name=""
+                  type="text"
+                  {...register("user_name", {
                     required: true,
                   })}
                   placeholder="Usuario"

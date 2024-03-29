@@ -40,7 +40,7 @@ function Neighbor() {
     );
     const formattedTotalDebt = totalDebt.toFixed(2);
     const statusText =
-      formattedTotalDebt > 0 ? `Deuda: ${totalDebt}` : "Al día";
+      formattedTotalDebt > 0 ? `Deuda: $${formattedTotalDebt}` : "Al día";
     return statusText;
   }
 
@@ -253,7 +253,7 @@ function Neighbor() {
                         <th
                           className={`${getColor(
                             neighbor
-                          )} border  border-slate-300  py-2`}
+                          )} border text-[11px] border-slate-300  py-2`}
                         >
                           {getDebt(neighbor)}
                         </th>

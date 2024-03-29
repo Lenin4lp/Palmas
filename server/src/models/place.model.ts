@@ -11,6 +11,9 @@ import {
   BelongsToMany,
   BeforeCreate,
   AfterCreate,
+  AfterSync,
+  AfterConnect,
+  BeforeSync,
 } from "sequelize-typescript";
 import { PlaceType } from "./placeType.model";
 import { Payment } from "./payment.model";

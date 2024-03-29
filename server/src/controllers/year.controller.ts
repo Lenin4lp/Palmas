@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { Year } from "../models/year.model";
 import { Month } from "../models/month.model";
 import { MonthlyFee } from "../models/monthlyFee.model";
+import { Place } from "../models/place.model";
+import { MonthlyDebt } from "../models/monthlyDebt.model";
 
 // ? Obtain all years
 export const getYears = async (req: Request, res: Response) => {
@@ -51,25 +53,33 @@ export const createYear = async (req: Request, res: Response) => {
 
     if (monthlyFeeCount > 0) {
       const months = [
-        "Enero",
-        "Febrero",
-        "Marzo",
-        "Abril",
-        "Mayo",
-        "Junio",
-        "Julio",
-        "Agosto",
-        "Septiembre",
-        "Octubre",
-        "Noviembre",
-        "Diciembre",
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
       ];
       for (const month of months) {
-        await Month.create({
+        const newMonth = await Month.create({
           month,
           month_year: newYear.year,
           monthlyFee_id: monthlyFee_id ?? 1,
         });
+        const places = await Place.findAll();
+        for (const place of places) {
+          await MonthlyDebt.create({
+            debt: 0,
+            month_id: newMonth.month_id,
+            place_id: place.place_id,
+          });
+        }
       }
       res.json(newYear);
     } else {

@@ -29,13 +29,6 @@ export class User extends Model {
   user_name!: string;
 
   @Column({
-    type: DataType.STRING(50),
-    field: "apellidos_usuario",
-    allowNull: false,
-  })
-  user_lastname!: string;
-
-  @Column({
     type: DataType.STRING(40),
     allowNull: false,
     field: "correo_usuario",
@@ -49,13 +42,6 @@ export class User extends Model {
     field: "contrasena_usuario",
   })
   user_password!: string;
-
-  @Column({
-    type: DataType.STRING(15),
-    allowNull: true,
-    field: "telefono",
-  })
-  user_phone!: string;
 
   @BeforeCreate
   static async automatizateId(user: User) {

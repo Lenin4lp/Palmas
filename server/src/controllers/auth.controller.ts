@@ -7,27 +7,27 @@ import { createAccesToken } from "../libs/jwt";
 
 //? User Register
 export const userRegister = async (req: Request, res: Response) => {
-  const { user_name, user_lastname, user_email, user_password, user_phone } =
-    req.body;
+  const { user_name, user_email, user_password } = req.body;
   try {
-    const userFound = await User.findOne({ where: { user_email: user_email } });
+    const userFound = await User.findOne({
+      where: { user_email: user_email, user_name: user_name },
+    });
     if (userFound)
-      return res.status(400).json(["Ya existe un usuario con este correo"]);
+      return res
+        .status(400)
+        .json(["Ya existe un usuario con esas credenciales"]);
     const passwordHash = await bcrypt.hash(user_password, 10);
 
     const newUser = await User.create({
       user_name,
-      user_lastname,
       user_email,
       user_password: passwordHash,
-      user_phone,
     });
 
     res.json({
       message: "Usuario registrado con exito",
       id: newUser.user_id,
       user_name: newUser.user_name,
-      user_lastname: newUser.user_lastname,
       user_email: newUser.user_email,
     });
   } catch (error) {
@@ -39,11 +39,11 @@ export const userRegister = async (req: Request, res: Response) => {
 // ? User Login
 
 export const login = async (req: Request, res: Response) => {
-  const { user_email, user_password } = req.body;
+  const { user_name, user_password } = req.body;
   try {
     const userFound = await User.findOne({
       where: {
-        user_email: user_email,
+        user_name: user_name,
       },
     });
     if (!userFound) return res.status(400).json(["El usuario no existe"]);
@@ -65,7 +65,6 @@ export const login = async (req: Request, res: Response) => {
       id: userFound.user_id,
       user_name: userFound.user_name,
       user_email: userFound.user_email,
-      user_lastname: userFound.user_lastname,
       token,
     });
   } catch (error) {
@@ -98,7 +97,6 @@ export const verifyToken = async (req: Request, res: Response) => {
     return res.json({
       user_id: userFound.user_id,
       user_name: userFound.user_name,
-      user_lastname: userFound.user_lastname,
       user_email: userFound.user_email,
       createdAt: userFound.createdAt,
       updatedAt: userFound.updatedAt,

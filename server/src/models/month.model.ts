@@ -9,6 +9,7 @@ import {
   BelongsToMany,
   BeforeCreate,
   BeforeUpdate,
+  AfterSync,
 } from "sequelize-typescript";
 import { Year } from "./year.model";
 import { Payment } from "./payment.model";
@@ -22,9 +23,10 @@ import { MonthlyDebt } from "./monthlyDebt.model";
 })
 export class Month extends Model {
   @Column({
-    type: DataType.STRING(15),
+    type: DataType.STRING(9),
     allowNull: true,
     field: "id_mes",
+    primaryKey: true,
   })
   month_id!: string;
 
@@ -41,13 +43,6 @@ export class Month extends Model {
     field: "dia_pago",
   })
   pay_day!: number;
-
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: true,
-    field: "estado",
-  })
-  month_status!: boolean;
 
   @ForeignKey(() => Year)
   @Column({
@@ -76,23 +71,8 @@ export class Month extends Model {
 
   @BeforeCreate
   static async automatizeId(month: Month) {
-    const monthName = month.month;
+    const monthName = month.month.toUpperCase().substring(0, 3);
     const year = month.month_year;
-    monthName.toUpperCase();
-    month.month_id = `${monthName}${year}`;
-  }
-
-  @BeforeUpdate
-  static async generateDebtIfStatusFalse(month: Month) {
-    if (month.changed("month_status") && month.month_status === false) {
-      const placeIds = month.places.map((place) => place.place_id);
-      await MonthlyDebt.bulkCreate(
-        placeIds.map((placeId) => ({
-          month_id: month.month_id,
-          place_id: placeId,
-          // Otros campos necesarios para la deuda
-        }))
-      );
-    }
+    month.month_id = `${monthName}-${year}`;
   }
 }

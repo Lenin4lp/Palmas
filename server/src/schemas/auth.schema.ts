@@ -5,22 +5,13 @@ export const registerSchema = z.object({
     .string({
       required_error: "El nombre es requerido",
     })
-    .min(5, {
-      message: "El nombre debe tener al menos 5 caracteres",
+    .min(4, {
+      message: "El nombre debe tener al menos 4 caracteres",
     })
     .max(50, {
       message: "El nombre debe tener como maximo 50 caracteres",
     }),
-  user_lastname: z
-    .string({
-      required_error: "El apellido es requerido",
-    })
-    .min(5, {
-      message: "El apellido debe tener al menos 5 caracteres",
-    })
-    .max(50, {
-      message: "El apellido debe tener como maximo 50 caracteres",
-    }),
+
   user_email: z
     .string({
       required_error: "El email es requerido",
@@ -38,37 +29,19 @@ export const registerSchema = z.object({
     .max(50, {
       message: "La contraseña debe tener como maximo 50 caracteres",
     }),
-  user_phone: z
-    .string({
-      required_error: "El teléfono es requerido",
-    })
-    .min(7, {
-      message: "El teléfono debe tener como mínimo 7 caracteres",
-    })
-    .max(10, {
-      message: "El teléfono debe tener como máximo 10 caracteres",
-    }),
 });
 
 export const updateSchema = z.object({
   user_name: z
     .string()
-    .min(5, {
-      message: "El nombre debe tener al menos 5 caracteres",
+    .min(4, {
+      message: "El nombre debe tener al menos 4 caracteres",
     })
     .max(50, {
       message: "El nombre debe tener como maximo 50 caracteres",
     })
     .optional(),
-  user_lastname: z
-    .string()
-    .min(5, {
-      message: "El apellido debe tener al menos 5 caracteres",
-    })
-    .max(50, {
-      message: "El apellido debe tener como maximo 50 caracteres",
-    })
-    .optional(),
+
   user_email: z
     .string({
       required_error: "El email es requerido",
@@ -86,25 +59,18 @@ export const updateSchema = z.object({
       message: "La contraseña debe tener como maximo 50 caracteres",
     })
     .optional(),
-  user_phone: z
-    .string()
-    .min(7, {
-      message: "El teléfono debe tener como mínimo 7 caracteres",
-    })
-    .max(10, {
-      message: "El teléfono debe tener como máximo 10 caracteres",
-    })
-    .optional(),
 });
 
 export const loginSchema = z.object({
-  user_email: z
-    .string({
-      required_error: "El correo electrónico es requerido",
+  user_name: z
+    .string()
+    .min(4, {
+      message: "El nombre debe tener al menos 4 caracteres",
     })
-    .email({
-      message: "Correo electrónico inválido",
-    }),
+    .max(50, {
+      message: "El nombre debe tener como máximo 50 caracteres",
+    })
+    .optional(),
   user_password: z
     .string({
       required_error: "La contraseña es requerida",

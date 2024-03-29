@@ -21,7 +21,7 @@ export const getUser = async (req: Request, res: Response) => {
 
 // ? Create a user
 export const createUser = async (req: Request, res: Response) => {
-  const { user_name, user_lastname, user_email, user_password } = req.body;
+  const { user_name, user_email, user_password } = req.body;
   try {
     const userFound = await User.findOne({
       where: { user_email: user_email },
@@ -31,7 +31,7 @@ export const createUser = async (req: Request, res: Response) => {
     }
     const newUser = await User.create({
       user_name,
-      user_lastname,
+
       user_email,
       user_password,
     });
@@ -43,12 +43,11 @@ export const createUser = async (req: Request, res: Response) => {
 
 // ? Update a user
 export const updateUser = async (req: Request, res: Response) => {
-  const { user_name, user_lastname, user_email, user_password } = req.body;
+  const { user_name, user_email, user_password } = req.body;
   const user = await User.findByPk(req.params.id);
   if (user) {
     await user.update({
       user_name,
-      user_lastname,
       user_email,
       user_password,
     });

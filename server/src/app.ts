@@ -13,6 +13,11 @@ import yearRoutes from "./routes/year.routes";
 import rolesRoutes from "./routes/neighborRoles.routes";
 import placeTypesRoutes from "./routes/placeTypes.routes";
 import vehicleTypeRoutes from "./routes/vehicleTypes.routes";
+import cron from "node-cron";
+import { Month } from "./models/month.model";
+import { MonthlyDebt } from "./models/monthlyDebt.model";
+import { MonthlyFee } from "./models/monthlyFee.model";
+import { Place } from "./models/place.model";
 
 const app = express();
 
@@ -43,3 +48,55 @@ app.listen(PORT, () => {
 });
 connectionDB();
 export default app;
+
+// ? ObtainMonth
+function ObtainMonth(date: string): string {
+  const month = date.split(" ");
+  if (month.length >= 2) {
+    return month[1].toUpperCase();
+  } else {
+    return "NO SE PUEDE";
+  }
+}
+
+// ? MonthlyDebt
+const ChangeMonth = async (currentMonth: string, currentYear: string) => {
+  try {
+    const monthFound = await Month.findOne({
+      where: { month_id: `${currentMonth}-${currentYear}` },
+      include: { model: MonthlyFee },
+    });
+    if (monthFound) {
+      console.log(monthFound.monthlyFee?.monthlyFee_value);
+      try {
+        const monthlyDebts = await MonthlyDebt.findAll({
+          where: { month_id: monthFound.month_id },
+        });
+        if (monthlyDebts) {
+          for (const monthlyDebt of monthlyDebts) {
+            monthlyDebt.debt = 0;
+            await monthlyDebt.save();
+          }
+          return "Se han cambiado los deudas";
+        }
+      } catch (error) {
+        return error;
+      }
+    } else {
+      return "No hay ese mes perro";
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// ? Prueba node-cron
+cron.schedule(" */5 * * * * *", async () => {
+  const currentDateString = new Date().toString();
+  const currentYear = new Date().getFullYear().toString();
+  const currentMonth = ObtainMonth(currentDateString);
+  const mesprueba = await ChangeMonth(currentMonth, currentYear);
+
+  console.log(mesprueba);
+  console.log(`${currentMonth}-${currentYear}`);
+});
