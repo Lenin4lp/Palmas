@@ -13,6 +13,9 @@ function Houses() {
   const [search, setSearch] = useState("");
   const [placesTable, setPlacesTable] = useState([]);
 
+  const originalPlaces = [...places];
+  const originalPlacesTable = [...placesTable];
+
   console.log(places, types);
   console.log(selectedOrder);
   console.log(selectedType);
@@ -40,12 +43,12 @@ function Houses() {
 
   const filteredPlaces =
     search === ""
-      ? selectedOrder === 1
+      ? selectedOrder === ""
         ? places
-        : sortByPendingValue(places)
-      : selectedOrder === 1
+        : sortByPendingValue(originalPlaces)
+      : selectedOrder === ""
       ? placesTable
-      : sortByPendingValue(placesTable);
+      : sortByPendingValue(originalPlacesTable);
 
   const filteredTypes =
     selectedType === ""
@@ -70,6 +73,10 @@ function Houses() {
 
   const handleSelectedType = (event) => {
     setSelectedType(event.target.value);
+  };
+
+  const handleSelectedOrder = (number) => {
+    setSelectedOrder(number);
   };
 
   if (navigation.state === "loading") {
@@ -227,16 +234,37 @@ function Houses() {
                   </div>
                   <div className=" mr-[20px]">
                     <div className=" block">
-                      <button className="flex items-center hover:cursor-pointer group hover:bg-[#8f0e2a] transition duration-500 px-4 border w-full justify-center border-gray-200 rounded ">
-                        <h1 className="w-full py-4 ms-2 text-sm font-medium group-hover:text-white transition duration-500 text-gray-900 ">
+                      <div className="flex items-center hover:cursor-pointer group transition duration-500 px-4 border w-full justify-center border-gray-200 rounded ">
+                        <input
+                          id="bordered-radio-1"
+                          type="radio"
+                          defaultChecked
+                          onFocus={() => setSelectedOrder("")}
+                          name="bordered-radio"
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-full focus:ring-blue-500 dark:focus:ring-blue-600 "
+                        />
+                        <label
+                          htmlFor="bordered-radio-1"
+                          className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                        >
                           Ordenar por numeración
-                        </h1>
-                      </button>
-                      <button className="flex items-center hover:cursor-pointer group hover:bg-[#8f0e2a] px-4 border w-full justify-center border-gray-200 rounded ">
-                        <h1 className="w-full py-4 ms-2 text-sm font-medium group-hover:text-white transition duration-500 text-gray-900 ">
+                        </label>
+                      </div>
+                      <div className="flex items-center hover:cursor-pointer group px-4 border w-full justify-center border-gray-200 rounded ">
+                        <input
+                          type="radio"
+                          id="bordered-radio-2"
+                          onFocus={() => setSelectedOrder("debt")}
+                          name="bordered-radio"
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600  focus:ring-2 "
+                        />
+                        <label
+                          htmlFor="bordered-radio-2"
+                          className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                        >
                           Ordenar por deuda
-                        </h1>
-                      </button>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
