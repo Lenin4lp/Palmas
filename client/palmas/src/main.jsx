@@ -29,6 +29,8 @@ import HouseExtras from "./pages/houses/HouseExtras.jsx";
 import VehicleTypes from "./pages/houses/VehicleTypes.jsx";
 import PlaceTypes from "./pages/houses/PlaceTypes.jsx";
 import { getVehicleTypes } from "./api/vehicles.js";
+import { getYears } from "./api/time.js";
+import { getMonthlyDebts } from "./api/debt.js";
 
 const router = createBrowserRouter([
   {
@@ -159,6 +161,27 @@ const router = createBrowserRouter([
       {
         path: "/calendario",
         element: <Calendar />,
+        loader: async () => {
+          const yearsPromise = getYears();
+          const placesPromise = getPlaces();
+          const monthlyDebtPromise = getMonthlyDebts();
+          const typesPromise = getPlaceTypes();
+
+          const [yearsData, placesData, monthlyDebtsData, typesData] =
+            await Promise.all([
+              yearsPromise,
+              placesPromise,
+              monthlyDebtPromise,
+              typesPromise,
+            ]);
+
+          return {
+            years: yearsData,
+            places: placesData,
+            monthlyDebts: monthlyDebtsData,
+            types: typesData,
+          };
+        },
       },
     ],
   },

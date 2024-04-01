@@ -8,7 +8,7 @@ function Houses() {
   const places = placesData.places.data;
   const types = placesData.types.data;
   const navigation = useNavigation();
-  const [selectedOrder, setSelectedOrder] = useState(1);
+  const [selectedOrder, setSelectedOrder] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [search, setSearch] = useState("");
   const [placesTable, setPlacesTable] = useState([]);

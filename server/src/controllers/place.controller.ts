@@ -10,7 +10,7 @@ import { Sequelize } from "sequelize-typescript";
 export const getPlaces = async (req: Request, res: Response) => {
   try {
     const places = await Place.findAll({
-      include: [{ model: Neighbor }],
+      include: [{ model: Neighbor }, { model: Month }],
       order: [
         ["placeType_id", "ASC"],
         [

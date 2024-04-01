@@ -4,6 +4,7 @@ import { Neighbor } from "../models/neighbor.model";
 import { Payment } from "../models/payment.model";
 import { Place } from "../models/place.model";
 import { MonthlyFee } from "../models/monthlyFee.model";
+import { Sequelize } from "sequelize-typescript";
 
 // ? Obtain all months
 export const getMonths = async (req: Request, res: Response) => {
@@ -14,6 +15,7 @@ export const getMonths = async (req: Request, res: Response) => {
         { model: MonthlyFee },
         { model: Place, include: [Neighbor] },
       ],
+      order: [["month_year", "ASC"]],
     });
     res.json(months);
   } catch (error) {

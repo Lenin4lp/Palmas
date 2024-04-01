@@ -18,6 +18,7 @@ import { Month } from "./models/month.model";
 import { MonthlyDebt } from "./models/monthlyDebt.model";
 import { MonthlyFee } from "./models/monthlyFee.model";
 import { Place } from "./models/place.model";
+import MonthlyDebtRoutes from "./routes/monthlyDebt.routes";
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use("/api", yearRoutes);
 app.use("/api", rolesRoutes);
 app.use("/api", placeTypesRoutes);
 app.use("/api", vehicleTypeRoutes);
+app.use("/api", MonthlyDebtRoutes);
 app.get("/", (_req, res) => {
   res.send("Hola mundo");
 });
