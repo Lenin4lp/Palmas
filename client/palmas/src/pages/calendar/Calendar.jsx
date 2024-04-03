@@ -16,6 +16,16 @@ function Calendar() {
   console.log(places);
   console.log(selectedYear);
   console.log(monthlyDebts);
+  console.log(types);
+
+  const handleSelectedType = (e) => {
+    setSelectedType(e.target.value);
+  };
+
+  const filteredPlaces =
+    selectedType == ""
+      ? places
+      : places.filter((place) => place.placeType_id == selectedType);
 
   if (navigation.state === "loading") {
     return <div>Cargando</div>;
@@ -24,7 +34,7 @@ function Calendar() {
     <ContentComponent>
       <div className=" flex justify-center items-center w-screen">
         <div className=" block">
-          <div className=" md:pl-[70px] w-screen h-[100px] flex justify-start items center bg-gradient-to-r from-[#852655] to-[#8f0e2a]">
+          <div className=" md:pl-[70px] w-screen h-[70px] md:h-[100px] flex justify-start items center bg-gradient-to-r from-[#852655] to-[#8f0e2a]">
             <div className=" flex justify-center items-center">
               <svg
                 version="1.1"
@@ -33,7 +43,7 @@ function Calendar() {
                 xmlnsXlink="http://www.w3.org/1999/xlink"
                 viewBox="0 0 512 512"
                 xmlSpace="preserve"
-                className=" fill-white h-[60px] px-5 w-auto"
+                className=" fill-white h-[35px] md:h-[60px] px-5 w-auto"
               >
                 <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
                 <g
@@ -126,30 +136,34 @@ function Calendar() {
               </svg>
             </div>
             <div className=" flex justify-center items-center">
-              <h1 className=" text-3xl text-white">Calendario de deuda</h1>
+              <h1 className=" text-xl md:text-2xl lg:text-3xl text-white">
+                Calendario de deuda
+              </h1>
             </div>
           </div>
           <div className=" md:pl-[70px] gap-5 m-5 h-fit flex justify-center lg:justify-normal items-center flex-wrap">
             <button
               onClick={() => setSelectedYear("")}
-              className={` h-[60px] w-[150px] hover:to-[#339494] hover:from-[#286868] transition duration-300 rounded-lg ${
+              className={` h-[50px] md:h-[60px] w-[120px] md:w-[150px] hover:to-[#339494] hover:from-[#286868] transition duration-300 rounded-lg ${
                 selectedYear === ""
                   ? "bg-gradient-to-b from-[#286868] to-[#339494]"
                   : "bg-gradient-to-b from-[#852655] to-[#8f0e2a]"
               } flex justify-center items-center`}
             >
-              <h1 className=" text-white text-lg font-semibold">Todos</h1>
+              <h1 className=" text-white text-base font-medium md:text-lg md:font-semibold">
+                Todos
+              </h1>
             </button>
             {years.map((year) => (
               <button
                 onClick={() => setSelectedYear(year.year)}
-                className={` h-[60px] w-[150px] hover:to-[#339494] hover:from-[#286868] transition duration-300 rounded-lg ${
+                className={` h-[50px] md:h-[60px] w-[120px] md:w-[150px] hover:to-[#339494] hover:from-[#286868] transition duration-300 rounded-lg ${
                   selectedYear === year.year
                     ? "bg-gradient-to-b from-[#286868] to-[#339494]"
                     : "bg-gradient-to-b from-[#852655] to-[#8f0e2a]"
                 } flex justify-center items-center`}
               >
-                <h1 className=" text-white text-lg font-semibold">
+                <h1 className=" text-white text-base font-medium md:text-lg md:font-semibold">
                   {year.year}
                 </h1>
               </button>
@@ -157,8 +171,30 @@ function Calendar() {
           </div>
           <div className=" flex justify-center items-center">
             <div className=" block">
+              <div className=" my-5 block">
+                <label
+                  htmlFor="countries"
+                  className="block mb-2 text-sm sm:text-base font-semibold text-gray-900 "
+                >
+                  Tipos de inmueble:
+                </label>
+                <select
+                  onChange={handleSelectedType}
+                  value={selectedType}
+                  className="bg-gray-50 border border-[#8f0e2a] text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[150px] p-2.5 "
+                >
+                  <option value="" defaultValue>
+                    Todos
+                  </option>
+                  {types.map((type) => (
+                    <option key={type.placetype_id} value={type.placetype_id}>
+                      {type.placetype_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               {selectedYear === "" ? (
-                <div className=" md:pl-[70px] mt-5 h-[500px]  overflow-x-auto overflow-y-auto w-[290px] md:w-fit max-w-[1200px]  ">
+                <div className=" my-5  border-[2px]  h-[500px]  overflow-x-auto overflow-y-auto w-[280px] sm:w-[500px] md:w-[680px] lg:w-fit max-w-[1200px]  ">
                   <table className="  h-full border-collapse w-fit text-[12px] lg:text-sm">
                     <thead className=" sticky top-0 ">
                       <tr>
@@ -196,7 +232,7 @@ function Calendar() {
                     </thead>
 
                     <tbody>
-                      {places.map((place) => (
+                      {filteredPlaces.map((place) => (
                         <tr className=" text-[12px]" key={place.place_id}>
                           <th className="border border-slate-300 px-2 py-2">
                             {place.place_name}
@@ -233,7 +269,7 @@ function Calendar() {
                                   : "bg-[#b34c51] text-white"
                               } border-slate-300 px-2 py-2`}
                             >
-                              {place.months
+                              {`$${place.months
                                 .filter(
                                   (month) => month.month_year === year.year
                                 )
@@ -242,7 +278,7 @@ function Calendar() {
                                     acc + parseFloat(month.MonthlyDebt?.debt),
                                   0
                                 )
-                                .toFixed(2)}
+                                .toFixed(2)}`}
                             </th>
                           ))}
                           <th
@@ -265,19 +301,27 @@ function Calendar() {
                         </th>
                         {years.map((year) => (
                           <th className="border bg-[#cfcfcf] text-black border-slate-300 px-2 py-2">
-                            {`$${monthlyDebts
-                              .filter((debt) =>
-                                debt.month_id.includes(year.year)
-                              )
-                              .reduce(
-                                (acc, debt) => acc + parseFloat(debt.debt),
-                                0
-                              )
-                              .toFixed(2)}`}
+                            {`$${filteredPlaces
+                              .map((place) => {
+                                const filteredMonths = place.months.filter(
+                                  (month) => month.month_year === year.year
+                                );
+                                const totalDebt = filteredMonths
+                                  .reduce(
+                                    (acc, month) =>
+                                      acc + parseFloat(month.MonthlyDebt?.debt),
+                                    0
+                                  )
+                                  .toFixed(2);
+                                return totalDebt;
+                              })
+                              .reduce((acc, debt) => acc + parseFloat(debt), 0)
+                              .toFixed(2)}
+                            `}
                           </th>
                         ))}
                         <th className="border border-slate-300 bg-[#cfcfcf] px-2 py-2">
-                          {`$${places
+                          {`$${filteredPlaces
                             .reduce(
                               (acc, place) =>
                                 acc + parseFloat(place.pending_value),
@@ -290,7 +334,7 @@ function Calendar() {
                   </table>
                 </div>
               ) : (
-                <div className=" md:pl-[70px] mt-5 h-[500px] overflow-x-auto overflow-y-auto w-[290px] sm:w-fit max-w-[1000px]  ">
+                <div className="  my-5 h-[500px] overflow-x-auto overflow-y-auto w-[280px] sm:w-[500px] md:w-[680px] lg:w-fit max-w-[1000px]  ">
                   <table className=" h-full border-collapse w-fit text-[12px] lg:text-sm">
                     <thead className=" sticky top-0 ">
                       <tr>
@@ -364,7 +408,7 @@ function Calendar() {
                     </thead>
 
                     <tbody>
-                      {places.map((place) => (
+                      {filteredPlaces.map((place) => (
                         <tr className=" text-[12px]" key={place.place_id}>
                           <th className="border border-slate-300 px-2 py-2">
                             {place.place_name}
@@ -458,27 +502,66 @@ function Calendar() {
                           .find((year) => year.year === selectedYear)
                           .months.map((month) => (
                             <th className="border bg-[#cfcfcf] text-black border-slate-300 px-2 py-2">
-                              {monthlyDebts
-                                .filter(
-                                  (debt) => debt.month_id === month.month_id
-                                )
-                                .reduce(
-                                  (acc, debt) => acc + parseFloat(debt.debt),
-                                  0
-                                )
-                                .toFixed(2)}
+                              {selectedType == ""
+                                ? monthlyDebts
+                                    .filter(
+                                      (debt) => debt.month_id === month.month_id
+                                    )
+                                    .reduce(
+                                      (acc, debt) =>
+                                        acc + parseFloat(debt.debt),
+                                      0
+                                    )
+                                    .toFixed(2)
+                                : month.places
+                                    .filter(
+                                      (place) =>
+                                        place.placeType_id == selectedType
+                                    )
+                                    .reduce(
+                                      (acc, place) =>
+                                        acc +
+                                        parseFloat(place.MonthlyDebt?.debt),
+                                      0
+                                    )
+                                    .toFixed(2)}
                             </th>
                           ))}
                         <th className="border bg-[#cfcfcf] text-black border-slate-300 px-2 py-2">
-                          {`$${monthlyDebts
-                            .filter((debt) =>
-                              debt.month_id.includes(selectedYear)
-                            )
-                            .reduce(
-                              (acc, debt) => acc + parseFloat(debt.debt),
-                              0
-                            )
-                            .toFixed(2)}`}
+                          {`$${
+                            selectedType == ""
+                              ? monthlyDebts
+                                  .filter((debt) =>
+                                    debt.month_id.includes(selectedYear)
+                                  )
+                                  .reduce(
+                                    (acc, debt) => acc + parseFloat(debt.debt),
+                                    0
+                                  )
+                                  .toFixed(2)
+                              : filteredPlaces
+                                  .map((place) => {
+                                    const filteredMonths = place.months.filter(
+                                      (month) =>
+                                        month.month_year === selectedYear
+                                    );
+                                    const totalDebt = filteredMonths
+                                      .reduce(
+                                        (acc, month) =>
+                                          acc +
+                                          parseFloat(month.MonthlyDebt?.debt),
+                                        0
+                                      )
+                                      .toFixed(2);
+                                    return totalDebt;
+                                  })
+                                  .reduce(
+                                    (acc, debt) => acc + parseFloat(debt),
+                                    0
+                                  )
+                                  .toFixed(2)
+                          }
+                          `}
                         </th>
                       </tr>
                     </tbody>

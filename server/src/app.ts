@@ -41,6 +41,7 @@ app.use("/api", rolesRoutes);
 app.use("/api", placeTypesRoutes);
 app.use("/api", vehicleTypeRoutes);
 app.use("/api", MonthlyDebtRoutes);
+
 app.get("/", (_req, res) => {
   res.send("Hola mundo");
 });

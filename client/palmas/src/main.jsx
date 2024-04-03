@@ -30,7 +30,7 @@ import VehicleTypes from "./pages/houses/VehicleTypes.jsx";
 import PlaceTypes from "./pages/houses/PlaceTypes.jsx";
 import { getVehicleTypes } from "./api/vehicles.js";
 import { getYears } from "./api/time.js";
-import { getMonthlyDebts } from "./api/debt.js";
+import { getMonthlyDebts, getMonthlyFees } from "./api/debt.js";
 
 const router = createBrowserRouter([
   {
@@ -157,6 +157,7 @@ const router = createBrowserRouter([
       {
         path: "/alicuotas",
         element: <Aliquot />,
+        loader: () => getMonthlyFees(),
       },
       {
         path: "/calendario",

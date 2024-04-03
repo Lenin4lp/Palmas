@@ -12,11 +12,6 @@ export const getMonthlyFees = async (req: Request, res: Response) => {
       include: [
         {
           model: Month,
-          include: [
-            { model: Payment },
-            { model: MonthlyFee },
-            { model: Place, include: [Neighbor] },
-          ],
         },
       ],
     });
@@ -29,18 +24,7 @@ export const getMonthlyFees = async (req: Request, res: Response) => {
 
 // ? Obtain a monthly fee
 export const getMonthlyFee = async (req: Request, res: Response) => {
-  const monthlyFee = await MonthlyFee.findByPk(req.params.id, {
-    include: [
-      {
-        model: Month,
-        include: [
-          { model: Payment },
-          { model: MonthlyFee },
-          { model: Place, include: [Neighbor] },
-        ],
-      },
-    ],
-  });
+  const monthlyFee = await MonthlyFee.findByPk(req.params.id);
   if (!monthlyFee) return res.status(404).json(["Alicuota no encontrada"]);
   res.json({ monthlyFee });
 };
