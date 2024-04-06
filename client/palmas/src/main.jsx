@@ -48,6 +48,19 @@ const router = createBrowserRouter([
       {
         path: "/billetera",
         element: <Wallet />,
+        loader: async () => {
+          const placesPromise = getPlaces();
+          const monthlyDebtsPromise = getMonthlyDebts();
+
+          const [placesData, monthlyDebtsData] = await Promise.all([
+            placesPromise,
+            monthlyDebtsPromise,
+          ]);
+          return {
+            places: placesData,
+            monthlyDebts: monthlyDebtsData,
+          };
+        },
       },
       {
         path: "/inmuebles",
@@ -157,7 +170,24 @@ const router = createBrowserRouter([
       {
         path: "/alicuotas",
         element: <Aliquot />,
-        loader: () => getMonthlyFees(),
+        loader: async () => {
+          const monthlyFeesPromise = getMonthlyFees();
+          const getPlacesPromise = getPlaces();
+          const getMonthlyDebtsPromise = getMonthlyDebts();
+
+          const [monthlyFeesData, getPlacesData, getMonthlyDebtsData] =
+            await Promise.all([
+              monthlyFeesPromise,
+              getPlacesPromise,
+              getMonthlyDebtsPromise,
+            ]);
+
+          return {
+            monthlyFees: monthlyFeesData,
+            places: getPlacesData,
+            monthlyDebts: getMonthlyDebtsData,
+          };
+        },
       },
       {
         path: "/calendario",

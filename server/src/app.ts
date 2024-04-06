@@ -19,6 +19,8 @@ import { MonthlyDebt } from "./models/monthlyDebt.model";
 import { MonthlyFee } from "./models/monthlyFee.model";
 import { Place } from "./models/place.model";
 import MonthlyDebtRoutes from "./routes/monthlyDebt.routes";
+import { Year } from "./models/year.model";
+import { createYear } from "./controllers/year.controller";
 
 const app = express();
 
@@ -77,7 +79,7 @@ const ChangeMonth = async (currentMonth: string, currentYear: string) => {
         });
         if (monthlyDebts) {
           for (const monthlyDebt of monthlyDebts) {
-            monthlyDebt.debt = 0;
+            monthlyDebt.debt += +monthFound.monthlyFee?.monthlyFee_value;
             await monthlyDebt.save();
           }
           return "Se han cambiado los deudas";
@@ -99,7 +101,58 @@ cron.schedule(" */5 * * * * *", async () => {
   const currentYear = new Date().getFullYear().toString();
   const currentMonth = ObtainMonth(currentDateString);
   const mesprueba = await ChangeMonth(currentMonth, currentYear);
-
+  console.log(currentDateString);
   console.log(mesprueba);
+
   console.log(`${currentMonth}-${currentYear}`);
+});
+
+cron.schedule("* * * 4 1 *", async () => {
+  const currentYear = new Date().getFullYear().toString();
+  const foundYear = await Year.findOne({ where: { year: currentYear } });
+
+  if (!foundYear) {
+    try {
+      const newYear = await Year.create({
+        year: currentYear,
+      });
+      const monthlyFeeCount = await MonthlyFee.count();
+
+      if (monthlyFeeCount > 0) {
+        const months = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        for (const month of months) {
+          const newMonth = await Month.create({
+            month,
+            month_year: newYear.year,
+            monthlyFee_id: 1,
+          });
+          const places = await Place.findAll();
+          for (const place of places) {
+            await MonthlyDebt.create({
+              debt: 0,
+              month_id: newMonth.month_id,
+              place_id: place.place_id,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  } else {
+    return "Ya existe el año";
+  }
 });

@@ -5,6 +5,7 @@ import {
   Column,
   BelongsTo,
   ForeignKey,
+  BeforeCreate,
 } from "sequelize-typescript";
 import { v4 as uuidv4 } from "uuid";
 import { Place } from "./place.model";
@@ -54,11 +55,11 @@ export class Payment extends Model {
   cash!: boolean;
 
   @Column({
-    type: DataType.INTEGER,
-    allowNull: true,
-    field: "no_recibo",
+    type: DataType.STRING(15),
+    allowNull: false,
+    field: "documento_identidad",
   })
-  receipt!: number;
+  id_document!: string;
 
   @Column({
     type: DataType.STRING(10),
@@ -66,6 +67,13 @@ export class Payment extends Model {
     field: "fecha",
   })
   date!: string;
+
+  @Column({
+    type: DataType.STRING(100),
+    allowNull: false,
+    field: "cliente",
+  })
+  customer!: string;
 
   @ForeignKey(() => MonthlyDebt)
   @Column({
@@ -77,4 +85,18 @@ export class Payment extends Model {
 
   @BelongsTo(() => MonthlyDebt)
   monthlyDebt!: MonthlyDebt;
+
+  @BeforeCreate
+  static async subtractPaymentFromDebt(payment: Payment) {
+    const monthlyDebt = await MonthlyDebt.findByPk(payment.monthlyDebt_id);
+    if (monthlyDebt) {
+      if (monthlyDebt.debt !== 0) {
+        monthlyDebt.debt -= payment.value;
+      } else {
+        // Pago adelantado, hacer el valor negativo
+        monthlyDebt.debt = -payment.value;
+      }
+      await monthlyDebt.save();
+    }
+  }
 }

@@ -30,6 +30,7 @@ export const getPayment = async (req: Request, res: Response) => {
 export const createPayment = async (req: Request, res: Response) => {
   const {
     payment_id,
+    customer,
     payment_amount,
     deposit,
     cash,
@@ -48,6 +49,7 @@ export const createPayment = async (req: Request, res: Response) => {
     }
     const newPayment = await Payment.create({
       payment_amount,
+      customer,
       deposit,
       cash,
       date,
