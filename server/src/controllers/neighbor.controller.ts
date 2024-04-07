@@ -3,12 +3,13 @@ import { Neighbor } from "../models/neighbor.model";
 import { Place } from "../models/place.model";
 import { Payment } from "../models/payment.model";
 import { Month } from "../models/month.model";
+import { NeighborRole } from "../models/neighborRole.model";
 
 // ? Obtain all neighbors
 export const getNeighbors = async (req: Request, res: Response) => {
   try {
     const neighbors = await Neighbor.findAll({
-      include: [{ model: Place }],
+      include: [{ model: Place }, { model: NeighborRole }],
       order: [["neighbor_lastname", "ASC"]],
     });
     res.json(neighbors);
@@ -21,7 +22,7 @@ export const getNeighbors = async (req: Request, res: Response) => {
 // ? Obtain a neighbor
 export const getNeighbor = async (req: Request, res: Response) => {
   const neighbor = await Neighbor.findByPk(req.params.id, {
-    include: [{ model: Place }],
+    include: [{ model: Place }, { model: NeighborRole }],
   });
   if (!neighbor) return res.status(404).json(["Vecino no encontrado"]);
   res.json({ neighbor });

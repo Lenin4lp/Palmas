@@ -5,6 +5,8 @@ import { Neighbor } from "../models/neighbor.model";
 import { Payment } from "../models/payment.model";
 import { Month } from "../models/month.model";
 import { Sequelize } from "sequelize-typescript";
+import { PlaceType } from "../models/placeType.model";
+import { NeighborRole } from "../models/neighborRole.model";
 
 // ? Obtain all places
 export const getPlaces = async (req: Request, res: Response) => {
@@ -34,7 +36,11 @@ export const getPlaces = async (req: Request, res: Response) => {
 // ? Obtain a place
 export const getPlace = async (req: Request, res: Response) => {
   const place = await Place.findByPk(req.params.id, {
-    include: [{ model: Neighbor }],
+    include: [
+      { model: Neighbor, include: [{ model: NeighborRole }] },
+      { model: Month, order: [["month_year", "ASC"]] },
+      { model: PlaceType },
+    ],
   });
   if (!place) return res.status(404).json(["Lugar no encontrado"]);
   res.json({ place });

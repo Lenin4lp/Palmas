@@ -21,7 +21,7 @@ import NeighborInfo from "./pages/neighbor/NeighborInfo.jsx";
 import RegisterNeighbor from "./pages/neighbor/RegisterNeighbor.jsx";
 import ModifyNeighbor from "./pages/neighbor/ModifyNeighbor.jsx";
 import NeighborPlaces from "./pages/neighbor/NeighborPlaces.jsx";
-import { getPlaces, getPlaceTypes } from "./api/places.js";
+import { getPlace, getPlaces, getPlaceTypes } from "./api/places.js";
 import RemoveNeighborPlaces from "./pages/neighbor/RemoveNeighborPlaces.jsx";
 import HouseOutlet from "./middlewares/HouseOutlet.jsx";
 import HouseRegister from "./pages/houses/HouseRegister.jsx";
@@ -31,6 +31,7 @@ import PlaceTypes from "./pages/houses/PlaceTypes.jsx";
 import { getVehicleTypes } from "./api/vehicles.js";
 import { getYears } from "./api/time.js";
 import { getMonthlyDebts, getMonthlyFees } from "./api/debt.js";
+import HouseInfo from "./pages/houses/HouseInfo.jsx";
 
 const router = createBrowserRouter([
   {
@@ -99,6 +100,14 @@ const router = createBrowserRouter([
             path: "/inmuebles/config/tipos_de_inmueble",
             element: <PlaceTypes />,
             loader: () => getPlaceTypes(),
+          },
+          {
+            path: "/inmuebles/:id",
+            element: <HouseInfo />,
+            loader: ({ params }) => {
+              const { id } = params;
+              return getPlace(id);
+            },
           },
         ],
       },
