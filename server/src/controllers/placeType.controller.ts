@@ -36,7 +36,7 @@ export const getPlaceType = async (req: Request, res: Response) => {
 
 // ? Create a placeType
 export const createPlaceType = async (req: Request, res: Response) => {
-  const { placetype_id, placetype_name } = req.body;
+  const { placetype_name, monthly_fee } = req.body;
   try {
     const placeTypeFound = await PlaceType.findOne({
       where: {
@@ -50,6 +50,7 @@ export const createPlaceType = async (req: Request, res: Response) => {
     }
     const newPlaceType = await PlaceType.create({
       placetype_name,
+      monthly_fee: monthly_fee ?? 1,
     });
     res.json(newPlaceType);
   } catch (error) {
@@ -60,13 +61,13 @@ export const createPlaceType = async (req: Request, res: Response) => {
 
 // ? Update a placeType
 export const updatePlaceType = async (req: Request, res: Response) => {
-  const { placetype_name } = req.body;
+  const { placetype_name, monthly_fee } = req.body;
   try {
     const placeType = await PlaceType.findByPk(req.params.id);
     if (!placeType) {
       return res.status(404).json(["Tipo de inmueble no encontrado"]);
     }
-    await placeType.update({ placetype_name });
+    await placeType.update({ placetype_name, monthly_fee });
     res.json({ placeType });
   } catch (error) {
     console.log(error);

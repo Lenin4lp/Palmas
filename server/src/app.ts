@@ -21,6 +21,8 @@ import { Place } from "./models/place.model";
 import MonthlyDebtRoutes from "./routes/monthlyDebt.routes";
 import { Year } from "./models/year.model";
 import { createYear } from "./controllers/year.controller";
+import { PlaceType } from "./models/placeType.model";
+import { log } from "console";
 
 const app = express();
 
@@ -67,37 +69,46 @@ function ObtainMonth(date: string): string {
 // ? MonthlyDebt
 const ChangeMonth = async (currentMonth: string, currentYear: string) => {
   try {
-    const monthFound = await Month.findOne({
-      where: { month_id: `${currentMonth}-${currentYear}` },
-      include: { model: MonthlyFee },
+    const places = await Place.findAll({
+      include: [
+        { model: PlaceType, include: [{ model: MonthlyFee }] },
+        { model: Month },
+      ],
     });
-    if (monthFound) {
-      console.log(monthFound.monthlyFee?.monthlyFee_value);
-      try {
-        const monthlyDebts = await MonthlyDebt.findAll({
-          where: { month_id: monthFound.month_id },
+    if (places) {
+      for (const place of places) {
+        const monthlyDebt = await MonthlyDebt.findOne({
+          where: {
+            place_id: place.place_id,
+            month_id: `${currentMonth}-${currentYear}`,
+          },
         });
-        if (monthlyDebts) {
-          for (const monthlyDebt of monthlyDebts) {
-            monthlyDebt.debt += +monthFound.monthlyFee?.monthlyFee_value;
+        if (monthlyDebt) {
+          const monthlyFee = await MonthlyFee.findOne({
+            where: { monthlyFee_id: place.placeType.monthly_fee },
+          });
+          if (monthlyFee) {
+            const totalDebt =
+              Number(monthlyDebt.debt) +
+              Number(place.placeType.monthlyFee.monthlyFee_value);
+            monthlyDebt.debt = totalDebt;
+            log(totalDebt);
             await monthlyDebt.save();
           }
-          return "Se han cambiado los deudas";
+          console.log(monthlyDebt);
+        } else {
+          return "No hay ese mes";
         }
-      } catch (error) {
-        return error;
       }
-    } else {
-      return "No hay ese mes perro";
     }
   } catch (error) {
-    console.log(error);
+    return error;
   }
 };
 
 // ? Prueba node-cron
-cron.schedule(" */5 * * * * *", async () => {
-  const currentDateString = new Date().toString();
+cron.schedule(" * * * 5 * *", async () => {
+  const currentDateString = new Date(2024, 0).toString();
   const currentYear = new Date().getFullYear().toString();
   const currentMonth = ObtainMonth(currentDateString);
   const mesprueba = await ChangeMonth(currentMonth, currentYear);
@@ -116,9 +127,8 @@ cron.schedule("* * * 4 1 *", async () => {
       const newYear = await Year.create({
         year: currentYear,
       });
-      const monthlyFeeCount = await MonthlyFee.count();
 
-      if (monthlyFeeCount > 0) {
+      if (newYear) {
         const months = [
           "January",
           "February",
@@ -137,7 +147,6 @@ cron.schedule("* * * 4 1 *", async () => {
           const newMonth = await Month.create({
             month,
             month_year: newYear.year,
-            monthlyFee_id: 1,
           });
           const places = await Place.findAll();
           for (const place of places) {

@@ -1,29 +1,96 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   useLoaderData,
   useParams,
   useNavigation,
   Link,
 } from "react-router-dom";
+import { createVehicle } from "../../api/vehicles";
+import { createPayment } from "../../api/payment";
+import { Toaster, toast } from "sonner";
+import { useForm } from "react-hook-form";
 
 function HouseInfo() {
   const { id } = useParams();
   const placeData = useLoaderData();
-  const place = placeData.data.place;
+  const place = placeData.place.data.place;
+  const vehicleTypes = placeData.vehicleTypes.data;
+  const monthlyDebts = placeData.monthlyDebts.data;
   const navigation = useNavigation();
+  const [open, setOpen] = useState("");
+  const [selectedPay, setSelectedPay] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const { register, handleSubmit } = useForm();
+
+  const handleSelectedPay = (e) => {
+    setSelectedPay(e.target.value);
+  };
+
+  const handleSelectedCustomer = (e) => {
+    setSelectedCustomer(e.target.value);
+  };
+
+  const handleSelectedMonth = (e) => {
+    setSelectedMonth(e.target.value);
+  };
+
+  useEffect(() => {
+    setSelectedCustomer("");
+    setSelectedMonth("");
+    setSelectedPay("");
+  }, [open]);
+
+  const monthDebt =
+    selectedMonth !== "" &&
+    monthlyDebts.find((monthlyDebt) => {
+      return (
+        monthlyDebt.month_id == selectedMonth &&
+        monthlyDebt.place_id == place.place_id
+      );
+    });
 
   console.log(place);
+  console.log(vehicleTypes);
+
+  const registerVehicle = async (data) => {
+    try {
+      const res = await createVehicle(data);
+      if (res.status === 200) {
+        toast.success("Vehículo registrado con éxito");
+        setTimeout(() => {
+          window.location.href = `/inmuebles/${id}/config`;
+        }, 2000);
+      }
+    } catch (error) {
+      error.response.data.map((err) => toast.error(err));
+    }
+  };
+
+  const registerPayment = async (data) => {
+    try {
+      const res = await createPayment(data);
+      if (res.status === 200) {
+        toast.success("Pago registrado con éxito");
+        setTimeout(() => {
+          window.location.href = `/inmuebles/${id}/config`;
+        }, 2000);
+      }
+    } catch (error) {
+      error.response.data.map((err) => toast.error(err));
+    }
+  };
 
   if (navigation.state === "loading") {
     return <div>Cargando</div>;
   }
   return (
-    <div className=" p-5 md:m-5 md:px-[70px] pb-[90px] md:py-0 w-screen min-h-screen h-fit">
+    <div className="  md:pl-[70px] pb-[90px] md:py-0 w-screen min-h-screen h-fit">
       <div className="block">
-        <div className=" flex justify-around lg:justify-between items-center flex-wrap">
+        <div className=" flex p-3 lg:p-5 pb-1 lg:pb-3 justify-around lg:justify-between items-center flex-wrap">
           <div className=" flex justify-center items-center">
             <svg
-              className=" h-[60px] w-auto"
+              className=" h-[50px] lg:h-[60px] w-auto"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -76,13 +143,12 @@ function HouseInfo() {
         </div>
         <div className=" my-5 h-[1px] w-full bg-[#8f0e2a]"></div>
         <div className=" flex justify-around gap-5 items-center flex-wrap">
-          <div className=" border-[1px] border-[#8f0e2a] rounded-lg h-[250px] w-[250px]">
+          <div className=" border-[1px] border-[#8f0e2a] rounded-lg h-[220px] w-[220px] lg:h-[250px] lg:w-[250px]">
             <div className=" w-full h-full grid grid-rows-3">
               <div className=" row-span-2 rounded-lg rounded-b-none flex justify-center items-center bg-gradient-to-r from-[#852655] to-[#8f0e2a]">
                 <svg
                   viewBox="0 0 24 24"
                   id="Layer_1"
-                  dataName="Layer 1"
                   xmlns="http://www.w3.org/2000/svg"
                   className=" fill-white h-[100px] w-auto"
                 >
@@ -124,14 +190,14 @@ function HouseInfo() {
                   </h1>
                 </div>
                 <div className=" flex justify-center items-center">
-                  <h1 className=" text-3xl font-bold text-[#8f0e2a]">
+                  <h1 className=" text-2xl lg:text-3xl font-bold text-[#8f0e2a]">
                     {place.placeType.placetype_name}
                   </h1>
                 </div>
               </div>
             </div>
           </div>
-          <div className=" border-[1px] border-[#8f0e2a] rounded-lg h-[250px] w-[250px]">
+          <div className="  border-[1px] border-[#8f0e2a] rounded-lg h-[220px] w-[220px] lg:h-[250px] lg:w-[250px]">
             <div className=" w-full h-full grid grid-rows-3">
               <div className=" row-span-2 rounded-lg rounded-b-none flex justify-center items-center bg-gradient-to-r from-[#852655] to-[#8f0e2a]">
                 <svg
@@ -155,12 +221,12 @@ function HouseInfo() {
                   <h1 className=" text-[#8f0e2a] font-bold">Deuda:</h1>
                 </div>
                 <div className=" flex justify-center items-center">
-                  <h1 className=" text-3xl font-bold text-[#8f0e2a]">{`$${place.pending_value}`}</h1>
+                  <h1 className=" text-2xl lg:text-3xl font-bold text-[#8f0e2a]">{`$${place.pending_value}`}</h1>
                 </div>
               </div>
             </div>
           </div>
-          <div className=" border-[1px] border-[#8f0e2a] rounded-lg h-[250px] w-[250px]">
+          <div className=" border-[1px] border-[#8f0e2a] rounded-lg h-[220px] w-[220px] lg:h-[250px] lg:w-[250px]">
             <div className=" w-full h-full grid grid-rows-3">
               <div className=" row-span-2 rounded-lg rounded-b-none flex justify-center items-center bg-gradient-to-r from-[#852655] to-[#8f0e2a]">
                 <svg
@@ -193,7 +259,7 @@ function HouseInfo() {
                   </h1>
                 </div>
                 <div className=" flex justify-center items-center">
-                  <h1 className=" text-3xl font-bold text-[#8f0e2a]">
+                  <h1 className=" text-2xl lg:text-3xl font-bold text-[#8f0e2a]">
                     {
                       place.months.filter(
                         (month) => month.MonthlyDebt.debt != 0
@@ -205,141 +271,870 @@ function HouseInfo() {
             </div>
           </div>
         </div>
-        <div className=" mt-14 mb-5 flex justify-center w-full items-center">
-          <h1 className=" text-xl font-bold text-[#8f0e2a]">
-            Vecinos relacionados
-          </h1>
-        </div>
-        <div className=" flex justify-center items-center">
-          <div>
-            <table className=" border-[1px] border-collapse text-[12px] border-[#8f0e2a] rounded-lg">
-              <thead className=" sticky top-0">
-                <tr>
-                  <th className=" border border-slate-300 p-2 w-[50px] text-white bg-[#8f0e2a]">
-                    N°
-                  </th>
-                  <th className=" border border-slate-300 text-white bg-[#8f0e2a]  px-[100px] lg:px-[120px] py-2">
-                    Nombres
-                  </th>
-                  <th className=" border border-slate-300 p-2 w-[150px] text-white bg-[#8f0e2a]">
-                    Rol
-                  </th>
-                  <th className=" border border-slate-300 p-2 w-[200px] text-white bg-[#8f0e2a]">
-                    Correo
-                  </th>
-                  <th className=" border border-slate-300 text-white bg-[#8f0e2a]  px-[15px] py-2">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {place.neighbors.map((neighbor, index) => (
-                  <tr key={index} className=" text-[11px] lg:text-[12px]">
-                    <th className="border border-slate-300 px-2 py-2">
-                      {index + 1}
-                    </th>
-                    <th className="border border-slate-300 px-2 py-2">
-                      {`${neighbor.neighbor_name} ${neighbor.neighbor_lastname}`}
-                    </th>
-                    <th className="border border-slate-300 px-2 py-2">
-                      {neighbor.neighborRole.role_name}
-                    </th>
-                    <th className="border border-slate-300 px-2 py-2">
-                      {neighbor.neighbor_email != null
-                        ? `${neighbor.neighbor_email}`
-                        : "---"}
-                    </th>
-                    <th className=" border grid grid-cols-2 h-full border-slate-300  py-2">
-                      <div className=" flex justify-center border-none items-center">
-                        <Link to={`/inmuebles/${place.place_id}`}>
-                          <svg
-                            className=" h-[19px] hover:cursor-pointer"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                            <g
-                              id="SVGRepo_tracerCarrier"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            ></g>
-                            <g id="SVGRepo_iconCarrier">
-                              {" "}
-                              <circle
-                                cx="12"
-                                cy="12"
-                                r="3"
-                                stroke="#ababab"
-                                strokeWidth="2"
-                              ></circle>{" "}
-                              <path
-                                d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
-                                stroke="#ababab"
-                                strokeWidth="2"
-                              ></path>{" "}
-                            </g>
-                          </svg>
-                        </Link>
-                      </div>
-                      <div className=" flex justify-center items-center">
-                        <Link to={`/inmuebles/modificar/${place.place_id}`}>
-                          <svg
-                            viewBox="-3 0 32 32"
-                            version="1.1"
-                            xmlns="http://www.w3.org/2000/svg"
-                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                            xmlnsSketch="http://www.bohemiancoding.com/sketch/ns"
-                            className=" h-[19px] hover:cursor-pointer fill-[#831818]"
-                          >
-                            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                            <g
-                              id="SVGRepo_tracerCarrier"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            ></g>
-                            <g id="SVGRepo_iconCarrier">
-                              {" "}
-                              <title>trash</title>{" "}
-                              <desc>Created with Sketch Beta.</desc>{" "}
-                              <defs> </defs>{" "}
-                              <g
-                                id="Page-1"
-                                stroke="none"
-                                strokeWidth="1"
-                                fill="none"
-                                fillRule="evenodd"
-                                sketchType="MSPage"
-                              >
-                                {" "}
-                                <g
-                                  id="Icon-Set"
-                                  sketchType="MSLayerGroup"
-                                  transform="translate(-259.000000, -203.000000)"
-                                  className=" fill-[#831818]"
+
+        <div className=" flex w-full bg-gradient-to-br from-[#852655] h-fit to-[#8f0e2a] justify-center items-center mt-5">
+          <div className=" block">
+            <div className=" mt-14  flex justify-center w-full items-center">
+              <svg
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+                className=" fill-none h-[100px] w-auto"
+              >
+                <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                <g
+                  id="SVGRepo_tracerCarrier"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                ></g>
+                <g id="SVGRepo_iconCarrier">
+                  {" "}
+                  <path
+                    d="M19 9.77806V16.2C19 17.8801 19 18.7202 18.673 19.3619C18.3854 19.9264 17.9265 20.3854 17.362 20.673C17.2111 20.7499 17.0492 20.8087 16.868 20.8537M5 9.7774V16.2C5 17.8801 5 18.7202 5.32698 19.3619C5.6146 19.9264 6.07354 20.3854 6.63803 20.673C6.78894 20.7499 6.95082 20.8087 7.13202 20.8537M21 12L15.5668 5.96393C14.3311 4.59116 13.7133 3.90478 12.9856 3.65138C12.3466 3.42882 11.651 3.42887 11.0119 3.65153C10.2843 3.90503 9.66661 4.59151 8.43114 5.96446L3 12M7.13202 20.8537C7.65017 18.6447 9.63301 17 12 17C14.367 17 16.3498 18.6447 16.868 20.8537M7.13202 20.8537C7.72133 21 8.51495 21 9.8 21H14.2C15.485 21 16.2787 21 16.868 20.8537M14 12C14 13.1045 13.1046 14 12 14C10.8954 14 10 13.1045 10 12C10 10.8954 10.8954 9.99996 12 9.99996C13.1046 9.99996 14 10.8954 14 12Z"
+                    className=" stroke-white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  ></path>{" "}
+                </g>
+              </svg>
+            </div>
+            <div className="  my-3 flex justify-center w-full items-center">
+              <h1 className=" text-xl font-bold text-white">
+                Vecinos relacionados
+              </h1>
+            </div>
+
+            {place.neighbors.length === 0 && (
+              <div className=" flex justify-center items-center">
+                <h1 className=" py-5 text-base text-white">
+                  No hay vecinos registrados
+                </h1>
+              </div>
+            )}
+            {place.neighbors.length > 0 && (
+              <div className=" flex justify-center items-center">
+                <div>
+                  <table className=" border-[1px] border-collapse text-[12px] border-[#8f0e2a] rounded-lg">
+                    <thead className=" sticky top-0">
+                      <tr>
+                        <th className=" border border-slate-400 p-2 w-[50px] text-[#8f0e2a] bg-white">
+                          N°
+                        </th>
+                        <th className=" border border-slate-400 text-[#8f0e2a] bg-white px-[100px] lg:px-[120px] py-2">
+                          Nombres
+                        </th>
+                        <th className=" border border-slate-400 p-2 w-[150px] text-[#8f0e2a] bg-white">
+                          Rol
+                        </th>
+                        <th className=" border border-slate-400 p-2 w-[200px] text-[#8f0e2a] bg-white">
+                          Correo
+                        </th>
+                        <th className=" border border-slate-400 text-[#8f0e2a] bg-white  px-[15px] py-2">
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {place.neighbors.map((neighbor, index) => (
+                        <tr
+                          key={index}
+                          className=" text-[11px] text-white lg:text-[12px]"
+                        >
+                          <th className="border border-slate-300 px-2 py-2">
+                            {index + 1}
+                          </th>
+                          <th className="border border-slate-300 px-2 py-2">
+                            {`${neighbor.neighbor_name} ${neighbor.neighbor_lastname}`}
+                          </th>
+                          <th className="border border-slate-300 px-2 py-2">
+                            {neighbor.neighborRole.role_name}
+                          </th>
+                          <th className="border border-slate-300 px-2 py-2">
+                            {neighbor.neighbor_email != null
+                              ? `${neighbor.neighbor_email}`
+                              : "---"}
+                          </th>
+                          <th className=" border grid grid-cols-2 h-full border-slate-300  py-2">
+                            <div className=" flex justify-center border-none items-center">
+                              <Link to={`/inmuebles/${place.place_id}`}>
+                                <svg
+                                  className=" h-[19px] hover:cursor-pointer"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  {" "}
-                                  <path
-                                    d="M282,211 L262,211 C261.448,211 261,210.553 261,210 C261,209.448 261.448,209 262,209 L282,209 C282.552,209 283,209.448 283,210 C283,210.553 282.552,211 282,211 L282,211 Z M281,231 C281,232.104 280.104,233 279,233 L265,233 C263.896,233 263,232.104 263,231 L263,213 L281,213 L281,231 L281,231 Z M269,206 C269,205.447 269.448,205 270,205 L274,205 C274.552,205 275,205.447 275,206 L275,207 L269,207 L269,206 L269,206 Z M283,207 L277,207 L277,205 C277,203.896 276.104,203 275,203 L269,203 C267.896,203 267,203.896 267,205 L267,207 L261,207 C259.896,207 259,207.896 259,209 L259,211 C259,212.104 259.896,213 261,213 L261,231 C261,233.209 262.791,235 265,235 L279,235 C281.209,235 283,233.209 283,231 L283,213 C284.104,213 285,212.104 285,211 L285,209 C285,207.896 284.104,207 283,207 L283,207 Z M272,231 C272.552,231 273,230.553 273,230 L273,218 C273,217.448 272.552,217 272,217 C271.448,217 271,217.448 271,218 L271,230 C271,230.553 271.448,231 272,231 L272,231 Z M267,231 C267.552,231 268,230.553 268,230 L268,218 C268,217.448 267.552,217 267,217 C266.448,217 266,217.448 266,218 L266,230 C266,230.553 266.448,231 267,231 L267,231 Z M277,231 C277.552,231 278,230.553 278,230 L278,218 C278,217.448 277.552,217 277,217 C276.448,217 276,217.448 276,218 L276,230 C276,230.553 276.448,231 277,231 L277,231 Z"
-                                    id="trash"
-                                    sketchType="MSShapeGroup"
-                                  >
+                                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                                  <g
+                                    id="SVGRepo_tracerCarrier"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  ></g>
+                                  <g id="SVGRepo_iconCarrier">
                                     {" "}
-                                  </path>{" "}
-                                </g>{" "}
-                              </g>{" "}
-                            </g>
-                          </svg>
-                        </Link>
+                                    <circle
+                                      cx="12"
+                                      cy="12"
+                                      r="3"
+                                      stroke="#ababab"
+                                      strokeWidth="2"
+                                    ></circle>{" "}
+                                    <path
+                                      d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
+                                      stroke="#ababab"
+                                      strokeWidth="2"
+                                    ></path>{" "}
+                                  </g>
+                                </svg>
+                              </Link>
+                            </div>
+                            <div className=" flex justify-center items-center">
+                              <Link
+                                to={`/inmuebles/modificar/${place.place_id}`}
+                              >
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className=" h-[19px] hover:cursor-pointer fill-none"
+                                >
+                                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                                  <g
+                                    id="SVGRepo_tracerCarrier"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  ></g>
+                                  <g id="SVGRepo_iconCarrier">
+                                    {" "}
+                                    <g id="Edit / Remove_Minus_Circle">
+                                      {" "}
+                                      <path
+                                        id="Vector"
+                                        d="M8 12H16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z"
+                                        className="stroke-white"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      ></path>{" "}
+                                    </g>{" "}
+                                  </g>
+                                </svg>
+                              </Link>
+                            </div>
+                          </th>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            <div className=" mt-8  flex justify-center w-full items-center">
+              <svg
+                version="1.1"
+                id="Layer_1"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlnsXlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 512.001 512.001"
+                xmlSpace="preserve"
+                className=" fill-white h-[100px] w-auto"
+              >
+                <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                <g
+                  id="SVGRepo_tracerCarrier"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                ></g>
+                <g id="SVGRepo_iconCarrier">
+                  {" "}
+                  <g>
+                    {" "}
+                    <g>
+                      {" "}
+                      <path d="M466.765,122.029H45.235C20.292,122.029,0,142.322,0,167.264v177.474c0,24.943,20.292,45.235,45.235,45.235h421.531 c24.942,0,45.235-20.292,45.235-45.235V167.264C512,142.322,491.708,122.029,466.765,122.029z M478.609,344.739 c0,6.53-5.313,11.844-11.844,11.844H45.235c-6.53,0-11.844-5.313-11.844-11.844v-2.477h445.217V344.739z M478.609,308.871H33.391 V203.132h445.217V308.871z M478.61,169.74H33.391v-2.477c0-6.53,5.313-11.844,11.844-11.844h421.531 c6.53,0,11.844,5.313,11.844,11.844V169.74z"></path>{" "}
+                    </g>{" "}
+                  </g>{" "}
+                  <g>
+                    {" "}
+                    <g>
+                      {" "}
+                      <path d="M115.594,222.468H102.39l-22.146,59.336h17.299l3.511-11.617h15.795l3.593,11.617h17.217L115.594,222.468z M103.475,259.324l5.516-19.89l5.265,19.89H103.475z"></path>{" "}
+                    </g>{" "}
+                  </g>{" "}
+                  <g>
+                    {" "}
+                    <g>
+                      {" "}
+                      <path d="M181.526,251.385c5.683-2.508,8.525-8.191,8.525-13.706c0-7.522-5.181-15.21-13.539-15.21H142.08v59.336h29.167 c11.7-0.001,21.31-4.513,21.31-15.211C192.558,258.322,188.296,253.39,181.526,251.385z M158.377,236.341h11.617 c2.089,0,3.928,1.253,3.928,4.512c0,3.677-2.257,4.597-4.43,4.597h-11.115V236.341z M171.247,268.099h-12.87v-9.945h13.456 c2.423,0,4.178,2.173,4.178,5.098C176.011,266.345,173.922,268.099,171.247,268.099z"></path>{" "}
+                    </g>{" "}
+                  </g>{" "}
+                  <g>
+                    {" "}
+                    <g>
+                      {" "}
+                      <path d="M235.008,260.578c-1.672,5.348-6.351,7.27-10.112,7.27c-7.522,0-11.951-7.437-11.951-15.712 c0-7.437,3.594-15.545,11.784-15.545c3.677,0,8.608,1.588,10.53,7.355l12.452-8.859c-3.761-7.772-12.118-12.954-22.648-12.954 c-18.052,0-28.665,15.044-28.665,29.501c-0.001,15.21,11.616,30.671,28.163,30.671c9.444,0,20.392-5.014,23.735-13.789 L235.008,260.578z"></path>{" "}
+                    </g>{" "}
+                  </g>{" "}
+                  <g>
+                    {" "}
+                    <g>
+                      {" "}
+                      <rect
+                        x="253.473"
+                        y="251.638"
+                        width="26.159"
+                        height="14.208"
+                      ></rect>{" "}
+                    </g>{" "}
+                  </g>{" "}
+                  <g>
+                    {" "}
+                    <g>
+                      {" "}
+                      <path d="M317.316,267.598v-45.547h-16.214c-0.167,0.335-7.772,7.939-13.789,7.939v14.541c4.514,0,11.952-4.596,13.791-7.187 v30.254h-11.867v14.208h38.694v-14.208H317.316z"></path>{" "}
+                    </g>{" "}
+                  </g>{" "}
+                  <g>
+                    {" "}
+                    <g>
+                      {" "}
+                      <path d="M356.591,267.597c0-3.593,5.432-6.268,10.195-9.026c7.438-4.345,11.784-8.525,11.784-17.717 c0-12.201-7.771-19.054-21.31-19.054c-10.864,0-19.89,4.43-24.32,9.444l9.778,10.614c3.176-3.092,7.939-6.017,12.285-6.017 c2.842,0,5.432,1.253,5.432,5.265c0.001,6.101-6.016,9.026-12.954,12.285c-12.703,6.017-14.542,13.037-14.542,28.415h45.715 v-14.208H356.591z"></path>{" "}
+                    </g>{" "}
+                  </g>{" "}
+                  <g>
+                    {" "}
+                    <g>
+                      {" "}
+                      <path d="M416.509,250.047c6.269-1.254,10.781-5.683,10.781-12.118c0-9.194-9.193-16.213-21.562-16.213 c-7.522,0-16.464,2.591-20.893,7.522l10.029,11.784c1.503-1.923,4.679-5.434,10.947-5.434c0.919,0,4.43,0.083,4.43,3.176 c0,4.178-6.601,5.6-13.956,5.6h-2.675v13.121h2.758c9.862,0,15.377,1.337,15.377,5.683c0,3.511-3.677,4.847-7.437,4.847 c-7.605,0-9.945-5.516-10.614-6.184l-8.106,11.031c3.844,6.686,10.195,9.695,19.055,9.695c11.115,0,23.651-4.764,23.651-17.215 C428.292,257.903,423.78,251.217,416.509,250.047z"></path>{" "}
+                    </g>{" "}
+                  </g>{" "}
+                </g>
+              </svg>
+            </div>
+            <div className="  my-2 flex justify-center w-full items-center">
+              <h1 className=" text-xl font-bold text-white">
+                Vehículos relacionados
+              </h1>
+            </div>
+            {place.vehicles.length === 0 && (
+              <div className=" flex justify-center items-center">
+                <h1 className=" py-5 text-base text-white">
+                  No hay vehículos registrados
+                </h1>
+              </div>
+            )}
+            {place.neighbors.length > 0 && (
+              <div className=" flex justify-center items-center">
+                <div>
+                  <table className=" border-[1px] border-collapse text-[12px] border-[#8f0e2a] rounded-lg">
+                    <thead className=" sticky top-0">
+                      <tr>
+                        <th className=" border border-slate-400 p-2 w-[50px] text-[#8f0e2a] bg-white">
+                          N°
+                        </th>
+                        <th className=" border border-slate-400 text-[#8f0e2a] bg-white px-[100px] lg:px-[120px] py-2">
+                          Nombres
+                        </th>
+                        <th className=" border border-slate-400 p-2 w-[150px] text-[#8f0e2a] bg-white">
+                          Rol
+                        </th>
+                        <th className=" border border-slate-400 p-2 w-[200px] text-[#8f0e2a] bg-white">
+                          Correo
+                        </th>
+                        <th className=" border border-slate-400 text-[#8f0e2a] bg-white  px-[15px] py-2">
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {place.neighbors.map((neighbor, index) => (
+                        <tr
+                          key={index}
+                          className=" text-[11px] text-white lg:text-[12px]"
+                        >
+                          <th className="border border-slate-300 px-2 py-2">
+                            {index + 1}
+                          </th>
+                          <th className="border border-slate-300 px-2 py-2">
+                            {`${neighbor.neighbor_name} ${neighbor.neighbor_lastname}`}
+                          </th>
+                          <th className="border border-slate-300 px-2 py-2">
+                            {neighbor.neighborRole.role_name}
+                          </th>
+                          <th className="border border-slate-300 px-2 py-2">
+                            {neighbor.neighbor_email != null
+                              ? `${neighbor.neighbor_email}`
+                              : "---"}
+                          </th>
+                          <th className=" border grid grid-cols-2 h-full border-slate-300  py-2">
+                            <div className=" flex justify-center border-none items-center">
+                              <Link to={`/inmuebles/${place.place_id}`}>
+                                <svg
+                                  className=" h-[19px] hover:cursor-pointer"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                                  <g
+                                    id="SVGRepo_tracerCarrier"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  ></g>
+                                  <g id="SVGRepo_iconCarrier">
+                                    {" "}
+                                    <circle
+                                      cx="12"
+                                      cy="12"
+                                      r="3"
+                                      stroke="#ababab"
+                                      strokeWidth="2"
+                                    ></circle>{" "}
+                                    <path
+                                      d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
+                                      stroke="#ababab"
+                                      strokeWidth="2"
+                                    ></path>{" "}
+                                  </g>
+                                </svg>
+                              </Link>
+                            </div>
+                            <div className=" flex justify-center items-center">
+                              <Link
+                                to={`/inmuebles/modificar/${place.place_id}`}
+                              >
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className=" h-[19px] hover:cursor-pointer fill-none"
+                                >
+                                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                                  <g
+                                    id="SVGRepo_tracerCarrier"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  ></g>
+                                  <g id="SVGRepo_iconCarrier">
+                                    {" "}
+                                    <g id="Edit / Remove_Minus_Circle">
+                                      {" "}
+                                      <path
+                                        id="Vector"
+                                        d="M8 12H16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z"
+                                        className="stroke-white"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      ></path>{" "}
+                                    </g>{" "}
+                                  </g>
+                                </svg>
+                              </Link>
+                            </div>
+                          </th>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            <div className=" mt-10  w-screen md:px-[33px] grid grid-cols-2 h-fit min-h-[600px] border-[1px] border-white">
+              <div className=" border-[1px] w-full flex justify-center items-center relative border-white">
+                <div
+                  onClick={() => setOpen(1)}
+                  className={` hover:bg-[#a14272]  transition duration-300 bg-[#852655] w-full h-full hover:cursor-pointer absolute ${
+                    open === 1 ? "hidden" : "flex"
+                  } justify-center items-center`}
+                >
+                  <div className=" block">
+                    <svg
+                      className=" fill-white h-[250px] w-auto"
+                      viewBox="0 0 32 32"
+                      id="icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                      <g
+                        id="SVGRepo_tracerCarrier"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      ></g>
+                      <g id="SVGRepo_iconCarrier">
+                        {" "}
+                        <defs>
+                          {" "}
+                          <style> .cls-1 {` fill: none; `} </style>{" "}
+                        </defs>{" "}
+                        <path
+                          d="M28,11a1.9907,1.9907,0,0,0-.8247.1821L24.8337,9.51A3.45,3.45,0,0,0,25,8.5a3.45,3.45,0,0,0-.1663-1.01l2.3416-1.6723A1.9975,1.9975,0,1,0,26,4c0,.064.0129.124.0188.1865L23.7273,5.8232A3.4652,3.4652,0,0,0,21.5,5a3.5,3.5,0,0,0,0,7,3.4652,3.4652,0,0,0,2.2273-.8232l2.2915,1.6367C26.0129,12.876,26,12.936,26,13a2,2,0,1,0,2-2Zm-6.5-1A1.5,1.5,0,1,1,23,8.5,1.5017,1.5017,0,0,1,21.5,10Z"
+                          transform="translate(0 0)"
+                        ></path>{" "}
+                        <path
+                          d="M29.3379,19.9336l-7.7324-2.7783L18.374,13.0967A2.99,2.99,0,0,0,16.0537,12H8.0576a2.9982,2.9982,0,0,0-2.48,1.3115L2.8662,17.2949A4.9884,4.9884,0,0,0,2,20.1074V26a1,1,0,0,0,1,1H5.1421a3.9806,3.9806,0,0,0,7.7158,0h6.2842a3.9806,3.9806,0,0,0,7.7158,0H29a1,1,0,0,0,1-1V20.875A1,1,0,0,0,29.3379,19.9336ZM9,28a2,2,0,1,1,2-2A2.0027,2.0027,0,0,1,9,28Zm14,0a2,2,0,1,1,2-2A2.0025,2.0025,0,0,1,23,28Zm5-3H26.8579a3.9806,3.9806,0,0,0-7.7158,0H12.8579a3.9806,3.9806,0,0,0-7.7158,0H4V20.1074A2.9977,2.9977,0,0,1,4.52,18.4189l2.711-3.9814A.9992.9992,0,0,1,8.0576,14h7.9961a.9928.9928,0,0,1,.7647.3545l3.3994,4.2685a1.0007,1.0007,0,0,0,.4443.3184L28,21.5781Z"
+                          transform="translate(0 0)"
+                        ></path>{" "}
+                        <rect
+                          id="_Transparent_Rectangle_"
+                          className="fill-none"
+                          width="32"
+                          height="32"
+                        ></rect>{" "}
+                      </g>
+                    </svg>
+                    <div className=" py-5 flex justify-center items-center">
+                      <h1 className=" text-2xl font-bold text-white">
+                        Añadir vehículo
+                      </h1>
+                    </div>
+                  </div>
+                </div>
+                <div className=" flex justify-center items-center h-full w-full ">
+                  <div className=" block">
+                    <div className=" flex justify-center items-center">
+                      <svg
+                        className=" fill-white h-[100px] w-auto"
+                        viewBox="-4 0 32 32"
+                        version="1.1"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                        <g
+                          id="SVGRepo_tracerCarrier"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></g>
+                        <g id="SVGRepo_iconCarrier">
+                          {" "}
+                          <title>car</title>{" "}
+                          <path d="M19.938 7.188l3.563 7.156c0.063 0.094 0.094 0.219 0.125 0.313 0.219 0.563 0.375 1.344 0.375 1.844v3.406c0 1.063-0.719 1.938-1.719 2.188v2c0 0.969-0.781 1.719-1.719 1.719-0.969 0-1.719-0.75-1.719-1.719v-1.938h-13.688v1.938c0 0.969-0.75 1.719-1.719 1.719-0.938 0-1.719-0.75-1.719-1.719v-2c-1-0.25-1.719-1.125-1.719-2.188v-3.406c0-0.5 0.156-1.281 0.375-1.844 0.031-0.094 0.063-0.219 0.125-0.313l3.563-7.156c0.281-0.531 1.031-1.031 1.656-1.031h12.563c0.625 0 1.375 0.5 1.656 1.031zM5.531 9.344l-1.906 4.344c-0.094 0.156-0.094 0.344-0.094 0.469h16.938c0-0.125 0-0.313-0.094-0.469l-1.906-4.344c-0.25-0.563-1-1.063-1.594-1.063h-9.75c-0.594 0-1.344 0.5-1.594 1.063zM4.688 19.906c1 0 1.781-0.813 1.781-1.844 0-1-0.781-1.781-1.781-1.781s-1.844 0.781-1.844 1.781c0 1.031 0.844 1.844 1.844 1.844zM19.313 19.906c1 0 1.844-0.813 1.844-1.844 0-1-0.844-1.781-1.844-1.781s-1.781 0.781-1.781 1.781c0 1.031 0.781 1.844 1.781 1.844z"></path>{" "}
+                        </g>
+                      </svg>
+                    </div>
+                    <div className=" flex justify-center items-center">
+                      <h1 className=" mb-5 text-lg font-bold text-white">
+                        Registra un vehículo
+                      </h1>
+                    </div>
+                    <form className=" my-5 h-full w-full block">
+                      <div className=" px-5 flex flex-wrap">
+                        <label
+                          htmlFor=""
+                          className=" px-2 text-white font-medium"
+                        >
+                          Tipo de vehículo:
+                        </label>
+                        <select className=" text-sm p-1 rounded-lg">
+                          <option className=" text-sm" defaultValue value={""}>
+                            Selecciona un tipo de vehículo
+                          </option>
+                          {vehicleTypes.map((vehicleType) => (
+                            <option
+                              key={vehicleType.vehicleType_id}
+                              className=" text-sm"
+                              value={""}
+                            >
+                              {vehicleType.vehicleType}
+                            </option>
+                          ))}
+                        </select>
                       </div>
-                    </th>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <div className=" p-10 flex flex-wrap justify-center items-center">
+                        <div className=" block">
+                          <div className="flex justify-center items-center">
+                            <label
+                              htmlFor=""
+                              className=" text-white font-medium"
+                            >
+                              Placa del vehículo:
+                            </label>
+                          </div>
+                          <div className=" my-3 flex justify-center items-center">
+                            <input type="text" className=" p-2 rounded-lg" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className=" flex justify-center items-center mb-5">
+                        <button className=" p-2 border-[1px] group border-white hover:text-[#8f0e2a] hover:bg-white transition duration-300 text-white rounded-lg">
+                          <h1 className=" text-white group-hover:text-[#8f0e2a] duration-300 transition">
+                            Registrar vehículo
+                          </h1>
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <div className=" border-[1px] w-full flex justify-center items-center relative border-white">
+                <div
+                  onClick={() => setOpen(2)}
+                  className={` hover:bg-[#a14272]  transition duration-300 bg-[#852655] w-full h-full hover:cursor-pointer absolute ${
+                    open === 2 ? "hidden" : "flex"
+                  } justify-center items-center`}
+                >
+                  <div className=" block">
+                    <svg
+                      viewBox="0 0 48 48"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className=" fill-white h-[250px] w-auto"
+                    >
+                      <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                      <g
+                        id="SVGRepo_tracerCarrier"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      ></g>
+                      <g id="SVGRepo_iconCarrier">
+                        {" "}
+                        <path d="M0 0h48v48H0z" fill="none"></path>{" "}
+                        <g id="Shopicon">
+                          {" "}
+                          <path d="M40.228,21.494L30,11.267V8c0-2.2-1.8-4-4-4H10C7.8,4,6,5.8,6,8v23.955c0,2.2,1.8,4,4,4h3.992l0.121,0.799 c0.621,4.105,4.012,7.201,7.888,7.201h20v-17C42,23.483,40.656,21.907,40.228,21.494z M26,9.185c-0.198-0.019-0.398-0.03-0.6-0.03 c-1.605,0-3.112,0.623-4.24,1.751c-1.132,1.125-1.758,2.629-1.76,4.234c-0.003,1.611,0.621,3.123,1.756,4.259L26,24.243v7.712h-7V8 h7V9.185z M10,8h3v23.955h-3V8z M38,39.955H22c-1.915,0-3.605-1.633-3.933-3.799l-0.03-0.201H26c2.2,0,4-1.8,4-4v-3.712l2.12,2.12 l2.829-2.828l-4.663-4.663L25,17.587l-1.016-1.016c-0.378-0.378-0.585-0.884-0.584-1.424c0.001-0.534,0.207-1.033,0.584-1.408 c0.423-0.423,1.024-0.6,1.604-0.548c0.455,0.04,0.897,0.217,1.228,0.548L31,17.923l6.416,6.416l-0.072-0.022l0.109,0.072 C37.584,24.586,38,25.337,38,26.955V39.955z"></path>{" "}
+                        </g>{" "}
+                      </g>
+                    </svg>
+                    <div className=" py-5 flex justify-center items-center">
+                      <h1 className=" text-2xl font-bold text-white">
+                        Realizar pago
+                      </h1>
+                    </div>
+                  </div>
+                </div>
+                <div className=" flex justify-center items-center h-full w-full ">
+                  <div className=" w-full p-5 block">
+                    <div className=" flex justify-center items-center">
+                      <svg
+                        className=" fill-white h-[80px] w-auto"
+                        version="1.1"
+                        id="Layer_1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlnsXlink="http://www.w3.org/1999/xlink"
+                        viewBox="0 0 511.999 511.999"
+                        xmlSpace="preserve"
+                      >
+                        <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                        <g
+                          id="SVGRepo_tracerCarrier"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></g>
+                        <g id="SVGRepo_iconCarrier">
+                          {" "}
+                          <g>
+                            {" "}
+                            <g>
+                              {" "}
+                              <g>
+                                {" "}
+                                <path d="M282.701,417.258c-0.801-2.99-3.714-4.902-6.776-4.445C170.016,428.644,73.038,346.171,73.038,237.85 c0-97.522,79.341-176.863,176.863-176.863c119.226,0,205.029,116.522,168.471,230.64c-1.066,3.326,0.839,6.868,4.213,7.772 l40.109,10.746c2.065,0.554,4.067,1.261,5.994,2.108c3.338,1.466,7.227-0.243,8.311-3.724C524.864,154.762,409.031,0,249.901,0 C118.75,0,12.051,106.7,12.051,237.85c0,151.181,137.666,259.523,278.547,234.509c3.525-0.626,5.762-4.139,4.836-7.597 L282.701,417.258z"></path>{" "}
+                                <path d="M250.711,174.075c14.56,0,22.086,9.975,21.931,19.667c-0.165,10.324,8.224,18.729,18.54,18.593 c10.408-0.137,18.277-9.225,18.034-19.631c-0.588-25.217-17.769-46.391-41.02-53.038v-8.094c0-9.852-7.571-18.328-17.412-18.791 c-10.507-0.495-19.18,7.877-19.18,18.275v9.59c-24.297,8.159-41.532,30.828-41.025,57.321 c0.614,32.082,27.225,58.182,59.321,58.182c9.121,0,17.085,5.499,20.688,13.351c1.415,3.082,5.195,4.295,8.213,2.748 c6.565-3.364,13.878-4.925,21.133-4.623c4.337,0.18,7.397-4.196,5.95-8.289c-8.133-23.006-30.157-39.656-55.701-39.78 c-10.123-0.049-19.267-6.71-22.112-16.425C223.653,188.033,235.903,174.075,250.711,174.075z"></path>{" "}
+                                <path d="M263.83,356.481c1.258-1.482,1.638-3.521,1.136-5.399c-8.469-31.599-9.829-34.283-9.344-43.045 c0.179-3.251-2.239-6.412-6.531-6.412c-14.56,0-22.086-9.976-21.931-19.667c0.165-10.324-8.224-18.729-18.54-18.593 c-10.408,0.138-18.277,9.225-18.034,19.631c0.588,25.218,17.769,46.391,41.02,53.038v8.106 C231.605,361.61,252.802,369.473,263.83,356.481z"></path>{" "}
+                                <path d="M494.59,436.295l-50.98-50.993l20.976-20.983c9.937-9.943,5.389-26.967-8.206-30.608l-153.417-41.105 c-13.578-3.636-26.052,8.813-22.408,22.409c0.329,1.229,39.938,149.009,40.431,150.849c4.962,18.551,22.397,19.672,31.296,10.77 l20.977-20.977l50.984,50.983c7.145,7.146,18.73,7.144,25.874,0l44.472-44.472C501.734,455.024,501.736,443.442,494.59,436.295z"></path>{" "}
+                              </g>{" "}
+                            </g>{" "}
+                          </g>{" "}
+                        </g>
+                      </svg>
+                    </div>
+                    <div className=" flex justify-center items-center">
+                      <h1 className=" mb-5 mt-2 text-lg font-bold text-white">
+                        Registra un pago
+                      </h1>
+                    </div>
+                    <form className=" my-5 h-full w-full flex justify-center items-center">
+                      <div className=" w-full block">
+                        <div className=" mb-5 w-full block md:flex justify-start items-center flex-wrap ">
+                          <h1 className=" mr-2 text-white">
+                            Fecha de emisión:
+                          </h1>
+                          <input
+                            type="date"
+                            className=" border-[1px] border-[#8f0e2a] rounded-lg pl-2"
+                          />
+                        </div>
+                        <div className="  w-full block md:flex justify-start items-center flex-wrap ">
+                          <h1 className=" mr-2 text-white">Cliente:</h1>
+
+                          <select
+                            onChange={handleSelectedCustomer}
+                            value={selectedCustomer}
+                            className="bg-gray-50 border border-[#8f0e2a] text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[270px] md:w-[350px] p-1 "
+                          >
+                            <option value="" defaultValue>
+                              Selecciona un cliente
+                            </option>
+                            {place.neighbors.map((neighbor) => (
+                              <option
+                                key={neighbor.neighbor_id}
+                                value={neighbor.neighbor_id}
+                              >
+                                {`${neighbor.neighbor_lastname} ${neighbor.neighbor_name}`}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className=" my-5 block md:flex justify-start  items-center flex-wrap">
+                          <h1 className=" text-white mr-2">Mes:</h1>
+                          <select
+                            onChange={handleSelectedMonth}
+                            value={selectedMonth}
+                            className=" border-[#8f0e2a] bg-gray-50 border  overflow-x-auto overflow-y-auto text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[170px] p-1 "
+                          >
+                            <option value="" defaultValue>
+                              Selecciona un mes
+                            </option>
+                            {place.months
+                              .sort((a, b) => {
+                                const monthNames = [
+                                  "January",
+                                  "February",
+                                  "March",
+                                  "April",
+                                  "May",
+                                  "June",
+                                  "July",
+                                  "August",
+                                  "September",
+                                  "October",
+                                  "November",
+                                  "December",
+                                ];
+                                return (
+                                  monthNames.indexOf(a.month) -
+                                  monthNames.indexOf(b.month)
+                                );
+                              })
+                              .filter(
+                                (month) =>
+                                  month.MonthlyDebt.month_status == false ||
+                                  month.MonthlyDebt.month_status == null
+                              )
+                              .map((month) => (
+                                <option
+                                  value={month.month_id}
+                                  key={month.month_id}
+                                >
+                                  {month.month_id
+                                    .substring(0, 3)
+                                    .includes("JAN") &&
+                                    `ENE-${month.month_year}`}
+                                  {month.month_id
+                                    .substring(0, 3)
+                                    .includes("FEB") &&
+                                    `FEB-${month.month_year}`}
+                                  {month.month_id
+                                    .substring(0, 3)
+                                    .includes("MAR") &&
+                                    `MAR-${month.month_year}`}
+                                  {month.month_id
+                                    .substring(0, 3)
+                                    .includes("APR") &&
+                                    `ABR-${month.month_year}`}
+                                  {month.month_id
+                                    .substring(0, 3)
+                                    .includes("MAY") &&
+                                    `MAY-${month.month_year}`}
+                                  {month.month_id
+                                    .substring(0, 3)
+                                    .includes("JUN") &&
+                                    `JUN-${month.month_year}`}
+                                  {month.month_id
+                                    .substring(0, 3)
+                                    .includes("JUL") &&
+                                    `JUL-${month.month_year}`}
+                                  {month.month_id
+                                    .substring(0, 3)
+                                    .includes("AUG") &&
+                                    `AGO-${month.month_year}`}
+                                  {month.month_id
+                                    .substring(0, 3)
+                                    .includes("SEP") &&
+                                    `SEP-${month.month_year}`}
+                                  {month.month_id
+                                    .substring(0, 3)
+                                    .includes("OCT") &&
+                                    `OCT-${month.month_year}`}
+                                  {month.month_id
+                                    .substring(0, 3)
+                                    .includes("NOV") &&
+                                    `NOV-${month.month_year}`}
+                                  {month.month_id
+                                    .substring(0, 3)
+                                    .includes("DEC") &&
+                                    `DIC-${month.month_year}`}
+                                </option>
+                              ))}
+                          </select>
+                        </div>
+                        <div className=" mb-5 block md:flex justify-start items-center flex-wrap ">
+                          <h1 className=" mr-2 text-white">Forma de pago:</h1>
+
+                          <select
+                            onChange={handleSelectedPay}
+                            value={selectedPay}
+                            className="bg-gray-50 border border-[#8f0e2a] text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[250px] p-1 "
+                          >
+                            <option value="" defaultValue>
+                              Selecciona la forma de pago
+                            </option>
+                            <option value={1}>Depósito</option>
+                            <option value={2}>Transferencia</option>
+                            <option value={3}>Efectivo</option>
+                          </select>
+                        </div>
+                        {selectedPay === "" && (
+                          <div className=" my-10 block md:flex justify-center items-center">
+                            <h1 className=" text-base font-bold text-white">
+                              Selecciona una forma de pago
+                            </h1>
+                          </div>
+                        )}
+                        {selectedPay == 1 && (
+                          <div className=" block">
+                            <div className=" block md:flex justify-between items-center flex-wrap gap-y-5">
+                              <div className=" flex flex-wrap">
+                                <h1 className=" text-white mr-2">
+                                  N° de comprobante:
+                                </h1>
+                                <input
+                                  type="number"
+                                  className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
+                                />
+                              </div>
+                              <div className=" flex flex-wrap">
+                                <h1 className=" text-white mr-2">CI/RUC:</h1>
+                                <input
+                                  type="number"
+                                  placeholder={
+                                    selectedCustomer != "" &&
+                                    place.neighbors.find((neighbor) => {
+                                      return (
+                                        neighbor.neighbor_id == selectedCustomer
+                                      );
+                                    }).identity_document
+                                  }
+                                  className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
+                                />
+                              </div>
+                            </div>
+                            <div className=" mb-5 rounded-lg min-h-[100px] mt-5 p-5 border-[1px] border-white flex justify-center items-center flex-wrap">
+                              <div className=" block">
+                                <h1 className=" my-3 text-white">
+                                  Deuda del mes: ${monthDebt.debt}
+                                </h1>
+                                <div className=" flex flex-wrap">
+                                  <h1 className=" mr-2 text-white">
+                                    Valor total: $
+                                  </h1>
+                                  <input
+                                    type="number"
+                                    className=" w-[100px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {selectedPay == 2 && (
+                          <div className=" block">
+                            <div className=" block md:flex justify-between items-center flex-wrap gap-y-5">
+                              <div className=" flex flex-wrap">
+                                <h1 className=" text-white mr-2">
+                                  N° de comprobante:
+                                </h1>
+                                <input
+                                  type="number"
+                                  className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
+                                />
+                              </div>
+                              <div className=" flex flex-wrap">
+                                <h1 className=" text-white mr-2">CI/RUC:</h1>
+                                <input
+                                  type="number"
+                                  placeholder={
+                                    selectedCustomer != "" &&
+                                    place.neighbors.find((neighbor) => {
+                                      return (
+                                        neighbor.neighbor_id == selectedCustomer
+                                      );
+                                    }).identity_document
+                                  }
+                                  className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
+                                />
+                              </div>
+                            </div>
+                            <div className=" mb-5 rounded-lg min-h-[100px] mt-5 p-5 border-[1px] border-white flex justify-center items-center flex-wrap">
+                              <div className=" block">
+                                <h1 className=" my-3 text-white">
+                                  Deuda del mes: ${monthDebt.debt}
+                                </h1>
+                                <div className=" flex flex-wrap">
+                                  <h1 className=" mr-2 text-white">
+                                    Valor total: $
+                                  </h1>
+                                  <input
+                                    type="number"
+                                    className=" w-[100px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {selectedPay == 3 && (
+                          <div className=" block">
+                            <div className=" block md:flex justify-between items-center flex-wrap gap-y-5">
+                              <div className=" flex flex-wrap">
+                                <h1 className=" text-white mr-2">CI/RUC:</h1>
+                                <input
+                                  type="number"
+                                  placeholder={
+                                    selectedCustomer != "" &&
+                                    place.neighbors.find((neighbor) => {
+                                      return (
+                                        neighbor.neighbor_id == selectedCustomer
+                                      );
+                                    }).identity_document
+                                  }
+                                  className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
+                                />
+                              </div>
+                            </div>
+                            <div className=" mb-5 rounded-lg min-h-[100px] mt-5 p-5 border-[1px] border-white flex justify-center items-center flex-wrap">
+                              <div className=" block">
+                                <h1 className=" my-3 text-white">
+                                  Deuda del mes: ${monthDebt.debt}
+                                </h1>
+                                <div className=" flex flex-wrap">
+                                  <h1 className=" mr-2 text-white">
+                                    Valor total: $
+                                  </h1>
+                                  <input
+                                    type="number"
+                                    className=" w-[100px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        <div className=" flex justify-center items-center mb-5">
+                          <button className=" p-2 border-[1px] group border-white hover:text-[#8f0e2a] hover:bg-white transition duration-300 text-white rounded-lg">
+                            <h1 className=" text-white group-hover:text-[#8f0e2a] duration-300 transition">
+                              Registrar pago
+                            </h1>
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      <Toaster position="top-center" richColors />
     </div>
   );
 }

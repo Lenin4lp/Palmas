@@ -3,7 +3,6 @@ import {
   getMonth,
   getMonths,
   createMonth,
-  updateMonth,
   deleteMonth,
 } from "../controllers/month.controller";
 import { validateSchema } from "../middlewares/validator.middleware";
@@ -20,12 +19,6 @@ router.post(
   authRequired,
   validateSchema(monthRegisterSchema),
   createMonth
-);
-router.put(
-  "/month/:id",
-  authRequired,
-  validateSchema(monthUpdateSchema),
-  updateMonth
 );
 router.get("months", getMonths);
 router.get("/month/:id", getMonth);

@@ -6,8 +6,11 @@ import {
   AutoIncrement,
   HasMany,
   AfterSync,
+  BelongsTo,
+  ForeignKey,
 } from "sequelize-typescript";
 import { Place } from "./place.model";
+import { MonthlyFee } from "./monthlyFee.model";
 
 @Table({
   tableName: "tipo_inmueble",
@@ -31,17 +34,30 @@ export class PlaceType extends Model {
   })
   placetype_name!: string;
 
+  @ForeignKey(() => MonthlyFee)
+  @Column({
+    type: DataType.INTEGER,
+    field: "alicuota",
+    allowNull: false,
+  })
+  monthly_fee!: number;
+
   @HasMany(() => Place)
   places!: Place[];
+
+  @BelongsTo(() => MonthlyFee)
+  monthlyFee!: MonthlyFee;
 
   @AfterSync
   static createDefaultTypes = async () => {
     const defaultTypes = [
       {
         placetype_name: "Casa",
+        monthly_fee: 1,
       },
       {
         placetype_name: "Local",
+        monthly_fee: 1,
       },
     ];
     try {

@@ -4,6 +4,7 @@ import { Month } from "../models/month.model";
 import { Payment } from "../models/payment.model";
 import { Place } from "../models/place.model";
 import { Neighbor } from "../models/neighbor.model";
+import { PlaceType } from "../models/placeType.model";
 
 // ? Obtain all monthly fees
 export const getMonthlyFees = async (req: Request, res: Response) => {
@@ -11,7 +12,7 @@ export const getMonthlyFees = async (req: Request, res: Response) => {
     const monthlyFees = await MonthlyFee.findAll({
       include: [
         {
-          model: Month,
+          model: PlaceType,
         },
       ],
     });

@@ -40,7 +40,7 @@ export const getYear = async (req: Request, res: Response) => {
 
 // ? Create a year
 export const createYear = async (req: Request, res: Response) => {
-  const { year, monthlyFee_id } = req.body;
+  const { year } = req.body;
   try {
     const yearFound = await Year.findOne({
       where: { year: year },
@@ -52,9 +52,7 @@ export const createYear = async (req: Request, res: Response) => {
       year,
     });
 
-    const monthlyFeeCount = await MonthlyFee.count();
-
-    if (monthlyFeeCount > 0) {
+    if (newYear) {
       const months = [
         "January",
         "February",
@@ -73,7 +71,6 @@ export const createYear = async (req: Request, res: Response) => {
         const newMonth = await Month.create({
           month,
           month_year: newYear.year,
-          monthlyFee_id: monthlyFee_id ?? 1,
         });
         const places = await Place.findAll();
         for (const place of places) {

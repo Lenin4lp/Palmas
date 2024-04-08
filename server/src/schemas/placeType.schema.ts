@@ -7,6 +7,9 @@ export const placeTypeRegisterSchema = z.object({
     })
     .min(3, "El nombre debe tener al menos 3 caracteres")
     .max(20, "El nombre debe tener como máximo 20 caracteres"),
+  monthly_fee: z.number({
+    required_error: "La alicuota inicial es requerida",
+  }),
 });
 
 export const placeTypeUpdateSchema = z.object({
@@ -15,4 +18,5 @@ export const placeTypeUpdateSchema = z.object({
     .min(3, "El nombre debe tener al menos 3 caracteres")
     .max(20, "El nombre debe tener como máximo 20 caracteres")
     .optional(),
+  monthly_fee: z.number().optional(),
 });

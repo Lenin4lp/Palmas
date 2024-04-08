@@ -5,8 +5,10 @@ import {
   Column,
   HasMany,
   AutoIncrement,
+  AfterSync,
 } from "sequelize-typescript";
 import { Month } from "./month.model";
+import { PlaceType } from "./placeType.model";
 
 @Table({
   tableName: "alicuota",
@@ -26,10 +28,28 @@ export class MonthlyFee extends Model {
   @Column({
     type: DataType.DECIMAL(6, 2),
     field: "alicuota",
-    allowNull: false,
+    allowNull: true,
   })
   monthlyFee_value!: number;
 
-  @HasMany(() => Month)
-  months!: Month[];
+  @HasMany(() => PlaceType)
+  placeTypes!: PlaceType[];
+
+  @AfterSync
+  static createDefaultMonthlyFee = async () => {
+    const defaultMonthlyFee = {
+      monthlyFee_value: 30,
+    };
+    try {
+      await MonthlyFee.findOrCreate({
+        where: {
+          monthlyFee_value: defaultMonthlyFee.monthlyFee_value,
+        },
+        defaults: defaultMonthlyFee,
+      });
+      console.log("Alicuota inicial creada exitosamente");
+    } catch (error) {
+      console.log("Oops, algo malio sal: ", error);
+    }
+  };
 }

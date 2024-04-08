@@ -27,11 +27,7 @@ export const getMonths = async (req: Request, res: Response) => {
 // ? Obtain a month
 export const getMonth = async (req: Request, res: Response) => {
   const month = await Month.findByPk(req.params.id, {
-    include: [
-      { model: Payment },
-      { model: MonthlyFee },
-      { model: Place, include: [Neighbor] },
-    ],
+    include: [{ model: Payment }, { model: Place, include: [Neighbor] }],
   });
   if (!month) return res.status(404).json(["Mes no encontrado"]);
   res.json({ month });
@@ -39,7 +35,7 @@ export const getMonth = async (req: Request, res: Response) => {
 
 // ? Create a month
 export const createMonth = async (req: Request, res: Response) => {
-  const { month_id, month, month_year, monthlyFee_id } = req.body;
+  const { month_id, month, month_year } = req.body;
   try {
     const monthFound = await Month.findOne({
       where: { month_id: month_id },
@@ -52,25 +48,12 @@ export const createMonth = async (req: Request, res: Response) => {
       month_id,
       month,
       month_year,
-      monthlyFee_id,
     });
     res.json(newMonth);
   } catch (error) {
     console.log(error);
     res.status(500).json(["Error al crear el mes"]);
   }
-};
-
-// ? Update a month
-export const updateMonth = async (req: Request, res: Response) => {
-  const { monthlyFee_id } = req.body;
-  const month = await Month.findByPk(req.params.id);
-  if (month) {
-    await month.update({ monthlyFee_id });
-  } else {
-    return res.status(404).json(["Mes no encontrado"]);
-  }
-  res.json({ month });
 };
 
 // ? Delete a month

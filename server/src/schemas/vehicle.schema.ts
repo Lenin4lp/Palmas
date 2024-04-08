@@ -6,7 +6,7 @@ export const vehicleRegisterSchema = z.object({
       required_error: "La placa es requerida",
     })
     .min(6, "La placa debe tener al menos 6 caracteres")
-    .max(6, "La placa debe tener como máximo 9 caracteres"),
+    .max(9, "La placa debe tener como máximo 9 caracteres"),
   vehicleType_id: z.number({
     required_error: "El tipo de vehículo es requerido",
   }),

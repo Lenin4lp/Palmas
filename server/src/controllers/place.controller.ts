@@ -7,6 +7,8 @@ import { Month } from "../models/month.model";
 import { Sequelize } from "sequelize-typescript";
 import { PlaceType } from "../models/placeType.model";
 import { NeighborRole } from "../models/neighborRole.model";
+import { Vehicle } from "../models/vehicle.model";
+import { VehicleType } from "../models/vehicleType.model";
 
 // ? Obtain all places
 export const getPlaces = async (req: Request, res: Response) => {
@@ -40,6 +42,7 @@ export const getPlace = async (req: Request, res: Response) => {
       { model: Neighbor, include: [{ model: NeighborRole }] },
       { model: Month, order: [["month_year", "ASC"]] },
       { model: PlaceType },
+      { model: Vehicle, include: [{ model: VehicleType }] },
     ],
   });
   if (!place) return res.status(404).json(["Lugar no encontrado"]);

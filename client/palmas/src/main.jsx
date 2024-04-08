@@ -104,9 +104,23 @@ const router = createBrowserRouter([
           {
             path: "/inmuebles/:id",
             element: <HouseInfo />,
-            loader: ({ params }) => {
+            loader: async ({ params }) => {
               const { id } = params;
-              return getPlace(id);
+              const placePromise = getPlace(id);
+              const vehicleTypesPromise = getVehicleTypes();
+              const getMonthlyDebtsPromise = getMonthlyDebts();
+
+              const [placeData, vehicleTypesData, getMonthlyDebtsData] =
+                await Promise.all([
+                  placePromise,
+                  vehicleTypesPromise,
+                  getMonthlyDebtsPromise,
+                ]);
+              return {
+                place: placeData,
+                vehicleTypes: vehicleTypesData,
+                monthlyDebts: getMonthlyDebtsData,
+              };
             },
           },
         ],

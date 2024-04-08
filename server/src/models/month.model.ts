@@ -5,15 +5,11 @@ import {
   Column,
   BelongsTo,
   ForeignKey,
-  HasMany,
   BelongsToMany,
   BeforeCreate,
-  BeforeUpdate,
-  AfterSync,
 } from "sequelize-typescript";
 import { Year } from "./year.model";
 import { Payment } from "./payment.model";
-import { MonthlyFee } from "./monthlyFee.model";
 import { Place } from "./place.model";
 import { MonthlyDebt } from "./monthlyDebt.model";
 
@@ -52,19 +48,8 @@ export class Month extends Model {
   })
   month_year!: string;
 
-  @ForeignKey(() => MonthlyFee)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-    field: "id_alicuota",
-  })
-  monthlyFee_id!: number;
-
   @BelongsToMany(() => Place, () => MonthlyDebt)
   places!: Place[];
-
-  @BelongsTo(() => MonthlyFee)
-  monthlyFee!: MonthlyFee;
 
   @BelongsTo(() => Year)
   year!: Year;
