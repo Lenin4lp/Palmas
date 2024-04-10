@@ -30,8 +30,10 @@ import VehicleTypes from "./pages/houses/VehicleTypes.jsx";
 import PlaceTypes from "./pages/houses/PlaceTypes.jsx";
 import { getVehicleTypes } from "./api/vehicles.js";
 import { getYears } from "./api/time.js";
-import { getMonthlyDebts, getMonthlyFees } from "./api/debt.js";
+import { getMonthlyDebts, getMonthlyFees, getMonthlyFee } from "./api/debt.js";
 import HouseInfo from "./pages/houses/HouseInfo.jsx";
+import AliquotRegister from "./pages/aliquot/AliquotRegister.jsx";
+import AliquotModify from "./pages/aliquot/AliquotModify.jsx";
 
 const router = createBrowserRouter([
   {
@@ -99,7 +101,19 @@ const router = createBrowserRouter([
           {
             path: "/inmuebles/config/tipos_de_inmueble",
             element: <PlaceTypes />,
-            loader: () => getPlaceTypes(),
+            loader: async () => {
+              const placeTypesPromise = getPlaceTypes();
+              const monthlyFeesPromise = getMonthlyFees();
+
+              const [placeTypesData, monthlyFeesData] = await Promise.all([
+                placeTypesPromise,
+                monthlyFeesPromise,
+              ]);
+              return {
+                placeTypes: placeTypesData,
+                monthlyFees: monthlyFeesData,
+              };
+            },
           },
           {
             path: "/inmuebles/:id",
@@ -210,6 +224,18 @@ const router = createBrowserRouter([
             places: getPlacesData,
             monthlyDebts: getMonthlyDebtsData,
           };
+        },
+      },
+      {
+        path: "/alicuotas/registrar",
+        element: <AliquotRegister />,
+      },
+      {
+        path: "/alicuotas/:id",
+        element: <AliquotModify />,
+        loader: async ({ params }) => {
+          const { id } = params;
+          return getMonthlyFee(id);
         },
       },
       {

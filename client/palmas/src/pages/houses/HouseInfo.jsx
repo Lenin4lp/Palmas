@@ -5,11 +5,15 @@ import {
   useNavigation,
   Link,
 } from "react-router-dom";
-import { createVehicle } from "../../api/vehicles";
+import { createVehicle, deleteVehicle } from "../../api/vehicles";
 import { createPayment } from "../../api/payment";
 import { Toaster, toast } from "sonner";
 import { useForm } from "react-hook-form";
+import Plate from "../../components/Plate";
+import Modal from "../../components/Modal";
+import { deletePlaceFromNeighbor } from "../../api/neighbors";
 
+// ! Falta dar funcionalidad a botón de pago
 function HouseInfo() {
   const { id } = useParams();
   const placeData = useLoaderData();
@@ -21,7 +25,18 @@ function HouseInfo() {
   const [selectedPay, setSelectedPay] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
+  const [vehicleType, setVehicleType] = useState();
+  const [openModal, setOpenModal] = useState(false);
   const { register, handleSubmit } = useForm();
+
+  console.log(selectedCustomer);
+  console.log(selectedMonth);
+  console.log(selectedPay);
+  console.log(vehicleType);
+
+  const handleVehicleType = (e) => {
+    setVehicleType(e.target.value);
+  };
 
   const handleSelectedPay = (e) => {
     setSelectedPay(e.target.value);
@@ -30,6 +45,72 @@ function HouseInfo() {
   const handleSelectedCustomer = (e) => {
     setSelectedCustomer(e.target.value);
   };
+
+  const removeNeighbor = async (neighborId, place_id) => {
+    try {
+      const res = await deletePlaceFromNeighbor(neighborId, place_id);
+      if (res.status === 204) {
+        toast.success("Inmueble desvinculado con éxito");
+      }
+    } catch (error) {
+      error.responde.data.map((err) => toast.error(err));
+    }
+  };
+
+  const removeVehicle = async (vehicleId) => {
+    try {
+      const res = await deleteVehicle(vehicleId);
+      if (res.status === 204) {
+        toast.success("Vehículo eliminado con éxito");
+        setTimeout(() => {
+          window.location.href = `/inmuebles/${id}`;
+        }, 2000);
+      }
+    } catch (error) {
+      toast.error("No se pudo eliminar el vehículo");
+    }
+  };
+
+  const registerVehicle = async (data) => {
+    try {
+      const res = await createVehicle(data);
+      if (res.status === 200) {
+        toast.success("Vehículo registrado con éxito");
+        setTimeout(() => {
+          window.location.href = `/inmuebles/${id}`;
+        }, 2000);
+      }
+    } catch (error) {
+      error.response.data.map((err) => toast.error(err));
+    }
+  };
+
+  const onSubmit = handleSubmit((data) => {
+    const modifiedData = {};
+
+    for (const key in data) {
+      if (data[key] !== "") {
+        modifiedData[key] = data[key];
+      }
+    }
+
+    modifiedData.vehicleType_id = vehicleType;
+    modifiedData.place_id = place.place_id;
+
+    if (modifiedData.vehicleType_id === "1") {
+      modifiedData.vehicleType_id = 1;
+    } else if (modifiedData.vehicleType_id === "2") {
+      modifiedData.vehicleType_id = 2;
+    } else if (modifiedData.vehicleType_id === "3") {
+      modifiedData.vehicleType_id = 3;
+    } else if (modifiedData.vehicleType_id === "4") {
+      modifiedData.vehicleType_id = 4;
+    } else if (modifiedData.vehicleType_id === "5") {
+      modifiedData.vehicleType_id = 5;
+    }
+
+    registerVehicle(modifiedData);
+  });
 
   const handleSelectedMonth = (e) => {
     setSelectedMonth(e.target.value);
@@ -52,20 +133,6 @@ function HouseInfo() {
 
   console.log(place);
   console.log(vehicleTypes);
-
-  const registerVehicle = async (data) => {
-    try {
-      const res = await createVehicle(data);
-      if (res.status === 200) {
-        toast.success("Vehículo registrado con éxito");
-        setTimeout(() => {
-          window.location.href = `/inmuebles/${id}/config`;
-        }, 2000);
-      }
-    } catch (error) {
-      error.response.data.map((err) => toast.error(err));
-    }
-  };
 
   const registerPayment = async (data) => {
     try {
@@ -90,7 +157,7 @@ function HouseInfo() {
         <div className=" flex p-3 lg:p-5 pb-1 lg:pb-3 justify-around lg:justify-between items-center flex-wrap">
           <div className=" flex justify-center items-center">
             <svg
-              className=" h-[50px] lg:h-[60px] w-auto"
+              className=" h-[40px] md:h-[50px] lg:h-[60px] w-auto"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -127,15 +194,15 @@ function HouseInfo() {
                 ></path>{" "}
               </g>
             </svg>
-            <div className="mx-5">
-              <h1 className=" text-4xl text-[#8f0e2a] font-bold">
+            <div className=" mx-3 md:mx-5">
+              <h1 className=" text-2xl sm:text-3xl md:text-4xl text-[#8f0e2a] font-bold">
                 {place.place_name}
               </h1>
             </div>
           </div>
           <div className=" flex justify-center items-center">
-            <button className=" group hover:bg-[#8f0e2a] transition duration-300 p-3 border-[1px] border-[#8f0e2a] rounded-lg flex justify-center items-center">
-              <h1 className=" text-center group-hover:text-white text-sm lg:text-base transition duration-300 text-[#8f0e2a]">
+            <button className=" group hover:bg-[#8f0e2a] transition duration-300 p-2 md:p-3 border-[1px] border-[#8f0e2a] rounded-lg flex justify-center items-center">
+              <h1 className=" text-center group-hover:text-white text-[12px] md:text-sm lg:text-base transition duration-300 text-[#8f0e2a]">
                 Recibos de pago
               </h1>
             </button>
@@ -278,7 +345,7 @@ function HouseInfo() {
               <svg
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
-                className=" fill-none h-[100px] w-auto"
+                className=" fill-none h-[80px] lg:h-[100px] w-auto"
               >
                 <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
                 <g
@@ -313,7 +380,7 @@ function HouseInfo() {
             )}
             {place.neighbors.length > 0 && (
               <div className=" flex justify-center items-center">
-                <div>
+                <div className=" overflow-x-auto overflow-y-auto w-[280px] sm:w-[400px] md:w-[680px] flex justify-center items-center lg:w-full max-h-[500px]">
                   <table className=" border-[1px] border-collapse text-[12px] border-[#8f0e2a] rounded-lg">
                     <thead className=" sticky top-0">
                       <tr>
@@ -435,7 +502,7 @@ function HouseInfo() {
                 xmlnsXlink="http://www.w3.org/1999/xlink"
                 viewBox="0 0 512.001 512.001"
                 xmlSpace="preserve"
-                className=" fill-white h-[100px] w-auto"
+                className=" fill-white h-[80px] lg:h-[100px] w-auto"
               >
                 <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
                 <g
@@ -521,124 +588,21 @@ function HouseInfo() {
                 </h1>
               </div>
             )}
-            {place.neighbors.length > 0 && (
-              <div className=" flex justify-center items-center">
-                <div>
-                  <table className=" border-[1px] border-collapse text-[12px] border-[#8f0e2a] rounded-lg">
-                    <thead className=" sticky top-0">
-                      <tr>
-                        <th className=" border border-slate-400 p-2 w-[50px] text-[#8f0e2a] bg-white">
-                          N°
-                        </th>
-                        <th className=" border border-slate-400 text-[#8f0e2a] bg-white px-[100px] lg:px-[120px] py-2">
-                          Nombres
-                        </th>
-                        <th className=" border border-slate-400 p-2 w-[150px] text-[#8f0e2a] bg-white">
-                          Rol
-                        </th>
-                        <th className=" border border-slate-400 p-2 w-[200px] text-[#8f0e2a] bg-white">
-                          Correo
-                        </th>
-                        <th className=" border border-slate-400 text-[#8f0e2a] bg-white  px-[15px] py-2">
-                          Acciones
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {place.neighbors.map((neighbor, index) => (
-                        <tr
-                          key={index}
-                          className=" text-[11px] text-white lg:text-[12px]"
-                        >
-                          <th className="border border-slate-300 px-2 py-2">
-                            {index + 1}
-                          </th>
-                          <th className="border border-slate-300 px-2 py-2">
-                            {`${neighbor.neighbor_name} ${neighbor.neighbor_lastname}`}
-                          </th>
-                          <th className="border border-slate-300 px-2 py-2">
-                            {neighbor.neighborRole.role_name}
-                          </th>
-                          <th className="border border-slate-300 px-2 py-2">
-                            {neighbor.neighbor_email != null
-                              ? `${neighbor.neighbor_email}`
-                              : "---"}
-                          </th>
-                          <th className=" border grid grid-cols-2 h-full border-slate-300  py-2">
-                            <div className=" flex justify-center border-none items-center">
-                              <Link to={`/inmuebles/${place.place_id}`}>
-                                <svg
-                                  className=" h-[19px] hover:cursor-pointer"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                                  <g
-                                    id="SVGRepo_tracerCarrier"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  ></g>
-                                  <g id="SVGRepo_iconCarrier">
-                                    {" "}
-                                    <circle
-                                      cx="12"
-                                      cy="12"
-                                      r="3"
-                                      stroke="#ababab"
-                                      strokeWidth="2"
-                                    ></circle>{" "}
-                                    <path
-                                      d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
-                                      stroke="#ababab"
-                                      strokeWidth="2"
-                                    ></path>{" "}
-                                  </g>
-                                </svg>
-                              </Link>
-                            </div>
-                            <div className=" flex justify-center items-center">
-                              <Link
-                                to={`/inmuebles/modificar/${place.place_id}`}
-                              >
-                                <svg
-                                  viewBox="0 0 24 24"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className=" h-[19px] hover:cursor-pointer fill-none"
-                                >
-                                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                                  <g
-                                    id="SVGRepo_tracerCarrier"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  ></g>
-                                  <g id="SVGRepo_iconCarrier">
-                                    {" "}
-                                    <g id="Edit / Remove_Minus_Circle">
-                                      {" "}
-                                      <path
-                                        id="Vector"
-                                        d="M8 12H16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z"
-                                        className="stroke-white"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      ></path>{" "}
-                                    </g>{" "}
-                                  </g>
-                                </svg>
-                              </Link>
-                            </div>
-                          </th>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+            {place.vehicles.length > 0 && (
+              <div className=" flex justify-center items-center flex-wrap p-3">
+                {place.vehicles.map((vehicle) => (
+                  <div className=" m-3" key={vehicle.plate}>
+                    {" "}
+                    <Plate
+                      vehicleType={vehicle.vehicleType.vehicleType}
+                      plate={vehicle.plate}
+                    />
+                  </div>
+                ))}
               </div>
             )}
 
-            <div className=" mt-10  w-screen md:px-[33px] grid grid-cols-2 h-fit min-h-[600px] border-[1px] border-white">
+            <div className=" mt-10  w-screen md:px-[33px] grid grid-cols-1 lg:grid-cols-2 h-fit lg:min-h-[600px] border-[1px] border-white">
               <div className=" border-[1px] w-full flex justify-center items-center relative border-white">
                 <div
                   onClick={() => setOpen(1)}
@@ -723,7 +687,11 @@ function HouseInfo() {
                         >
                           Tipo de vehículo:
                         </label>
-                        <select className=" text-sm p-1 rounded-lg">
+                        <select
+                          onChange={handleVehicleType}
+                          value={vehicleType}
+                          className=" text-sm p-1 rounded-lg"
+                        >
                           <option className=" text-sm" defaultValue value={""}>
                             Selecciona un tipo de vehículo
                           </option>
@@ -731,7 +699,7 @@ function HouseInfo() {
                             <option
                               key={vehicleType.vehicleType_id}
                               className=" text-sm"
-                              value={""}
+                              value={vehicleType.vehicleType_id}
                             >
                               {vehicleType.vehicleType}
                             </option>
@@ -749,14 +717,21 @@ function HouseInfo() {
                             </label>
                           </div>
                           <div className=" my-3 flex justify-center items-center">
-                            <input type="text" className=" p-2 rounded-lg" />
+                            <input
+                              type="text"
+                              {...register("plate")}
+                              className=" p-2 rounded-lg"
+                            />
                           </div>
                         </div>
                       </div>
 
                       <div className=" flex justify-center items-center mb-5">
-                        <button className=" p-2 border-[1px] group border-white hover:text-[#8f0e2a] hover:bg-white transition duration-300 text-white rounded-lg">
-                          <h1 className=" text-white group-hover:text-[#8f0e2a] duration-300 transition">
+                        <button
+                          onClick={onSubmit}
+                          className=" p-2 border-[1px] group border-white hover:text-[#8f0e2a] hover:bg-white transition duration-300 text-white rounded-lg"
+                        >
+                          <h1 className=" text-white text-sm md:text-base group-hover:text-[#8f0e2a] duration-300 transition">
                             Registrar vehículo
                           </h1>
                         </button>
@@ -1001,7 +976,7 @@ function HouseInfo() {
                                   className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                 />
                               </div>
-                              <div className=" flex flex-wrap">
+                              <div className=" my-5 md:my-0 flex flex-wrap">
                                 <h1 className=" text-white mr-2">CI/RUC:</h1>
                                 <input
                                   type="number"
@@ -1047,7 +1022,7 @@ function HouseInfo() {
                                   className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                 />
                               </div>
-                              <div className=" flex flex-wrap">
+                              <div className=" my-5 md:my-0 flex flex-wrap">
                                 <h1 className=" text-white mr-2">CI/RUC:</h1>
                                 <input
                                   type="number"
@@ -1120,7 +1095,7 @@ function HouseInfo() {
                         )}
                         <div className=" flex justify-center items-center mb-5">
                           <button className=" p-2 border-[1px] group border-white hover:text-[#8f0e2a] hover:bg-white transition duration-300 text-white rounded-lg">
-                            <h1 className=" text-white group-hover:text-[#8f0e2a] duration-300 transition">
+                            <h1 className=" text-white text-sm md:text-base group-hover:text-[#8f0e2a] duration-300 transition">
                               Registrar pago
                             </h1>
                           </button>

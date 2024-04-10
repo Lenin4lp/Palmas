@@ -6,7 +6,7 @@ export const vehicleTypeRegisterSchema = z.object({
       required_error: "El nombre del tipo es requerido",
     })
     .min(3, "El nombre debe tener al menos 3 caracteres")
-    .max(30, "El nombre debe tener como máximo 30 caracteres"),
+    .max(20, "El nombre debe tener como máximo 20 caracteres"),
 });
 
 export const vehicleTypeUpdateSchema = z.object({

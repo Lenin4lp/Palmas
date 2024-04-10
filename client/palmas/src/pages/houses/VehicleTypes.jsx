@@ -119,44 +119,7 @@ function VehicleTypes() {
                                 <th className="border border-slate-300 px-2 py-2">
                                   {type.vehicles.length}
                                 </th>
-                                <th className=" border grid grid-cols-2 h-full border-slate-300  py-2">
-                                  <div className=" flex justify-center border-none items-center">
-                                    <Link
-                                      to={`/inmuebles/${type.vehicleType_id}`}
-                                    >
-                                      <svg
-                                        className=" h-[19px] hover:cursor-pointer"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      >
-                                        <g
-                                          id="SVGRepo_bgCarrier"
-                                          strokeWidth="0"
-                                        ></g>
-                                        <g
-                                          id="SVGRepo_tracerCarrier"
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                        ></g>
-                                        <g id="SVGRepo_iconCarrier">
-                                          {" "}
-                                          <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="3"
-                                            stroke="#ababab"
-                                            strokeWidth="2"
-                                          ></circle>{" "}
-                                          <path
-                                            d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
-                                            stroke="#ababab"
-                                            strokeWidth="2"
-                                          ></path>{" "}
-                                        </g>
-                                      </svg>
-                                    </Link>
-                                  </div>
+                                <th className=" border  h-full border-slate-300  py-2">
                                   <div className=" flex justify-center items-center">
                                     <Link
                                       to={`/inmuebles/modificar/${type.vehicleType_id}`}

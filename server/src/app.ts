@@ -13,6 +13,7 @@ import yearRoutes from "./routes/year.routes";
 import rolesRoutes from "./routes/neighborRoles.routes";
 import placeTypesRoutes from "./routes/placeTypes.routes";
 import vehicleTypeRoutes from "./routes/vehicleTypes.routes";
+import vehicleRoutes from "./routes/vehicle.routes";
 import cron from "node-cron";
 import { Month } from "./models/month.model";
 import { MonthlyDebt } from "./models/monthlyDebt.model";
@@ -45,6 +46,7 @@ app.use("/api", rolesRoutes);
 app.use("/api", placeTypesRoutes);
 app.use("/api", vehicleTypeRoutes);
 app.use("/api", MonthlyDebtRoutes);
+app.use("/api", vehicleRoutes);
 
 app.get("/", (_req, res) => {
   res.send("Hola mundo");

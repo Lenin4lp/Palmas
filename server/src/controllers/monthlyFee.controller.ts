@@ -68,6 +68,14 @@ export const updateMonthlyFee = async (req: Request, res: Response) => {
 export const deleteMonthlyFee = async (req: Request, res: Response) => {
   const monthlyFee = await MonthlyFee.findByPk(req.params.id);
   if (monthlyFee) {
+    const placeType = await PlaceType.findOne({
+      where: { monthly_fee: monthlyFee.monthlyFee_id },
+    });
+    if (placeType) {
+      placeType.update({ monthlyFee_id: 1 });
+      placeType.save();
+    }
+
     await monthlyFee.destroy();
     return res.sendStatus(204);
   } else {

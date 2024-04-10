@@ -2,17 +2,24 @@ import React, { useState } from "react";
 import ContentComponent from "../../components/ContentComponent";
 import { Link, useLoaderData, useNavigation } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { createPlaceType } from "../../api/places";
+import { createPlaceType, deletePlaceType } from "../../api/places";
 import { Toaster, toast } from "sonner";
+import Modal from "../../components/Modal";
 
 function PlaceTypes() {
   const typesData = useLoaderData();
-  const types = typesData.data;
+  const types = typesData.placeTypes.data;
+  const aliquots = typesData.monthlyFees.data;
   const navigation = useNavigation();
   const { handleSubmit, register } = useForm();
   console.log(types);
   const [content, setContent] = useState("");
+  const [open, setOpen] = useState(false);
+  const [open2, setOpen2] = useState(false);
+  const [selectedAliquot, setSelectedAliquot] = useState("");
+  const [selectedType, setSelectedType] = useState("");
 
+  console.log(selectedType);
   const registerType = async (data) => {
     try {
       const res = await createPlaceType(data);
@@ -27,9 +34,30 @@ function PlaceTypes() {
     }
   };
 
+  const removeType = async (id) => {
+    try {
+      const res = await deletePlaceType(id);
+      if (res.status === 200) {
+        toast.success("Tipo de inmueble eliminado con éxito");
+        setTimeout(() => {
+          window.location.href = `/inmuebles/config/tipos_de_inmueble`;
+        }, 2000);
+      }
+    } catch (error) {
+      error.response.data.map((err) => toast.error(err));
+    }
+  };
+
   const onSubmit = handleSubmit((data) => {
     registerType(data);
   });
+
+  const handleSelectedType = (type) => {
+    setSelectedType(type);
+  };
+  const handleSelectedAliquot = (e) => {
+    setSelectedAliquot(e.target.value);
+  };
 
   function getDebt(type) {
     if (type.places?.length === 0) return "N/A";
@@ -41,10 +69,107 @@ function PlaceTypes() {
     const formattedTotalDebt = totalDebt.toFixed(2);
     return formattedTotalDebt;
   }
+  if (navigation.state === "loading") {
+    return <div>Cargando</div>;
+  }
 
   return (
     <ContentComponent>
       <div className=" flex min-h-fit justify-center items-center bg-gradient-to-br from-[#852655] to-[#8f0e2a] w-screen">
+        <Modal open={open} onClose={() => setOpen(false)}>
+          <div className=" block m-3">
+            <div className=" my-3">
+              <h1 className=" text-center text-white text-lg font-bold">
+                Selecciona una alicuota
+              </h1>
+            </div>
+            <div className=" my-3">
+              <select
+                value={selectedAliquot}
+                onChange={handleSelectedAliquot}
+                className="bg-gray-50 border border-[#8f0e2a] text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                name=""
+                id=""
+              >
+                <option value="" defaultValue>
+                  Selecciona una alicuota
+                </option>
+                {aliquots.map((aliquot) => (
+                  <option
+                    key={aliquot.monthlyFee_id}
+                    value={aliquot.monthlyFee_id}
+                  >
+                    {aliquot.monthlyFee_value}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className=" flex justify-center items-center">
+              <div className=" my-2 grid grid-cols-2">
+                <div className=" mx-4">
+                  <button className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500">
+                    Guardar
+                  </button>
+                </div>
+                <div className=" mx-4">
+                  <button
+                    onClick={() => setOpen(false)}
+                    className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Modal>
+        <Modal open={open2} onClose={() => setOpen2(false)}>
+          {selectedType !== "" &&
+          types.find((type) => {
+            type.placetype_id == selectedType;
+          }).places.length > 0 ? (
+            <div className=" block m-3">
+              <div className=" my-3">
+                <h1 className=" text-center text-white text-lg font-bold">
+                  Confirmación
+                </h1>
+              </div>
+            </div>
+          ) : (
+            <div className=" block m-3">
+              <div className=" my-3">
+                <h1 className=" text-center text-white text-lg font-bold">
+                  Confirmación
+                </h1>
+              </div>
+              <div className=" my-3">
+                <h1 className=" text-center text-white text-base font-medium">
+                  ¿Estás seguro de eliminar el tipo de inmueble?
+                </h1>
+              </div>
+              <div className=" flex justify-center items-center">
+                <div className=" my-2 grid grid-cols-2">
+                  <div className=" mx-4">
+                    <button
+                      onClick={() => removeType(selectedType)}
+                      className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                    >
+                      Aceptar
+                    </button>
+                  </div>
+                  <div className=" mx-4">
+                    <button
+                      onClick={() => setOpen2(false)}
+                      className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </Modal>
         <div className=" block">
           <div className=" flex   transition duration-700  group justify-center items-center w-screen md:pl-[70px] border-[1px] border-white h-fit bg-gradient-to-br from-[#852655] to-[#8f0e2a]">
             <div
@@ -124,6 +249,9 @@ function PlaceTypes() {
                               <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]  px-[10px] py-2">
                                 N° de inmuebles
                               </th>
+                              <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]  px-[10px] py-2">
+                                Alicuota
+                              </th>
                               <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]  px-[25px] py-2">
                                 Deuda
                               </th>
@@ -148,100 +276,93 @@ function PlaceTypes() {
                                   {type.places.length}
                                 </th>
                                 <th className="border border-slate-300 px-2 py-2">
+                                  {`$${type.monthlyFee.monthlyFee_value}`}
+                                </th>
+                                <th className="border border-slate-300 px-2 py-2">
                                   {getDebt(type)}
                                 </th>
                                 <th className=" border grid grid-cols-2 h-full border-slate-300  py-2">
                                   <div className=" flex justify-center border-none items-center">
-                                    <Link
-                                      to={`/inmuebles/${type.placetype_id}`}
+                                    <svg
+                                      onClick={() => setOpen(true)}
+                                      className=" h-[19px] cursor-pointer"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      xmlns="http://www.w3.org/2000/svg"
                                     >
-                                      <svg
-                                        className=" h-[19px] hover:cursor-pointer"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      >
-                                        <g
-                                          id="SVGRepo_bgCarrier"
-                                          strokeWidth="0"
-                                        ></g>
-                                        <g
-                                          id="SVGRepo_tracerCarrier"
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                        ></g>
-                                        <g id="SVGRepo_iconCarrier">
-                                          {" "}
-                                          <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="3"
-                                            stroke="#ababab"
-                                            strokeWidth="2"
-                                          ></circle>{" "}
-                                          <path
-                                            d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
-                                            stroke="#ababab"
-                                            strokeWidth="2"
-                                          ></path>{" "}
-                                        </g>
-                                      </svg>
-                                    </Link>
+                                      <g
+                                        id="SVGRepo_bgCarrier"
+                                        strokeWidth="0"
+                                      ></g>
+                                      <g
+                                        id="SVGRepo_tracerCarrier"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      ></g>
+                                      <g id="SVGRepo_iconCarrier">
+                                        {" "}
+                                        <path
+                                          fillRule="evenodd"
+                                          clipRule="evenodd"
+                                          d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z"
+                                          fill="#852655"
+                                        ></path>{" "}
+                                      </g>
+                                    </svg>
                                   </div>
                                   <div className=" flex justify-center items-center">
-                                    <Link
-                                      to={`/inmuebles/modificar/${type.placetype_id}`}
+                                    <svg
+                                      onClick={() =>
+                                        setSelectedType(type.placetype_id)
+                                      }
+                                      viewBox="-3 0 32 32"
+                                      version="1.1"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      xmlnsXlink="http://www.w3.org/1999/xlink"
+                                      xmlnsSketch="http://www.bohemiancoding.com/sketch/ns"
+                                      className=" h-[19px] hover:cursor-pointer fill-[#831818]"
                                     >
-                                      <svg
-                                        viewBox="-3 0 32 32"
-                                        version="1.1"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        xmlnsXlink="http://www.w3.org/1999/xlink"
-                                        xmlnsSketch="http://www.bohemiancoding.com/sketch/ns"
-                                        className=" h-[19px] hover:cursor-pointer fill-[#831818]"
-                                      >
+                                      <g
+                                        id="SVGRepo_bgCarrier"
+                                        strokeWidth="0"
+                                      ></g>
+                                      <g
+                                        id="SVGRepo_tracerCarrier"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      ></g>
+                                      <g id="SVGRepo_iconCarrier">
+                                        {" "}
+                                        <title>trash</title>{" "}
+                                        <desc>Created with Sketch Beta.</desc>{" "}
+                                        <defs> </defs>{" "}
                                         <g
-                                          id="SVGRepo_bgCarrier"
-                                          strokeWidth="0"
-                                        ></g>
-                                        <g
-                                          id="SVGRepo_tracerCarrier"
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                        ></g>
-                                        <g id="SVGRepo_iconCarrier">
+                                          id="Page-1"
+                                          stroke="none"
+                                          strokeWidth="1"
+                                          fill="none"
+                                          fillRule="evenodd"
+                                          sketchType="MSPage"
+                                        >
                                           {" "}
-                                          <title>trash</title>{" "}
-                                          <desc>Created with Sketch Beta.</desc>{" "}
-                                          <defs> </defs>{" "}
                                           <g
-                                            id="Page-1"
-                                            stroke="none"
-                                            strokeWidth="1"
-                                            fill="none"
-                                            fillRule="evenodd"
-                                            sketchType="MSPage"
+                                            id="Icon-Set"
+                                            sketchType="MSLayerGroup"
+                                            transform="translate(-259.000000, -203.000000)"
+                                            className=" fill-[#831818]"
                                           >
                                             {" "}
-                                            <g
-                                              id="Icon-Set"
-                                              sketchType="MSLayerGroup"
-                                              transform="translate(-259.000000, -203.000000)"
-                                              className=" fill-[#831818]"
+                                            <path
+                                              d="M282,211 L262,211 C261.448,211 261,210.553 261,210 C261,209.448 261.448,209 262,209 L282,209 C282.552,209 283,209.448 283,210 C283,210.553 282.552,211 282,211 L282,211 Z M281,231 C281,232.104 280.104,233 279,233 L265,233 C263.896,233 263,232.104 263,231 L263,213 L281,213 L281,231 L281,231 Z M269,206 C269,205.447 269.448,205 270,205 L274,205 C274.552,205 275,205.447 275,206 L275,207 L269,207 L269,206 L269,206 Z M283,207 L277,207 L277,205 C277,203.896 276.104,203 275,203 L269,203 C267.896,203 267,203.896 267,205 L267,207 L261,207 C259.896,207 259,207.896 259,209 L259,211 C259,212.104 259.896,213 261,213 L261,231 C261,233.209 262.791,235 265,235 L279,235 C281.209,235 283,233.209 283,231 L283,213 C284.104,213 285,212.104 285,211 L285,209 C285,207.896 284.104,207 283,207 L283,207 Z M272,231 C272.552,231 273,230.553 273,230 L273,218 C273,217.448 272.552,217 272,217 C271.448,217 271,217.448 271,218 L271,230 C271,230.553 271.448,231 272,231 L272,231 Z M267,231 C267.552,231 268,230.553 268,230 L268,218 C268,217.448 267.552,217 267,217 C266.448,217 266,217.448 266,218 L266,230 C266,230.553 266.448,231 267,231 L267,231 Z M277,231 C277.552,231 278,230.553 278,230 L278,218 C278,217.448 277.552,217 277,217 C276.448,217 276,217.448 276,218 L276,230 C276,230.553 276.448,231 277,231 L277,231 Z"
+                                              id="trash"
+                                              sketchType="MSShapeGroup"
                                             >
                                               {" "}
-                                              <path
-                                                d="M282,211 L262,211 C261.448,211 261,210.553 261,210 C261,209.448 261.448,209 262,209 L282,209 C282.552,209 283,209.448 283,210 C283,210.553 282.552,211 282,211 L282,211 Z M281,231 C281,232.104 280.104,233 279,233 L265,233 C263.896,233 263,232.104 263,231 L263,213 L281,213 L281,231 L281,231 Z M269,206 C269,205.447 269.448,205 270,205 L274,205 C274.552,205 275,205.447 275,206 L275,207 L269,207 L269,206 L269,206 Z M283,207 L277,207 L277,205 C277,203.896 276.104,203 275,203 L269,203 C267.896,203 267,203.896 267,205 L267,207 L261,207 C259.896,207 259,207.896 259,209 L259,211 C259,212.104 259.896,213 261,213 L261,231 C261,233.209 262.791,235 265,235 L279,235 C281.209,235 283,233.209 283,231 L283,213 C284.104,213 285,212.104 285,211 L285,209 C285,207.896 284.104,207 283,207 L283,207 Z M272,231 C272.552,231 273,230.553 273,230 L273,218 C273,217.448 272.552,217 272,217 C271.448,217 271,217.448 271,218 L271,230 C271,230.553 271.448,231 272,231 L272,231 Z M267,231 C267.552,231 268,230.553 268,230 L268,218 C268,217.448 267.552,217 267,217 C266.448,217 266,217.448 266,218 L266,230 C266,230.553 266.448,231 267,231 L267,231 Z M277,231 C277.552,231 278,230.553 278,230 L278,218 C278,217.448 277.552,217 277,217 C276.448,217 276,217.448 276,218 L276,230 C276,230.553 276.448,231 277,231 L277,231 Z"
-                                                id="trash"
-                                                sketchType="MSShapeGroup"
-                                              >
-                                                {" "}
-                                              </path>{" "}
-                                            </g>{" "}
+                                            </path>{" "}
                                           </g>{" "}
-                                        </g>
-                                      </svg>
-                                    </Link>
+                                        </g>{" "}
+                                      </g>
+                                    </svg>
                                   </div>
                                 </th>
                               </tr>

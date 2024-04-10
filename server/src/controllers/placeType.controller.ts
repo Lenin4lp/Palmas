@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { PlaceType } from "../models/placeType.model";
 import { Place } from "../models/place.model";
+import { MonthlyDebt } from "../models/monthlyDebt.model";
+import { MonthlyFee } from "../models/monthlyFee.model";
 
 // ? Obtain all placeTypes
 export const getPlaceTypes = async (req: Request, res: Response) => {
@@ -9,6 +11,9 @@ export const getPlaceTypes = async (req: Request, res: Response) => {
       include: [
         {
           model: Place,
+        },
+        {
+          model: MonthlyFee,
         },
       ],
       order: [["placetype_id", "ASC"]],
@@ -26,6 +31,9 @@ export const getPlaceType = async (req: Request, res: Response) => {
     include: [
       {
         model: Place,
+      },
+      {
+        model: MonthlyFee,
       },
     ],
   });

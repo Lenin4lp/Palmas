@@ -300,7 +300,7 @@ function Houses() {
                   </div>
                   {filteredTypes.length > 0 ? (
                     <div className=" flex justify-center items-center">
-                      <div className=" mt-5 h-full md:h-[500px] overflow-x-auto overflow-y-auto w-[290px] sm:w-full  ">
+                      <div className=" mt-5 h-full md:h-[500px] overflow-x-auto overflow-y-auto w-[290px] sm:w-full">
                         <table className=" h-full  border-collapse text-[12px] lg:text-sm">
                           <thead className=" sticky top-0 ">
                             <tr>
