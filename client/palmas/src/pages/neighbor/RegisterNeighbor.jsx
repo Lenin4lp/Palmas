@@ -10,6 +10,7 @@ import {
 import { useForm } from "react-hook-form";
 import { createNeighbor } from "../../api/neighbors";
 import { Toaster, toast } from "sonner";
+import Modal from "../../components/Modal";
 
 function RegisterNeighbor() {
   const [errors, setErrors] = useState([]);
@@ -17,17 +18,9 @@ function RegisterNeighbor() {
   const roles = rolesdata.data;
   const navigation = useNavigation();
   const [roleId, setRoleId] = useState("");
+  const [open, setOpen] = useState(false);
 
   const { register, handleSubmit } = useForm();
-
-  useEffect(() => {
-    if (errors.length > 0) {
-      const timer = setTimeout(() => {
-        setErrors([]);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [errors]);
 
   const registerNeighbor = async (data) => {
     try {
@@ -71,6 +64,40 @@ function RegisterNeighbor() {
 
   return (
     <ContentComponent>
+      <Modal open={open} onClose={() => setOpen(false)}>
+        <div className=" block m-3">
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-lg font-bold">
+              Confirmación
+            </h1>
+          </div>
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-base font-medium">
+              ¿Estás seguro de registrar el vecino?
+            </h1>
+          </div>
+          <div className=" flex justify-center items-center">
+            <div className=" my-2 grid grid-cols-2">
+              <div className=" mx-4">
+                <button
+                  onClick={onSubmit}
+                  className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Aceptar
+                </button>
+              </div>
+              <div className=" mx-4">
+                <button
+                  onClick={() => setOpen(false)}
+                  className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
       <div className="block">
         <div className=" h-[70px] sm:h-[100px] w-screen md:px-[70px] bg-gradient-to-r from-[#852655] to-[#8f0e2a]">
           <div className=" flex h-full justify-start px-10 items-center">
@@ -305,7 +332,7 @@ function RegisterNeighbor() {
                   </form>
                   <div className=" my-10 flex justify-center items-center">
                     <button
-                      onClick={onSubmit}
+                      onClick={() => setOpen(true)}
                       className=" group hover:text-white bg-transparent flex items-center hover:bg-[#852655] transition duration-300 text-[#852655] p-2 border-[1px] rounded-lg border-[#852655]"
                     >
                       <svg

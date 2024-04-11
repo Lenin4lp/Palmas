@@ -1,17 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   useLoaderData,
   useParams,
   useNavigation,
   Link,
 } from "react-router-dom";
-import ContentComponent from "../../components/ContentComponent";
+import { deleteNeighbor } from "../../api/neighbors";
+import { toast, Toaster } from "sonner";
+import Modal from "../../components/Modal";
 
 function NeighborInfo() {
   const { id } = useParams();
   const neighbordata = useLoaderData();
   const neighbor = neighbordata.data.neighbor;
   const navigation = useNavigation();
+  const [open, setOpen] = useState(false);
+
+  const removeNeighbor = async (neighborId) => {
+    try {
+      const res = await deleteNeighbor(neighborId);
+      if (res.status === 204) {
+        toast.success("Vecino eliminado con éxito");
+        setTimeout(() => {
+          window.location.href = `/vecinos`;
+        }, 2000);
+      }
+    } catch (error) {
+      error.response.data.map((err) => toast.error(err));
+    }
+  };
 
   console.log(neighbor);
 
@@ -20,6 +37,40 @@ function NeighborInfo() {
   }
   return (
     <div className="  h-fit min-h-screen w-screen md:pl-[70px] md:py-0 pb-[90px]">
+      <Modal open={open} onClose={() => setOpen(false)}>
+        <div className=" block m-3">
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-lg font-bold">
+              Confirmación
+            </h1>
+          </div>
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-base font-medium">
+              ¿Estás seguro de eliminar el tipo de inmueble?
+            </h1>
+          </div>
+          <div className=" flex justify-center items-center">
+            <div className=" my-2 grid grid-cols-2">
+              <div className=" mx-4">
+                <button
+                  onClick={() => removeNeighbor(neighbor.neighbor_id)}
+                  className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Aceptar
+                </button>
+              </div>
+              <div className=" mx-4">
+                <button
+                  onClick={() => setOpen(false)}
+                  className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
       <div className=" w-full block">
         <div className=" w-full h-[100px] px-5 flex justify-start items-center bg-gradient-to-r border-[1px] border-[#8f0e2a] from-[#c2c2c2] to-[#e6e6e6]">
           <svg
@@ -161,7 +212,7 @@ function NeighborInfo() {
                       </h1>
                     </div>
                   </div>
-                  <div className=" my-10 lg:my-20 sm:col-span-2 flex justify-center items-center">
+                  <div className=" mt-10 mb-5  sm:col-span-2 flex justify-center items-center">
                     <Link to={`/vecinos/modificar/${neighbor.neighbor_id}`}>
                       <button className=" group hover:bg-[#8f0e2a] transition duration-300 p-3 border-[1px] border-[#8f0e2a] rounded-lg flex justify-center items-center">
                         <h1 className=" text-center group-hover:text-white text-sm lg:text-base transition duration-300 text-[#8f0e2a]">
@@ -169,6 +220,16 @@ function NeighborInfo() {
                         </h1>
                       </button>
                     </Link>
+                  </div>
+                  <div className=" mb-10 mt-5 sm:col-span-2 flex justify-center items-center">
+                    <button
+                      onClick={() => setOpen(true)}
+                      className=" group hover:bg-[#a32b2b] bg-[#8b1e1e] transition duration-300 p-3 border-[1px] border-[#8f0e2a] rounded-lg flex justify-center items-center"
+                    >
+                      <h1 className=" text-center group-hover:text-white text-sm lg:text-base transition duration-300 text-white">
+                        Eliminar usuario
+                      </h1>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -183,20 +244,26 @@ function NeighborInfo() {
               </div>
               <div className=" my-10 flex justify-start items-start flex-wrap">
                 {neighbor.places.map((place) => (
-                  <div
-                    key={place.place_id}
-                    className=" m-3 lg:m-5 bg-white rounded-full flex justify-center items-center h-[120px] w-[120px]"
+                  <Link
+                    className=" h-fit w-fit group rounded-full"
+                    to={`/inmuebles/${place.place_id}`}
                   >
-                    <h1 className=" text-[#8f0e2a] font-semibold text-center">
-                      {place.place_name}
-                    </h1>
-                  </div>
+                    <div
+                      key={place.place_id}
+                      className=" m-3 lg:m-5 group-hover:scale-105 transition duration-300 bg-white rounded-full flex justify-center items-center h-[120px] w-[120px]"
+                    >
+                      <h1 className=" text-[#8f0e2a] font-semibold text-center">
+                        {place.place_name}
+                      </h1>
+                    </div>
+                  </Link>
                 ))}
               </div>
             </div>
           </div>
         </div>
       </div>
+      <Toaster position="top-center" richColors />
     </div>
   );
 }

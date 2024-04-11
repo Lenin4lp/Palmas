@@ -4,12 +4,14 @@ import { useLoaderData, useNavigation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Toaster, toast } from "sonner";
 import { createPlace } from "../../api/places";
+import Modal from "../../components/Modal";
 
 function HouseRegister() {
   const typesdata = useLoaderData();
   const types = typesdata.data;
   const navigation = useNavigation();
   const [selectedType, setSelectedType] = useState("");
+  const [open, setOpen] = useState(false);
 
   console.log(selectedType);
 
@@ -56,6 +58,40 @@ function HouseRegister() {
   return (
     <ContentComponent>
       <div className=" w-full flex justify-center items-center">
+        <Modal open={open} onClose={() => setOpen(false)}>
+          <div className=" block m-3">
+            <div className=" my-3">
+              <h1 className=" text-center text-white text-lg font-bold">
+                Confirmación
+              </h1>
+            </div>
+            <div className=" my-3">
+              <h1 className=" text-center text-white text-base font-medium">
+                ¿Estás seguro de registrar el inmueble?
+              </h1>
+            </div>
+            <div className=" flex justify-center items-center">
+              <div className=" my-2 grid grid-cols-2">
+                <div className=" mx-4">
+                  <button
+                    onClick={onSubmit}
+                    className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                  >
+                    Aceptar
+                  </button>
+                </div>
+                <div className=" mx-4">
+                  <button
+                    onClick={() => setOpen(false)}
+                    className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Modal>
         <div className=" block ">
           <div className=" mx-5 py-5 border-b-[1px] bg-gradient-to-r from-white to-[#cccccc] border-[#852655]">
             <div className=" h-[40px] md:h-[60px]  w-screen md:px-[70px]  flex justify-start items-center">
@@ -181,7 +217,7 @@ function HouseRegister() {
           </div>
           <div className=" my-10 flex justify-center items-center">
             <button
-              onClick={onSubmit}
+              onClick={() => setOpen(true)}
               disabled={selectedType === "" ? true : false}
               className=" disabled:cursor-not-allowed disabled:opacity-50 group hover:text-white bg-transparent flex items-center hover:bg-[#852655] transition duration-300 text-[#852655] p-2 border-[1px] rounded-lg border-[#852655]"
             >

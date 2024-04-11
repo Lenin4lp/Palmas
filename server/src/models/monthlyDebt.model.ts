@@ -12,6 +12,7 @@ import {
   AfterConnect,
   AfterSync,
   BeforeSync,
+  BeforeDestroy,
 } from "sequelize-typescript";
 import { v4 as uuidv4 } from "uuid";
 import { Place } from "./place.model";
@@ -112,5 +113,12 @@ export class MonthlyDebt extends Model {
     if (place) {
       await place.update({ pending_value: totalDebt });
     }
+  }
+
+  @BeforeDestroy
+  static async destroyMonthlyDebtRelations(monthlyDebt: MonthlyDebt) {
+    await Payment.destroy({
+      where: { monthlyDebt_id: monthlyDebt.monthlyDebt_id },
+    });
   }
 }

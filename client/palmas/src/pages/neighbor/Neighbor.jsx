@@ -375,7 +375,7 @@ function Neighbor() {
                               </th>
                               <th className=" h-full border grid grid-cols-2 border-slate-300  py-2">
                                 <div className=" flex justify-center border-none items-center">
-                                  <Link>
+                                  <Link to={`/vecinos/${neighbor.neighbor_id}`}>
                                     <svg
                                       className=" h-[19px] hover:cursor-pointer"
                                       viewBox="0 0 24 24"
@@ -410,7 +410,9 @@ function Neighbor() {
                                   </Link>
                                 </div>
                                 <div className=" flex justify-center items-center">
-                                  <Link>
+                                  <Link
+                                    to={`/vecinos/modificar/${neighbor.neighbor_id}`}
+                                  >
                                     <svg
                                       className=" h-[19px] cursor-pointer"
                                       viewBox="0 0 24 24"

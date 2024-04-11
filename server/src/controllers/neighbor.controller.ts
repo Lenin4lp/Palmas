@@ -39,6 +39,15 @@ export const createNeighbor = async (req: Request, res: Response) => {
     role_id,
   } = req.body;
   try {
+    const neighborEmailFound = await Neighbor.findOne({
+      where: {
+        neighbor_email: neighbor_email,
+      },
+    });
+
+    if (neighborEmailFound) {
+      return res.status(400).json(["Ya existe un vecino con ese correo"]);
+    }
     const neighborFound = await Neighbor.findOne({
       where: {
         neighbor_name: neighbor_name,

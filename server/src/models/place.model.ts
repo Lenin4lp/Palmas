@@ -14,6 +14,7 @@ import {
   AfterSync,
   AfterConnect,
   BeforeSync,
+  BeforeDestroy,
 } from "sequelize-typescript";
 import { PlaceType } from "./placeType.model";
 import { Payment } from "./payment.model";
@@ -85,5 +86,15 @@ export class Place extends Model {
       place.place_id = prefix + `${count + 1}` + generatedUuid;
       place.place_name = `${placeType.placetype_name} ${count + 1}`;
     }
+  }
+  @BeforeDestroy
+  static async destroyPlaceRelations(place: Place) {
+    await NeighborPlace.destroy({
+      where: { place_id: place.place_id },
+    });
+
+    await MonthlyDebt.destroy({
+      where: { place_id: place.place_id },
+    });
   }
 }

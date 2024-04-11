@@ -7,6 +7,7 @@ import {
   BelongsTo,
   ForeignKey,
   BelongsToMany,
+  BeforeDestroy,
 } from "sequelize-typescript";
 import { v4 as uuidv4 } from "uuid";
 import { NeighborRole } from "./neighborRole.model";
@@ -80,5 +81,11 @@ export class Neighbor extends Model {
   static async automatizateId(neighbor: Neighbor) {
     const generatedUuid = uuidv4().substring(0, 10);
     neighbor.neighbor_id = generatedUuid;
+  }
+  @BeforeDestroy
+  static async destroyNeighborRelations(neighbor: Neighbor) {
+    await NeighborPlace.destroy({
+      where: { neighbor_id: neighbor.neighbor_id },
+    });
   }
 }

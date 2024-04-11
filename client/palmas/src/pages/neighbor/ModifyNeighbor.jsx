@@ -15,6 +15,7 @@ function ModifyNeighbor() {
   const navigation = useNavigation();
   const [roleId, setRoleId] = useState(neighbor.role_id);
   const [open, setOpen] = useState(false);
+  const [open2, setOpen2] = useState(false);
 
   const { register, handleSubmit } = useForm();
 
@@ -173,6 +174,40 @@ function ModifyNeighbor() {
                     </g>
                   </svg>
                   <h1>Quitar</h1>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+      <Modal open={open2} onClose={() => setOpen2(false)}>
+        <div className=" block m-3">
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-lg font-bold">
+              Confirmación
+            </h1>
+          </div>
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-base font-medium">
+              ¿Estás seguro de modificar el vecino?
+            </h1>
+          </div>
+          <div className=" flex justify-center items-center">
+            <div className=" my-2 grid grid-cols-2">
+              <div className=" mx-4">
+                <button
+                  onClick={onSubmit}
+                  className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Aceptar
+                </button>
+              </div>
+              <div className=" mx-4">
+                <button
+                  onClick={() => setOpen2(false)}
+                  className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Cancelar
                 </button>
               </div>
             </div>
@@ -421,7 +456,7 @@ function ModifyNeighbor() {
         </div>
         <div className=" my-10 flex justify-center items-center">
           <button
-            onClick={onSubmit}
+            onClick={() => setOpen2(true)}
             className=" group hover:text-white bg-transparent flex items-center hover:bg-[#852655] transition duration-300 text-[#852655] p-2 border-[1px] rounded-lg border-[#852655]"
           >
             <svg

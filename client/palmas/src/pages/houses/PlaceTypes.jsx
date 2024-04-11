@@ -16,6 +16,7 @@ function PlaceTypes() {
   const [content, setContent] = useState("");
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
+  const [open3, setOpen3] = useState(false);
   const [selectedAliquot, setSelectedAliquot] = useState("");
   const [selectedType, setSelectedType] = useState("");
 
@@ -59,6 +60,12 @@ function PlaceTypes() {
     setSelectedAliquot(e.target.value);
   };
 
+  const selectedPlaceType =
+    selectedType != "" &&
+    types.find((type) => type.placetype_id == selectedType);
+
+  console.log(selectedPlaceType);
+
   function getDebt(type) {
     if (type.places?.length === 0) return "N/A";
 
@@ -72,6 +79,8 @@ function PlaceTypes() {
   if (navigation.state === "loading") {
     return <div>Cargando</div>;
   }
+
+  console.log(selectedPlaceType);
 
   return (
     <ContentComponent>
@@ -124,14 +133,39 @@ function PlaceTypes() {
           </div>
         </Modal>
         <Modal open={open2} onClose={() => setOpen2(false)}>
-          {selectedType !== "" &&
-          types.find((type) => {
-            type.placetype_id == selectedType;
-          }).places.length > 0 ? (
+          {selectedType != "" && selectedPlaceType.places.length > 0 ? (
             <div className=" block m-3">
               <div className=" my-3">
-                <h1 className=" text-center text-white text-lg font-bold">
-                  Confirmación
+                <h1 className=" text-center text-white text-xl font-bold">
+                  IMPORTANTE
+                </h1>
+              </div>
+              <div className=" py-3 flex justify-center items-center">
+                <svg
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className=" h-[80px] fill-white"
+                >
+                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path d="M13.995 1.827a1.745 1.745 0 0 0-2.969 0l-9.8 17.742a1.603 1.603 0 0 0 0 1.656 1.678 1.678 0 0 0 1.48.775H22.28a1.68 1.68 0 0 0 1.484-.775 1.608 1.608 0 0 0 .003-1.656zM12 8h1v7h-1zm.5 10.5a1 1 0 1 1 1-1 1.002 1.002 0 0 1-1 1z"></path>
+                    <path fill="none" d="M0 0h24v24H0z"></path>
+                  </g>
+                </svg>
+              </div>
+              <div className=" pt-5 flex justify-center items-center">
+                <h1 className=" text-white">
+                  Primero se deben eliminar todos inmuebles de este tipo.
+                </h1>
+              </div>
+              <div className="  flex justify-center items-center">
+                <h1 className=" text-white">
+                  Para soporte seguro contactar con el administrador.
                 </h1>
               </div>
             </div>
@@ -169,6 +203,40 @@ function PlaceTypes() {
               </div>
             </div>
           )}
+        </Modal>
+        <Modal open={open3} onClose={() => setOpen3(false)}>
+          <div className=" block m-3">
+            <div className=" my-3">
+              <h1 className=" text-center text-white text-lg font-bold">
+                Confirmación
+              </h1>
+            </div>
+            <div className=" my-3">
+              <h1 className=" text-center text-white text-base font-medium">
+                ¿Estás seguro de registrar el tipo de inmueble?
+              </h1>
+            </div>
+            <div className=" flex justify-center items-center">
+              <div className=" my-2 grid grid-cols-2">
+                <div className=" mx-4">
+                  <button
+                    onClick={onSubmit}
+                    className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                  >
+                    Aceptar
+                  </button>
+                </div>
+                <div className=" mx-4">
+                  <button
+                    onClick={() => setOpen3(false)}
+                    className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </Modal>
         <div className=" block">
           <div className=" flex   transition duration-700  group justify-center items-center w-screen md:pl-[70px] border-[1px] border-white h-fit bg-gradient-to-br from-[#852655] to-[#8f0e2a]">
@@ -312,9 +380,10 @@ function PlaceTypes() {
                                   </div>
                                   <div className=" flex justify-center items-center">
                                     <svg
-                                      onClick={() =>
-                                        setSelectedType(type.placetype_id)
-                                      }
+                                      onClick={() => {
+                                        setSelectedType(type.placetype_id);
+                                        setOpen2(true);
+                                      }}
                                       viewBox="-3 0 32 32"
                                       version="1.1"
                                       xmlns="http://www.w3.org/2000/svg"
@@ -448,7 +517,7 @@ function PlaceTypes() {
                   </div>
                   <div className=" flex justify-center items-center">
                     <button
-                      onClick={onSubmit}
+                      onClick={() => setOpen3(true)}
                       className=" text-white hover:text-[#8f0e2a] flex justify-center items-center p-2 border-[1px] border-white rounded-lg hover:bg-white transition duration-300"
                     >
                       <h1>Registrar</h1>

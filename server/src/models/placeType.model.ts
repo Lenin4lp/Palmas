@@ -8,6 +8,7 @@ import {
   AfterSync,
   BelongsTo,
   ForeignKey,
+  BeforeDestroy,
 } from "sequelize-typescript";
 import { Place } from "./place.model";
 import { MonthlyFee } from "./monthlyFee.model";
@@ -74,4 +75,12 @@ export class PlaceType extends Model {
       console.log("Oops, algo malio sal: ", error);
     }
   };
+  @BeforeDestroy
+  static async destroyTypeRelations(placeType: PlaceType) {
+    await Place.destroy({
+      where: {
+        placeType_id: placeType.placetype_id,
+      },
+    });
+  }
 }

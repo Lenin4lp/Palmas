@@ -6,6 +6,7 @@ import {
   HasMany,
   AfterSync,
   AutoIncrement,
+  BeforeDestroy,
 } from "sequelize-typescript";
 import { Vehicle } from "./vehicle.model";
 
@@ -57,4 +58,12 @@ export class VehicleType extends Model {
       console.log("Oops, algo malio sal:", error);
     }
   };
+  @BeforeDestroy
+  static async destroyTypeRelations(vehicleType: VehicleType) {
+    await Vehicle.destroy({
+      where: {
+        vehicleType_id: vehicleType.vehicleType_id,
+      },
+    });
+  }
 }
