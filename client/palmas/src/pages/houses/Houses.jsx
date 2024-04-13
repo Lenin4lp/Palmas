@@ -31,6 +31,18 @@ function Houses() {
     searchedPlaces(e.target.value);
   };
 
+  const removePlace = async (placeId) => {
+    try {
+      const res = await deletePlace(placeId);
+      if (res.status === 204) {
+        toast.success("inmueble eliminado con éxito");
+        setTimeout(() => {
+          window.location.href = `/inmuebles`;
+        }, 2000);
+      }
+    } catch (error) {}
+  };
+
   function sortByPendingValue(places) {
     return places.sort((a, b) => {
       const valueA = parseFloat(a.pending_value);
@@ -90,49 +102,85 @@ function Houses() {
     <ContentComponent>
       <div className=" w-full m-5 mb-0">
         <Modal open={open} onClose={() => setOpen(false)}>
-          <div className=" block m-3">
-            <div className=" my-3">
-              <h1 className=" text-center text-white text-lg font-bold">
-                Confirmación
-              </h1>
-            </div>
-            <div className=" py-3">
-              <h1 className=" text-center text-white text-base font-medium">
-                ¿Estás seguro de eliminar el tipo de inmueble?
-              </h1>
-            </div>
-            <div className=" pb-1">
-              <h1 className=" text-center text-white text-base font-medium">
-                Se borrarán todas las deudas y registros de pagos
-                correspondientes
-              </h1>
-            </div>
-            <div className=" pb-3">
-              <h1 className=" text-center text-white text-base font-medium">
-                al inmueble
-              </h1>
-            </div>
-            <div className=" flex justify-center items-center">
-              <div className=" my-2 grid grid-cols-2">
-                <div className=" mx-4">
-                  <button
-                    onClick={() => removeType(selectedType)}
-                    className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
-                  >
-                    Aceptar
-                  </button>
-                </div>
-                <div className=" mx-4">
-                  <button
-                    onClick={() => setOpen(false)}
-                    className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
-                  >
-                    Cancelar
-                  </button>
+          {Object.keys(selectedPlace).length != 0 &&
+          selectedPlace.months.length === 0 ? (
+            <div className=" block m-3">
+              <div className=" my-3">
+                <h1 className=" text-center text-white text-lg font-bold">
+                  Confirmación
+                </h1>
+              </div>
+              <div className=" my-3">
+                <h1 className=" text-center text-white text-base font-medium">
+                  ¿Estás seguro de eliminar el inmueble?
+                </h1>
+              </div>
+              <div className=" flex justify-center items-center">
+                <div className=" my-2 grid grid-cols-2">
+                  <div className=" mx-4">
+                    <button
+                      onClick={() => removePlace(selectedPlace.place_id)}
+                      className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                    >
+                      Aceptar
+                    </button>
+                  </div>
+                  <div className=" mx-4">
+                    <button
+                      onClick={() => setOpen(false)}
+                      className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className=" block m-3">
+              <div className=" my-3">
+                <h1 className=" text-center text-white text-lg font-bold">
+                  Confirmación
+                </h1>
+              </div>
+              <div className=" py-3">
+                <h1 className=" text-center text-white text-base font-medium">
+                  ¿Estás seguro de eliminar el tipo de inmueble?
+                </h1>
+              </div>
+              <div className=" pb-1">
+                <h1 className=" text-center text-white text-base font-medium">
+                  Se borrarán todas las deudas y registros de pagos
+                  correspondientes
+                </h1>
+              </div>
+              <div className=" pb-3">
+                <h1 className=" text-center text-white text-base font-medium">
+                  al inmueble
+                </h1>
+              </div>
+              <div className=" flex justify-center items-center">
+                <div className=" my-2 grid grid-cols-2">
+                  <div className=" mx-4">
+                    <button
+                      onClick={() => removePlace(selectedPlace.place_id)}
+                      className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                    >
+                      Aceptar
+                    </button>
+                  </div>
+                  <div className=" mx-4">
+                    <button
+                      onClick={() => setOpen(false)}
+                      className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </Modal>
         <div className="block">
           <div className=" block md:flex mx-5 ">
@@ -505,6 +553,7 @@ function Houses() {
             </div>
           </div>
         </div>
+        <Toaster position="top-center" richColors />
       </div>
     </ContentComponent>
   );

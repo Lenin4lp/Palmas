@@ -28,14 +28,17 @@ function HouseInfo() {
   const [vehicleType, setVehicleType] = useState();
   const [openModal, setOpenModal] = useState(false);
   const { register, handleSubmit } = useForm();
-
-  console.log(selectedCustomer);
-  console.log(selectedMonth);
-  console.log(selectedPay);
-  console.log(vehicleType);
+  const [openModal2, setOpenModal2] = useState(false);
+  const [selectedNeighbor, setSelectedNeighbor] = useState({});
+  const [selectedVehicle, setSelectedVehicle] = useState({});
+  const [open2, setOpen2] = useState(false);
 
   const handleVehicleType = (e) => {
     setVehicleType(e.target.value);
+  };
+
+  const handleOpen2 = (value) => {
+    setOpen2(value);
   };
 
   const handleSelectedPay = (e) => {
@@ -50,7 +53,10 @@ function HouseInfo() {
     try {
       const res = await deletePlaceFromNeighbor(neighborId, place_id);
       if (res.status === 204) {
-        toast.success("Inmueble desvinculado con éxito");
+        toast.success("Vecino desvinculado con éxito");
+        setTimeout(() => {
+          window.location.href = `/inmuebles/${place.place_id}`;
+        }, 2000);
       }
     } catch (error) {
       error.responde.data.map((err) => toast.error(err));
@@ -153,6 +159,82 @@ function HouseInfo() {
   }
   return (
     <div className="  md:pl-[70px] pb-[90px] md:py-0 w-screen min-h-screen h-fit">
+      <Modal open={openModal} onClose={() => setOpenModal(false)}>
+        {Object.keys(selectedNeighbor).length > 0 && (
+          <div className=" block m-3">
+            <div className=" my-3">
+              <h1 className=" text-center text-white text-lg font-bold">
+                Confirmación
+              </h1>
+            </div>
+            <div className=" my-3">
+              <h1 className=" text-center text-white text-base font-medium">
+                ¿Estás seguro de desvincular al vecino?
+              </h1>
+            </div>
+            <div className=" flex justify-center items-center">
+              <div className=" my-2 grid grid-cols-2">
+                <div className=" mx-4">
+                  <button
+                    onClick={() =>
+                      removeNeighbor(
+                        selectedNeighbor.neighbor_id,
+                        place.place_id
+                      )
+                    }
+                    className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                  >
+                    Aceptar
+                  </button>
+                </div>
+                <div className=" mx-4">
+                  <button
+                    onClick={() => setOpenModal(false)}
+                    className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+      <Modal open={openModal2} onClose={() => setOpenModal2(false)}>
+        <div className=" block m-3">
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-lg font-bold">
+              Confirmación
+            </h1>
+          </div>
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-base font-medium">
+              ¿Estás seguro de eliminar el vehículo?
+            </h1>
+          </div>
+          <div className=" flex justify-center items-center">
+            <div className=" my-2 grid grid-cols-2">
+              <div className=" mx-4">
+                <button
+                  onClick={() => removeVehicle(selectedVehicle.plate)}
+                  className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Aceptar
+                </button>
+              </div>
+              <div className=" mx-4">
+                <button
+                  onClick={() => setOpenModal2(false)}
+                  className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
       <div className="block">
         <div className=" flex p-3 lg:p-5 pb-1 lg:pb-3 justify-around lg:justify-between items-center flex-wrap">
           <div className=" flex justify-center items-center">
@@ -423,7 +505,7 @@ function HouseInfo() {
                           </th>
                           <th className=" border grid grid-cols-2 h-full border-slate-300  py-2">
                             <div className=" flex justify-center border-none items-center">
-                              <Link to={`/inmuebles/${place.place_id}`}>
+                              <Link to={`/vecinos/${neighbor.neighbor_id}`}>
                                 <svg
                                   className=" h-[19px] hover:cursor-pointer"
                                   viewBox="0 0 24 24"
@@ -455,36 +537,36 @@ function HouseInfo() {
                               </Link>
                             </div>
                             <div className=" flex justify-center items-center">
-                              <Link
-                                to={`/inmuebles/modificar/${place.place_id}`}
+                              <svg
+                                onClick={() => {
+                                  setSelectedNeighbor(neighbor);
+                                  setOpenModal(true);
+                                }}
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                                className=" h-[19px] hover:cursor-pointer fill-none"
                               >
-                                <svg
-                                  viewBox="0 0 24 24"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className=" h-[19px] hover:cursor-pointer fill-none"
-                                >
-                                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                                  <g
-                                    id="SVGRepo_tracerCarrier"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  ></g>
-                                  <g id="SVGRepo_iconCarrier">
+                                <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                                <g
+                                  id="SVGRepo_tracerCarrier"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                ></g>
+                                <g id="SVGRepo_iconCarrier">
+                                  {" "}
+                                  <g id="Edit / Remove_Minus_Circle">
                                     {" "}
-                                    <g id="Edit / Remove_Minus_Circle">
-                                      {" "}
-                                      <path
-                                        id="Vector"
-                                        d="M8 12H16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z"
-                                        className="stroke-white"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      ></path>{" "}
-                                    </g>{" "}
-                                  </g>
-                                </svg>
-                              </Link>
+                                    <path
+                                      id="Vector"
+                                      d="M8 12H16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z"
+                                      className="stroke-white"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    ></path>{" "}
+                                  </g>{" "}
+                                </g>
+                              </svg>
                             </div>
                           </th>
                         </tr>
@@ -596,6 +678,10 @@ function HouseInfo() {
                     <Plate
                       vehicleType={vehicle.vehicleType.vehicleType}
                       plate={vehicle.plate}
+                      onClick={() => {
+                        setSelectedVehicle(vehicle);
+                        setOpenModal2(true);
+                      }}
                     />
                   </div>
                 ))}

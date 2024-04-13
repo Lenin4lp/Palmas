@@ -5,6 +5,7 @@ const Plate = ({ vehicleType, plate, onClick }) => {
     <div className=" h-[100px] w-[230px] bg-white rounded-lg p-1 relative">
       <div className=" absolute top-[7px] right-[7px]">
         <svg
+          onClick={onClick}
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
           className=" h-[19px] hover:cursor-pointer fill-none"

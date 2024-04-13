@@ -6,6 +6,7 @@ import {
   BelongsTo,
   ForeignKey,
   BeforeCreate,
+  AutoIncrement,
 } from "sequelize-typescript";
 import { v4 as uuidv4 } from "uuid";
 import { Place } from "./place.model";
@@ -17,6 +18,7 @@ import { MonthlyDebt } from "./monthlyDebt.model";
   timestamps: false,
 })
 export class Payment extends Model {
+  @AutoIncrement
   @Column({
     type: DataType.INTEGER,
     primaryKey: true,
@@ -74,6 +76,13 @@ export class Payment extends Model {
     field: "cliente",
   })
   customer!: string;
+
+  @Column({
+    type: DataType.STRING(200),
+    allowNull: true,
+    field: "recibo",
+  })
+  receipt!: string;
 
   @ForeignKey(() => MonthlyDebt)
   @Column({
