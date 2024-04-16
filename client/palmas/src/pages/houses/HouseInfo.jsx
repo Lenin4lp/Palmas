@@ -12,6 +12,8 @@ import { useForm } from "react-hook-form";
 import Plate from "../../components/Plate";
 import Modal from "../../components/Modal";
 import { deletePlaceFromNeighbor } from "../../api/neighbors";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 // ! Falta dar funcionalidad a botón de pago
 function HouseInfo() {
@@ -32,13 +34,12 @@ function HouseInfo() {
   const [selectedNeighbor, setSelectedNeighbor] = useState({});
   const [selectedVehicle, setSelectedVehicle] = useState({});
   const [open2, setOpen2] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [openModal3, setOpenModal3] = useState(false);
+  const [openModal4, setOpenModal4] = useState(false);
 
   const handleVehicleType = (e) => {
     setVehicleType(e.target.value);
-  };
-
-  const handleOpen2 = (value) => {
-    setOpen2(value);
   };
 
   const handleSelectedPay = (e) => {
@@ -115,12 +116,20 @@ function HouseInfo() {
       modifiedData.vehicleType_id = 5;
     }
 
+    console.log(modifiedData);
+
     registerVehicle(modifiedData);
   });
 
   const handleSelectedMonth = (e) => {
     setSelectedMonth(e.target.value);
   };
+
+  const handleSelectedDate = (e) => {
+    setSelectedDate(e.target.value);
+  };
+
+  console.log(selectedDate);
 
   useEffect(() => {
     setSelectedCustomer("");
@@ -137,22 +146,127 @@ function HouseInfo() {
       );
     });
 
+  const selectedCostumerJSON =
+    selectedCustomer != "" &&
+    place.neighbors.find((neighbor) => {
+      return neighbor.neighbor_id == selectedCustomer;
+    });
+
   console.log(place);
-  console.log(vehicleTypes);
+  console.log(selectedPay);
 
   const registerPayment = async (data) => {
     try {
       const res = await createPayment(data);
       if (res.status === 200) {
         toast.success("Pago registrado con éxito");
+        generatePDF();
         setTimeout(() => {
-          window.location.href = `/inmuebles/${id}/config`;
+          window.location.href = `/inmuebles/${id}`;
         }, 2000);
       }
     } catch (error) {
+      console.log(error);
       error.response.data.map((err) => toast.error(err));
     }
   };
+
+  const onSubmit2 = handleSubmit((data) => {
+    const modifiedData = {};
+
+    if (data.id_document == "") {
+      data.id_document = selectedCostumerJSON.identity_document;
+    } else {
+      data.id_document = data.id_document;
+    }
+
+    if (selectedPay == "3") {
+      data.cash = 1;
+    }
+
+    data.customer = `${selectedCostumerJSON.neighbor_name} ${selectedCostumerJSON.neighbor_lastname}`;
+
+    if (data.value === null) {
+      data.value = "";
+    } else {
+      data.value = parseFloat(data.value);
+    }
+
+    data.date = selectedDate;
+
+    data.monthlyDebt_id = monthDebt.monthlyDebt_id;
+
+    for (const key in data) {
+      if (data[key] !== "") {
+        modifiedData[key] = data[key];
+      }
+    }
+    console.log(modifiedData);
+    // registerPayment(modifiedData);
+    generatePDF();
+  });
+
+  const generatePDF = async () => {
+    const doc = new jsPDF({
+      unit: "mm",
+      format: [79, 70],
+    });
+    let fontSize = 8;
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Punto central en el eje X
+    const centerX = pageWidth / 2;
+
+    // Posición de inicio del texto
+    function textStartX(textWidth) {
+      return centerX - textWidth / 2;
+    }
+
+    doc.setFontSize(8);
+
+    doc.text(
+      "Cjto. Habitacional",
+      textStartX(
+        (doc.getStringUnitWidth(`Cjto. Habitacional`) * fontSize) /
+          doc.internal.scaleFactor
+      ),
+      4
+    );
+    doc.text(
+      "Casa Club Las Palmas",
+      textStartX(
+        (doc.getStringUnitWidth(`Casa Club Las Palmas`) * fontSize) /
+          doc.internal.scaleFactor
+      ),
+      8
+    );
+
+    doc.setFontSize(7);
+    fontSize = 7;
+
+    doc.text(
+      "RUC: 1792386772001",
+      textStartX(
+        (doc.getStringUnitWidth(`RUC:1792386772001`) * fontSize) /
+          doc.internal.scaleFactor
+      ),
+      12
+    );
+    doc.text("Dirección: Sangolquí", 5, 17);
+    doc.text("Calle 10 de diciembre y 10 de agosto", 5, 21);
+    doc.text(`Fecha: ${selectedDate}`, 5, 25);
+    doc.text(
+      `Pago mes de ${selectedMonth}`,
+      textStartX(
+        (doc.getStringUnitWidth(`Pago mes de ${selectedMonth}`) * fontSize) /
+          doc.internal.scaleFactor
+      ),
+      31
+    );
+    doc.save("report.pdf");
+  };
+
+  console.log(selectedCostumerJSON);
 
   if (navigation.state === "loading") {
     return <div>Cargando</div>;
@@ -234,7 +348,74 @@ function HouseInfo() {
           </div>
         </div>
       </Modal>
-
+      <Modal open={openModal3} onClose={() => setOpenModal3(false)}>
+        <div className=" block m-3">
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-lg font-bold">
+              Confirmación
+            </h1>
+          </div>
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-base font-medium">
+              ¿Estás seguro de registrar el pago?
+            </h1>
+          </div>
+          <div className=" flex justify-center items-center">
+            <div className=" my-2 grid grid-cols-2">
+              <div className=" mx-4">
+                <button
+                  onClick={onSubmit2}
+                  className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Aceptar
+                </button>
+              </div>
+              <div className=" mx-4">
+                <button
+                  onClick={() => setOpenModal3(false)}
+                  className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+      <Modal open={openModal4} onClose={() => setOpenModal4(false)}>
+        <div className=" block m-3">
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-lg font-bold">
+              Confirmación
+            </h1>
+          </div>
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-base font-medium">
+              ¿Estás seguro de registrar el vehículo?
+            </h1>
+          </div>
+          <div className=" flex justify-center items-center">
+            <div className=" my-2 grid grid-cols-2">
+              <div className=" mx-4">
+                <button
+                  onClick={onSubmit}
+                  className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Aceptar
+                </button>
+              </div>
+              <div className=" mx-4">
+                <button
+                  onClick={() => setOpenModal4(false)}
+                  className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
       <div className="block">
         <div className=" flex p-3 lg:p-5 pb-1 lg:pb-3 justify-around lg:justify-between items-center flex-wrap">
           <div className=" flex justify-center items-center">
@@ -811,18 +992,17 @@ function HouseInfo() {
                           </div>
                         </div>
                       </div>
-
-                      <div className=" flex justify-center items-center mb-5">
-                        <button
-                          onClick={onSubmit}
-                          className=" p-2 border-[1px] group border-white hover:text-[#8f0e2a] hover:bg-white transition duration-300 text-white rounded-lg"
-                        >
-                          <h1 className=" text-white text-sm md:text-base group-hover:text-[#8f0e2a] duration-300 transition">
-                            Registrar vehículo
-                          </h1>
-                        </button>
-                      </div>
                     </form>
+                    <div className=" flex justify-center items-center mb-5">
+                      <button
+                        onClick={() => setOpenModal4(true)}
+                        className=" p-2 border-[1px] group border-white hover:text-[#8f0e2a] hover:bg-white transition duration-300 text-white rounded-lg"
+                      >
+                        <h1 className=" text-white text-sm md:text-base group-hover:text-[#8f0e2a] duration-300 transition">
+                          Registrar vehículo
+                        </h1>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -909,6 +1089,8 @@ function HouseInfo() {
                             Fecha de emisión:
                           </h1>
                           <input
+                            value={selectedDate}
+                            onChange={handleSelectedDate}
                             type="date"
                             className=" border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                           />
@@ -1060,6 +1242,7 @@ function HouseInfo() {
                                 <input
                                   type="number"
                                   className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
+                                  {...register("deposit")}
                                 />
                               </div>
                               <div className=" my-5 md:my-0 flex flex-wrap">
@@ -1068,12 +1251,9 @@ function HouseInfo() {
                                   type="number"
                                   placeholder={
                                     selectedCustomer != "" &&
-                                    place.neighbors.find((neighbor) => {
-                                      return (
-                                        neighbor.neighbor_id == selectedCustomer
-                                      );
-                                    }).identity_document
+                                    selectedCostumerJSON.identity_document
                                   }
+                                  {...register("id_document")}
                                   className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                 />
                               </div>
@@ -1089,6 +1269,7 @@ function HouseInfo() {
                                   </h1>
                                   <input
                                     type="number"
+                                    {...register("payment_amount")}
                                     className=" w-[100px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                   />
                                 </div>
@@ -1105,6 +1286,7 @@ function HouseInfo() {
                                 </h1>
                                 <input
                                   type="number"
+                                  {...register("transfer")}
                                   className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                 />
                               </div>
@@ -1114,12 +1296,9 @@ function HouseInfo() {
                                   type="number"
                                   placeholder={
                                     selectedCustomer != "" &&
-                                    place.neighbors.find((neighbor) => {
-                                      return (
-                                        neighbor.neighbor_id == selectedCustomer
-                                      );
-                                    }).identity_document
+                                    selectedCostumerJSON.identity_document
                                   }
+                                  {...register("id_document")}
                                   className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                 />
                               </div>
@@ -1135,6 +1314,7 @@ function HouseInfo() {
                                   </h1>
                                   <input
                                     type="number"
+                                    {...register("payment_amount")}
                                     className=" w-[100px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                   />
                                 </div>
@@ -1150,13 +1330,10 @@ function HouseInfo() {
                                 <input
                                   type="number"
                                   placeholder={
-                                    selectedCustomer != "" &&
-                                    place.neighbors.find((neighbor) => {
-                                      return (
-                                        neighbor.neighbor_id == selectedCustomer
-                                      );
-                                    }).identity_document
+                                    selectedCustomer != 0 &&
+                                    selectedCostumerJSON.identity_document
                                   }
+                                  {...register("id_document")}
                                   className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                 />
                               </div>
@@ -1172,6 +1349,7 @@ function HouseInfo() {
                                   </h1>
                                   <input
                                     type="number"
+                                    {...register("value")}
                                     className=" w-[100px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                   />
                                 </div>
@@ -1179,15 +1357,18 @@ function HouseInfo() {
                             </div>
                           </div>
                         )}
-                        <div className=" flex justify-center items-center mb-5">
-                          <button className=" p-2 border-[1px] group border-white hover:text-[#8f0e2a] hover:bg-white transition duration-300 text-white rounded-lg">
-                            <h1 className=" text-white text-sm md:text-base group-hover:text-[#8f0e2a] duration-300 transition">
-                              Registrar pago
-                            </h1>
-                          </button>
-                        </div>
                       </div>
                     </form>
+                    <div className=" flex justify-center items-center mb-5">
+                      <button
+                        onClick={onSubmit2}
+                        className=" p-2 border-[1px] group border-white hover:text-[#8f0e2a] hover:bg-white transition duration-300 text-white rounded-lg"
+                      >
+                        <h1 className=" text-white text-sm md:text-base group-hover:text-[#8f0e2a] duration-300 transition">
+                          Registrar pago
+                        </h1>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

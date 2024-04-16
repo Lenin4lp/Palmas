@@ -26,7 +26,7 @@ export class MonthlyFee extends Model {
   monthlyFee_id!: number;
 
   @Column({
-    type: DataType.DECIMAL(6, 2),
+    type: DataType.DECIMAL(8, 2),
     field: "alicuota",
     allowNull: true,
   })

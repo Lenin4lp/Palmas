@@ -3,6 +3,7 @@ import { Payment } from "../models/payment.model";
 import { Month } from "../models/month.model";
 import { Place } from "../models/place.model";
 import { Neighbor } from "../models/neighbor.model";
+import { MonthlyDebt } from "../models/monthlyDebt.model";
 
 // ? Obtain all payments
 export const getPayments = async (req: Request, res: Response) => {
@@ -29,34 +30,52 @@ export const getPayment = async (req: Request, res: Response) => {
 // ? Create a payment
 export const createPayment = async (req: Request, res: Response) => {
   const {
-    payment_id,
     customer,
-    payment_amount,
+    value,
     deposit,
+    transfer,
+    id_document,
     cash,
     date,
-    month_id,
-    place_id,
+    monthlyDebt_id,
   } = req.body;
+
   try {
-    const paymentFound = await Payment.findOne({
-      where: {
-        payment_id: payment_id,
-      },
-    });
-    if (paymentFound) {
-      return res.status(400).json(["Ya existe un pago con este id"]);
+    const monthlyDebt = await MonthlyDebt.findByPk(monthlyDebt_id);
+
+    if (monthlyDebt && monthlyDebt.debt > 0 && value <= monthlyDebt.debt) {
+      const newPayment = await Payment.create({
+        value,
+        customer,
+        deposit,
+        transfer,
+        cash,
+        id_document,
+        date,
+        monthlyDebt_id,
+      });
+      monthlyDebt.debt -= Math.abs(value);
+      await monthlyDebt.save();
+      res.json(newPayment);
+    } else if (monthlyDebt && monthlyDebt.debt == 0) {
+      const newPayment = await Payment.create({
+        value,
+        customer,
+        deposit,
+        transfer,
+        cash,
+        id_document,
+        date,
+        monthlyDebt_id,
+      });
+      monthlyDebt.early_payment += Math.abs(value);
+      await monthlyDebt.save();
+      res.json(newPayment);
+    } else {
+      return res
+        .status(400)
+        .json(["El valor del pago no puede ser mayor que la deuda"]);
     }
-    const newPayment = await Payment.create({
-      payment_amount,
-      customer,
-      deposit,
-      cash,
-      date,
-      month_id,
-      place_id,
-    });
-    res.json(newPayment);
   } catch (error) {
     console.log(error);
     res.status(500).json(["Error al crear el pago"]);

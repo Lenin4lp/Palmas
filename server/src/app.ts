@@ -23,7 +23,7 @@ import MonthlyDebtRoutes from "./routes/monthlyDebt.routes";
 import { Year } from "./models/year.model";
 import { createYear } from "./controllers/year.controller";
 import { PlaceType } from "./models/placeType.model";
-import { log } from "console";
+import PaymentRoutes from "./routes/payment.routes";
 
 const app = express();
 
@@ -47,6 +47,7 @@ app.use("/api", placeTypesRoutes);
 app.use("/api", vehicleTypeRoutes);
 app.use("/api", MonthlyDebtRoutes);
 app.use("/api", vehicleRoutes);
+app.use("/api", PaymentRoutes);
 
 app.get("/", (_req, res) => {
   res.send("Hola mundo");
@@ -94,7 +95,11 @@ const ChangeMonth = async (currentMonth: string, currentYear: string) => {
               Number(monthlyDebt.debt) +
               Number(place.placeType.monthlyFee.monthlyFee_value);
             monthlyDebt.debt = totalDebt;
-            log(totalDebt);
+
+            if (monthlyDebt.early_payment !== null) {
+              monthlyDebt.debt -= monthlyDebt.early_payment;
+            }
+
             await monthlyDebt.save();
           }
           console.log(monthlyDebt);

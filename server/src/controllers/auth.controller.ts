@@ -7,7 +7,7 @@ import { createAccesToken } from "../libs/jwt";
 
 //? User Register
 export const userRegister = async (req: Request, res: Response) => {
-  const { user_name, user_email, user_password } = req.body;
+  const { user_name, user_email, user_password, role_id } = req.body;
   try {
     const userFound = await User.findOne({
       where: { user_email: user_email, user_name: user_name },
@@ -22,6 +22,7 @@ export const userRegister = async (req: Request, res: Response) => {
       user_name,
       user_email,
       user_password: passwordHash,
+      role_id,
     });
 
     res.json({
@@ -29,6 +30,7 @@ export const userRegister = async (req: Request, res: Response) => {
       id: newUser.user_id,
       user_name: newUser.user_name,
       user_email: newUser.user_email,
+      role_id: newUser.role_id,
     });
   } catch (error) {
     console.log(error);

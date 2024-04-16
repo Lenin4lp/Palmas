@@ -4,8 +4,11 @@ import {
   Table,
   Column,
   BeforeCreate,
+  BelongsTo,
+  ForeignKey,
 } from "sequelize-typescript";
 import { v4 as uuidv4 } from "uuid";
+import { Role } from "./userRole.model";
 
 @Table({
   tableName: "usuario",
@@ -42,6 +45,17 @@ export class User extends Model {
     field: "contrasena_usuario",
   })
   user_password!: string;
+
+  @ForeignKey(() => Role)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    field: "rol",
+  })
+  role_id!: number;
+
+  @BelongsTo(() => Role)
+  role!: Role;
 
   @BeforeCreate
   static async automatizateId(user: User) {

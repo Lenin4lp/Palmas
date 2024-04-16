@@ -3,17 +3,11 @@ import {
   DataType,
   Table,
   Column,
-  AutoIncrement,
-  HasOne,
   ForeignKey,
   BelongsTo,
   HasMany,
   BelongsToMany,
   BeforeCreate,
-  AfterCreate,
-  AfterSync,
-  AfterConnect,
-  BeforeSync,
   BeforeDestroy,
 } from "sequelize-typescript";
 import { PlaceType } from "./placeType.model";

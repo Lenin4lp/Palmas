@@ -13,6 +13,7 @@ import { NeighborPlace } from "../models/neighborPlace.model";
 import { Vehicle } from "../models/vehicle.model";
 import { VehicleType } from "../models/vehicleType.model";
 import { MonthlyDebt } from "../models/monthlyDebt.model";
+import { Role } from "../models/userRole.model";
 
 export const connection = new Sequelize({
   dialect: "mysql",
@@ -23,6 +24,7 @@ export const connection = new Sequelize({
   port: 3306,
   models: [
     User,
+    Role,
     Place,
     Neighbor,
     NeighborPlace,

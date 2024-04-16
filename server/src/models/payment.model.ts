@@ -29,14 +29,14 @@ export class Payment extends Model {
   payment_id!: number;
 
   @Column({
-    type: DataType.STRING(15),
+    type: DataType.STRING(20),
     allowNull: true,
     field: "deposito",
   })
   deposit!: string;
 
   @Column({
-    type: DataType.STRING(15),
+    type: DataType.STRING(20),
     allowNull: true,
     field: "transferencia",
   })
@@ -77,16 +77,9 @@ export class Payment extends Model {
   })
   customer!: string;
 
-  @Column({
-    type: DataType.STRING(200),
-    allowNull: true,
-    field: "recibo",
-  })
-  receipt!: string;
-
   @ForeignKey(() => MonthlyDebt)
   @Column({
-    type: DataType.STRING(15),
+    type: DataType.STRING(20),
     allowNull: false,
     field: "id_deuda",
   })
@@ -94,18 +87,4 @@ export class Payment extends Model {
 
   @BelongsTo(() => MonthlyDebt)
   monthlyDebt!: MonthlyDebt;
-
-  @BeforeCreate
-  static async subtractPaymentFromDebt(payment: Payment) {
-    const monthlyDebt = await MonthlyDebt.findByPk(payment.monthlyDebt_id);
-    if (monthlyDebt) {
-      if (monthlyDebt.debt !== 0) {
-        monthlyDebt.debt -= payment.value;
-      } else {
-        // Pago adelantado, hacer el valor negativo
-        monthlyDebt.debt = -payment.value;
-      }
-      await monthlyDebt.save();
-    }
-  }
 }

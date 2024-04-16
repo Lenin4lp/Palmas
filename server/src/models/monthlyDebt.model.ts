@@ -41,11 +41,18 @@ export class MonthlyDebt extends Model {
   month_status!: boolean;
 
   @Column({
-    type: DataType.DECIMAL(6, 2),
+    type: DataType.DECIMAL(8, 2),
     allowNull: true,
     field: "deuda",
   })
   debt!: number;
+
+  @Column({
+    type: DataType.DECIMAL(8, 2),
+    allowNull: true,
+    field: "abono",
+  })
+  early_payment!: number;
 
   @ForeignKey(() => Place)
   @Column({

@@ -1,27 +1,37 @@
 import { z } from "zod";
 
 export const paymentRegisterSchema = z.object({
-  payment_amount: z.number({ required_error: "Monto requerido" }),
-  client: z.string({
+  value: z.number({ required_error: "Monto requerido" }),
+  customer: z.string({
     required_error: "Cliente requerido",
   }),
   deposit: z.number().optional(),
+  transfer: z.string().optional(),
   cash: z.number().optional(),
-  date: z.string().refine((value) => {
-    const regex = /^\d{4}-\d{2}-\d{2}$/;
-    return regex.test(value);
-  }, "Fecha inválida"),
-  month_id: z.string({
-    required_error: "Mes requerido",
-  }),
-  place_id: z.string({
-    required_error: "Inmueble requerido",
-  }),
+  id_document: z
+    .string({
+      required_error: "El documento de identidad es requerido",
+    })
+    .min(8, {
+      message: "La cédula debe tener como mínimo 10 caracteres",
+    })
+    .max(14, {
+      message: "La cédula debe tener como máximo 14 caracteres",
+    }),
+  date: z
+    .string({
+      required_error: "Fecha requerida",
+    })
+    .refine((value) => {
+      const regex = /^\d{4}-\d{2}-\d{2}$/;
+      return regex.test(value);
+    }, "Fecha inválida"),
 });
 
 export const paymentUpdateSchema = z.object({
-  payment_amount: z.number().optional(),
+  value: z.number().optional(),
   deposit: z.number().optional(),
+  transfer: z.string().optional(),
   cash: z.number().optional(),
   date: z
     .string()
@@ -30,6 +40,4 @@ export const paymentUpdateSchema = z.object({
       return regex.test(value);
     }, "Fecha inválida")
     .optional(),
-  month_id: z.string().optional(),
-  place_id: z.string().optional(),
 });
