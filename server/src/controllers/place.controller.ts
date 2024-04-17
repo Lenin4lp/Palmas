@@ -9,6 +9,7 @@ import { PlaceType } from "../models/placeType.model";
 import { NeighborRole } from "../models/neighborRole.model";
 import { Vehicle } from "../models/vehicle.model";
 import { VehicleType } from "../models/vehicleType.model";
+import { MonthlyFee } from "../models/monthlyFee.model";
 
 // ? Obtain all places
 export const getPlaces = async (req: Request, res: Response) => {
@@ -41,7 +42,7 @@ export const getPlace = async (req: Request, res: Response) => {
     include: [
       { model: Neighbor, include: [{ model: NeighborRole }] },
       { model: Month, order: [["month_year", "ASC"]] },
-      { model: PlaceType },
+      { model: PlaceType, include: [{ model: MonthlyFee }] },
       { model: Vehicle, include: [{ model: VehicleType }] },
     ],
   });

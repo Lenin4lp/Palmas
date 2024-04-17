@@ -5,7 +5,7 @@ export const paymentRegisterSchema = z.object({
   customer: z.string({
     required_error: "Cliente requerido",
   }),
-  deposit: z.number().optional(),
+  deposit: z.string().optional(),
   transfer: z.string().optional(),
   cash: z.number().optional(),
   id_document: z

@@ -97,7 +97,10 @@ const ChangeMonth = async (currentMonth: string, currentYear: string) => {
             monthlyDebt.debt = totalDebt;
 
             if (monthlyDebt.early_payment !== null) {
-              monthlyDebt.debt -= monthlyDebt.early_payment;
+              if (monthlyDebt.debt >= monthlyDebt.early_payment) {
+                monthlyDebt.debt -= monthlyDebt.early_payment;
+                monthlyDebt.early_payment -= monthlyDebt.early_payment;
+              }
             }
 
             await monthlyDebt.save();

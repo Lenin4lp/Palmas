@@ -4,6 +4,8 @@ import { Month } from "../models/month.model";
 import { Place } from "../models/place.model";
 import { Neighbor } from "../models/neighbor.model";
 import { MonthlyDebt } from "../models/monthlyDebt.model";
+import { PlaceType } from "../models/placeType.model";
+import { MonthlyFee } from "../models/monthlyFee.model";
 
 // ? Obtain all payments
 export const getPayments = async (req: Request, res: Response) => {
@@ -68,9 +70,27 @@ export const createPayment = async (req: Request, res: Response) => {
         date,
         monthlyDebt_id,
       });
-      monthlyDebt.early_payment += Math.abs(value);
-      await monthlyDebt.save();
-      res.json(newPayment);
+      const place = await Place.findByPk(monthlyDebt.place_id, {
+        include: [{ model: PlaceType, include: [{ model: MonthlyFee }] }],
+      });
+      if (place) {
+        if (place.placeType.monthlyFee.monthlyFee_value >= value) {
+          const earlyPay = monthlyDebt.early_payment + Math.abs(value);
+          if (earlyPay <= place.placeType.monthlyFee.monthlyFee_value) {
+            monthlyDebt.early_payment += Math.abs(value);
+            await monthlyDebt.save();
+            res.json(newPayment);
+          } else {
+            return res
+              .status(400)
+              .json(["El abono supera el valor de la mensualidad"]);
+          }
+        } else {
+          return res
+            .status(400)
+            .json(["El valor del abono no puede ser mayor a la alicuota"]);
+        }
+      }
     } else {
       return res
         .status(400)

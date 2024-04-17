@@ -160,9 +160,15 @@ function HouseInfo() {
       const res = await createPayment(data);
       if (res.status === 200) {
         toast.success("Pago registrado con éxito");
-        generatePDF();
+        console.log(res.data);
+        generatePDF(
+          res.data.payment_id,
+          res.data.id_document,
+          res.data.value,
+          res.data
+        );
         setTimeout(() => {
-          window.location.href = `/inmuebles/${id}`;
+          window.location.href = `/inmuebles/${place.place_id}`;
         }, 2000);
       }
     } catch (error) {
@@ -202,11 +208,17 @@ function HouseInfo() {
       }
     }
     console.log(modifiedData);
-    // registerPayment(modifiedData);
-    generatePDF();
+
+    if (selectedPay == 1 && data.deposit == "") {
+      toast.error("Se debe colocar el N° de comprobante del depósito");
+    } else if (selectedPay == 2 && data.transfer == "") {
+      toast.error("Se debe colocar el N° de comprobante de la transferencia");
+    } else {
+      registerPayment(modifiedData);
+    }
   });
 
-  const generatePDF = async () => {
+  const generatePDF = async (paymentId, clientId, value, receipt) => {
     const doc = new jsPDF({
       unit: "mm",
       format: [79, 70],
@@ -256,13 +268,164 @@ function HouseInfo() {
     doc.text("Calle 10 de diciembre y 10 de agosto", 5, 21);
     doc.text(`Fecha: ${selectedDate}`, 5, 25);
     doc.text(
-      `Pago mes de ${selectedMonth}`,
+      `Cliente: ${selectedCostumerJSON?.neighbor_name} ${selectedCostumerJSON?.neighbor_lastname} / ${place.place_name}`,
+      5,
+      29
+    );
+    doc.text(`CI/PA/RUC: ${clientId}`, 5, 33);
+
+    function translateAbreviations(selectedMonth) {
+      if (selectedMonth.startsWith("JAN")) {
+        return "ENE" + selectedMonth.substring(3);
+      } else if (selectedMonth.startsWith("APR")) {
+        return "ABR" + selectedMonth.substring(3);
+      } else if (selectedMonth.startsWith("AUG")) {
+        return "AGO" + selectedMonth.substring(3);
+      } else if (selectedMonth.startsWith("DEC")) {
+        return "DIC" + selectedMonth.substring(3);
+      } else {
+        return selectedMonth;
+      }
+    }
+
+    doc.text(
+      `Comprobante de Pago N°${paymentId}`,
       textStartX(
-        (doc.getStringUnitWidth(`Pago mes de ${selectedMonth}`) * fontSize) /
+        (doc.getStringUnitWidth(`Comprobante de Pago N°${paymentId}`) *
+          fontSize) /
           doc.internal.scaleFactor
       ),
-      31
+      37
     );
+    doc.text(
+      "____________________________________________",
+      textStartX(
+        (doc.getStringUnitWidth(
+          `____________________________________________`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      39
+    );
+    doc.text(
+      "Cant.                          Detalle                            V.Total",
+      5,
+      42
+    );
+
+    doc.text(
+      "____________________________________________",
+      textStartX(
+        (doc.getStringUnitWidth(
+          `____________________________________________`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      43
+    );
+    doc.text("1", 7, 47);
+
+    if (monthDebt && monthDebt.debt != 0) {
+      doc.text(`Pago alicuota ${translateAbreviations(selectedMonth)}`, 20, 47);
+    } else {
+      doc.text(
+        `Abono alicuota ${translateAbreviations(selectedMonth)}`,
+        19,
+        47
+      );
+    }
+
+    doc.text(`$${value}`, 55, 47);
+
+    doc.text(
+      "____________________________________________",
+      textStartX(
+        (doc.getStringUnitWidth(
+          `____________________________________________`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      52
+    );
+    doc.text(
+      "____________________________________________",
+      textStartX(
+        (doc.getStringUnitWidth(
+          `____________________________________________`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      53
+    );
+    doc.text("Forma de pago:", 5, 57);
+    let pay = "";
+    if (selectedPay == 1) {
+      pay = "Depósito";
+    } else if (selectedPay == 2) {
+      pay = "Transferencia";
+    } else if (selectedPay == 3) {
+      pay = "Efectivo";
+    } else {
+      pay = "";
+    }
+
+    doc.text("Subtotal:", 36, 57);
+    doc.text(`$${value}`, 55, 57);
+
+    doc.text("Valor total:", 36, 61);
+    doc.text(`$${value}`, 55, 61);
+
+    doc.setFontSize(6);
+    fontSize = 6;
+    const receiptObject = receipt;
+
+    doc.text(pay, 5, 60);
+    if (selectedPay == 1) {
+      doc.text(`N° ${receiptObject.deposit}`, 5, 63);
+    } else if (selectedPay == 2) {
+      doc.text(`N° ${receiptObject.transfer}`, 5, 63);
+    }
+
+    doc.text(
+      `_________________                _________________`,
+      textStartX(
+        (doc.getStringUnitWidth(
+          `_________________                _________________`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      70
+    );
+
+    doc.text(
+      `  Recibí conforme                        Firma autorizada`,
+      textStartX(
+        (doc.getStringUnitWidth(
+          `  Recibí conforme                        Firma autorizada`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      73
+    );
+
+    doc.text(
+      `   Copropietario                              Administración`,
+      textStartX(
+        (doc.getStringUnitWidth(
+          `   Copropietario                              Administración`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      76
+    );
+
     doc.save("report.pdf");
   };
 
@@ -1269,7 +1432,7 @@ function HouseInfo() {
                                   </h1>
                                   <input
                                     type="number"
-                                    {...register("payment_amount")}
+                                    {...register("value")}
                                     className=" w-[100px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                   />
                                 </div>
@@ -1314,7 +1477,7 @@ function HouseInfo() {
                                   </h1>
                                   <input
                                     type="number"
-                                    {...register("payment_amount")}
+                                    {...register("value")}
                                     className=" w-[100px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                   />
                                 </div>
@@ -1361,7 +1524,7 @@ function HouseInfo() {
                     </form>
                     <div className=" flex justify-center items-center mb-5">
                       <button
-                        onClick={onSubmit2}
+                        onClick={() => setOpenModal3(true)}
                         className=" p-2 border-[1px] group border-white hover:text-[#8f0e2a] hover:bg-white transition duration-300 text-white rounded-lg"
                       >
                         <h1 className=" text-white text-sm md:text-base group-hover:text-[#8f0e2a] duration-300 transition">

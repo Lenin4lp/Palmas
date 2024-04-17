@@ -47,13 +47,6 @@ export class MonthlyDebt extends Model {
   })
   debt!: number;
 
-  @Column({
-    type: DataType.DECIMAL(8, 2),
-    allowNull: true,
-    field: "abono",
-  })
-  early_payment!: number;
-
   @ForeignKey(() => Place)
   @Column({
     type: DataType.STRING(15),
@@ -70,6 +63,13 @@ export class MonthlyDebt extends Model {
   })
   month_id!: string;
 
+  @Column({
+    type: DataType.DECIMAL(8, 2),
+    allowNull: true,
+    field: "abono",
+  })
+  early_payment!: number;
+
   @HasMany(() => Payment)
   payments!: Payment[];
 
@@ -83,7 +83,7 @@ export class MonthlyDebt extends Model {
 
   @BeforeUpdate
   static updateMonthlyDebtStatus(monthlyDebt: MonthlyDebt) {
-    if (monthlyDebt.debt !== 0) {
+    if (monthlyDebt.debt > 0) {
       monthlyDebt.month_status = false;
     } else {
       monthlyDebt.month_status = true;
