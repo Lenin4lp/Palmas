@@ -6,7 +6,7 @@ import {
   Link,
 } from "react-router-dom";
 import { createVehicle, deleteVehicle } from "../../api/vehicles";
-import { createPayment } from "../../api/payment";
+import { createPayment, updatePayment } from "../../api/payment";
 import { Toaster, toast } from "sonner";
 import { useForm } from "react-hook-form";
 import Plate from "../../components/Plate";
@@ -14,6 +14,7 @@ import Modal from "../../components/Modal";
 import { deletePlaceFromNeighbor } from "../../api/neighbors";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import axios from "axios";
 
 // ! Falta dar funcionalidad a botón de pago
 function HouseInfo() {
@@ -37,6 +38,7 @@ function HouseInfo() {
   const [selectedDate, setSelectedDate] = useState("");
   const [openModal3, setOpenModal3] = useState(false);
   const [openModal4, setOpenModal4] = useState(false);
+  const [file, setFile] = useState();
 
   const handleVehicleType = (e) => {
     setVehicleType(e.target.value);
@@ -48,6 +50,20 @@ function HouseInfo() {
 
   const handleSelectedCustomer = (e) => {
     setSelectedCustomer(e.target.value);
+  };
+
+  const modifyPayment = async (data) => {
+    try {
+      const res = await updatePayment(id, data);
+      if (res.status === 200) {
+        toast.success("Comprobante guardado con éxito");
+        setTimeout(() => {
+          window.location.href = `/inmuebles/${place.place_id}`;
+        }, 2000);
+      }
+    } catch (error) {
+      error.response.data.map((err) => toast.error(err));
+    }
   };
 
   const removeNeighbor = async (neighborId, place_id) => {
@@ -155,6 +171,24 @@ function HouseInfo() {
   console.log(place);
   console.log(selectedPay);
 
+  const upload = (id) => {
+    const formData = new FormData();
+    formData.append("myFile", file);
+    axios
+      .post("http://localhost:8081/api/upload", formData)
+      .then((res) => {
+        if (res.status === 200) {
+          const fileLocation = res.data.location;
+          const data = {
+            file: fileLocation,
+          };
+          console.log(fileLocation);
+          modifyPayment(id, data);
+        }
+      })
+      .catch((err) => console.log(err));
+  };
+
   const registerPayment = async (data) => {
     try {
       const res = await createPayment(data);
@@ -167,9 +201,8 @@ function HouseInfo() {
           res.data.value,
           res.data
         );
-        setTimeout(() => {
-          window.location.href = `/inmuebles/${place.place_id}`;
-        }, 2000);
+
+        upload(res.data.payment_id);
       }
     } catch (error) {
       console.log(error);
@@ -425,8 +458,9 @@ function HouseInfo() {
       ),
       76
     );
-
-    doc.save("report.pdf");
+    const buffer = doc.output("arraybuffer");
+    setFile(buffer);
+    doc.save(`Comprobante_N°_${paymentId}.pdf`);
   };
 
   console.log(selectedCostumerJSON);

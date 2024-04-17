@@ -30,9 +30,19 @@ export const paymentRegisterSchema = z.object({
 
 export const paymentUpdateSchema = z.object({
   value: z.number().optional(),
-  deposit: z.number().optional(),
+  customer: z.string().optional(),
+  deposit: z.string().optional(),
   transfer: z.string().optional(),
   cash: z.number().optional(),
+  id_document: z
+    .string()
+    .min(8, {
+      message: "La cédula debe tener como mínimo 10 caracteres",
+    })
+    .max(14, {
+      message: "La cédula debe tener como máximo 14 caracteres",
+    })
+    .optional(),
   date: z
     .string()
     .refine((value) => {
@@ -40,4 +50,5 @@ export const paymentUpdateSchema = z.object({
       return regex.test(value);
     }, "Fecha inválida")
     .optional(),
+  file: z.string().optional(),
 });

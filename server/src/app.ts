@@ -24,6 +24,7 @@ import { Year } from "./models/year.model";
 import { createYear } from "./controllers/year.controller";
 import { PlaceType } from "./models/placeType.model";
 import PaymentRoutes from "./routes/payment.routes";
+import uploadRoutes from "./routes/upload.routes";
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use("/api", vehicleTypeRoutes);
 app.use("/api", MonthlyDebtRoutes);
 app.use("/api", vehicleRoutes);
 app.use("/api", PaymentRoutes);
+app.use("/api", uploadRoutes);
 
 app.get("/", (_req, res) => {
   res.send("Hola mundo");

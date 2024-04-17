@@ -104,16 +104,29 @@ export const createPayment = async (req: Request, res: Response) => {
 
 // ? Update a payment
 export const updatePayment = async (req: Request, res: Response) => {
-  const { payment_amount, deposit, cash, date, month_id, place_id } = req.body;
+  const {
+    value,
+    customer,
+    deposit,
+    transfer,
+    cash,
+    id_document,
+    date,
+    monthlyDebt_id,
+    file,
+  } = req.body;
   const payment = await Payment.findByPk(req.params.id);
   if (payment) {
     await payment.update({
-      payment_amount,
+      value,
+      customer,
       deposit,
+      transfer,
       cash,
+      id_document,
       date,
-      month_id,
-      place_id,
+      monthlyDebt_id,
+      file,
     });
   } else {
     return res.status(404).json(["Pago no encontrado"]);

@@ -77,6 +77,13 @@ export class Payment extends Model {
   })
   customer!: string;
 
+  @Column({
+    type: DataType.STRING(200),
+    allowNull: true,
+    field: "archivo",
+  })
+  file!: string;
+
   @ForeignKey(() => MonthlyDebt)
   @Column({
     type: DataType.STRING(20),
