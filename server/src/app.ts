@@ -119,8 +119,8 @@ const ChangeMonth = async (currentMonth: string, currentYear: string) => {
 };
 
 // ? Prueba node-cron
-cron.schedule(" * * * 5 * *", async () => {
-  const currentDateString = new Date(2024, 0).toString();
+cron.schedule(" 1 20 4 5 * *", async () => {
+  const currentDateString = new Date().toString();
   const currentYear = new Date().getFullYear().toString();
   const currentMonth = ObtainMonth(currentDateString);
   const mesprueba = await ChangeMonth(currentMonth, currentYear);
@@ -130,7 +130,7 @@ cron.schedule(" * * * 5 * *", async () => {
   console.log(`${currentMonth}-${currentYear}`);
 });
 
-cron.schedule("* * * 4 1 *", async () => {
+cron.schedule("1 20 4 2 1 *", async () => {
   const currentYear = new Date().getFullYear().toString();
   const foundYear = await Year.findOne({ where: { year: currentYear } });
 

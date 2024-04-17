@@ -11,7 +11,7 @@ import { MonthlyFee } from "../models/monthlyFee.model";
 export const getPayments = async (req: Request, res: Response) => {
   try {
     const payments = await Payment.findAll({
-      include: [{ model: Month }, { model: Place }],
+      include: [{ model: MonthlyDebt }],
     });
     res.json(payments);
   } catch (error) {
@@ -23,7 +23,7 @@ export const getPayments = async (req: Request, res: Response) => {
 // ? Obtain a payment
 export const getPayment = async (req: Request, res: Response) => {
   const payment = await Payment.findByPk(req.params.id, {
-    include: [{ model: Month }, { model: Place }],
+    include: [{ model: MonthlyDebt }],
   });
   if (!payment) return res.status(404).json(["Pago no encontrado"]);
   res.json({ payment });

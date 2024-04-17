@@ -52,7 +52,7 @@ function HouseInfo() {
     setSelectedCustomer(e.target.value);
   };
 
-  const modifyPayment = async (data) => {
+  const modifyPayment = async (id, data) => {
     try {
       const res = await updatePayment(id, data);
       if (res.status === 200) {
@@ -201,8 +201,6 @@ function HouseInfo() {
           res.data.value,
           res.data
         );
-
-        upload(res.data.payment_id);
       }
     } catch (error) {
       console.log(error);
@@ -458,9 +456,29 @@ function HouseInfo() {
       ),
       76
     );
-    const buffer = doc.output("arraybuffer");
-    setFile(buffer);
-    doc.save(`Comprobante_N°_${paymentId}.pdf`);
+    const pdfBlob = doc.output("blob");
+
+    const formData = new FormData();
+    formData.append("myFile", pdfBlob, `Comprobante_N°_${paymentId}.pdf`);
+
+    axios
+      .post("http://localhost:8081/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          const fileLocation = res.data.location;
+          const data = {
+            file: fileLocation,
+          };
+          console.log(fileLocation);
+          doc.save(`Comprobante_N°_${paymentId}.pdf`);
+          modifyPayment(paymentId, data);
+        }
+      })
+      .catch((err) => console.log(err));
   };
 
   console.log(selectedCostumerJSON);
