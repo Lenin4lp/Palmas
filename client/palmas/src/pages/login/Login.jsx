@@ -111,7 +111,7 @@ const Login = () => {
               </svg>
             </div>
             <div className=" flex justify-center items-center mt-5">
-              <form onSubmit={onSubmit}>
+              <form>
                 <p className="mb-4 text-sm select-none">
                   Por favor ingrese su usuario y contraseña
                 </p>
@@ -139,7 +139,7 @@ const Login = () => {
 
                 <div className="py-5 h-fit text-center grid grid-rows-2">
                   <button
-                    type="submit"
+                    onClick={onSubmit}
                     className="rounded-xl w-36 justify-self-center bg-gradient-to-br from-[#3E8F44] to-[#64bb6a] px-5 py-3 text-base font-medium text-white transition duration-300 hover:shadow-lg hover:shadow-black/50 active:transform active:scale-90"
                   >
                     Ingresar

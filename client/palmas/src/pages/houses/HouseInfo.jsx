@@ -462,7 +462,7 @@ function HouseInfo() {
     formData.append("myFile", pdfBlob, `Comprobante_N°_${paymentId}.pdf`);
 
     axios
-      .post("http://localhost:8081/api/upload", formData, {
+      .post("https://aliquot.api.softdeveral.com/api/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

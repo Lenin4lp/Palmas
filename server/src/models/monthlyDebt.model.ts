@@ -109,7 +109,7 @@ export class MonthlyDebt extends Model {
     }
   }
 
-  @BeforeUpdate
+  @AfterUpdate
   static async updateDebt(monthlyDebt: MonthlyDebt) {
     const totalDebt = await MonthlyDebt.sum("debt", {
       where: {
@@ -119,6 +119,7 @@ export class MonthlyDebt extends Model {
     const place = await Place.findByPk(monthlyDebt.place_id);
     if (place) {
       await place.update({ pending_value: totalDebt });
+      place.save();
     }
   }
 

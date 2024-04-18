@@ -10,30 +10,48 @@ import "./index.css";
 import Login from "./pages/login/Login.jsx";
 import ProtectedRoutes from "./middlewares/ProtectedRoutes.jsx";
 import { AuthProvider } from "./auth/AuthProvider.jsx";
-import Dashboard from "./pages/dashboard/Dashboard.jsx";
-import Wallet from "./pages/wallet/Wallet.jsx";
-import Houses from "./pages/houses/Houses.jsx";
-import Neighbor from "./pages/neighbor/Neighbor.jsx";
-import Aliquot from "./pages/aliquot/Aliquot.jsx";
-import Calendar from "./pages/calendar/Calendar.jsx";
 import { getNeighbors, getNeighbor, getRoles } from "./api/neighbors.js";
-import NeighborInfo from "./pages/neighbor/NeighborInfo.jsx";
-import RegisterNeighbor from "./pages/neighbor/RegisterNeighbor.jsx";
-import ModifyNeighbor from "./pages/neighbor/ModifyNeighbor.jsx";
-import NeighborPlaces from "./pages/neighbor/NeighborPlaces.jsx";
 import { getPlace, getPlaces, getPlaceTypes } from "./api/places.js";
-import RemoveNeighborPlaces from "./pages/neighbor/RemoveNeighborPlaces.jsx";
 import HouseOutlet from "./middlewares/HouseOutlet.jsx";
-import HouseRegister from "./pages/houses/HouseRegister.jsx";
-import HouseExtras from "./pages/houses/HouseExtras.jsx";
-import VehicleTypes from "./pages/houses/VehicleTypes.jsx";
-import PlaceTypes from "./pages/houses/PlaceTypes.jsx";
 import { getVehicleTypes } from "./api/vehicles.js";
 import { getYears } from "./api/time.js";
 import { getMonthlyDebts, getMonthlyFees, getMonthlyFee } from "./api/debt.js";
-import HouseInfo from "./pages/houses/HouseInfo.jsx";
-import AliquotRegister from "./pages/aliquot/AliquotRegister.jsx";
-import AliquotModify from "./pages/aliquot/AliquotModify.jsx";
+const Dashboard = React.lazy(() => import("./pages/dashboard/Dashboard.jsx"));
+const Wallet = React.lazy(() => import("./pages/wallet/Wallet.jsx"));
+const Houses = React.lazy(() => import("./pages/houses/Houses.jsx"));
+const Neighbor = React.lazy(() => import("./pages/neighbor/Neighbor.jsx"));
+const Aliquot = React.lazy(() => import("./pages/aliquot/Aliquot.jsx"));
+const Calendar = React.lazy(() => import("./pages/calendar/Calendar.jsx"));
+const NeighborInfo = React.lazy(() =>
+  import("./pages/neighbor/NeighborInfo.jsx")
+);
+const RegisterNeighbor = React.lazy(() =>
+  import("./pages/neighbor/RegisterNeighbor.jsx")
+);
+const ModifyNeighbor = React.lazy(() =>
+  import("./pages/neighbor/ModifyNeighbor.jsx")
+);
+const NeighborPlaces = React.lazy(() =>
+  import("./pages/neighbor/NeighborPlaces.jsx")
+);
+const RemoveNeighborPlaces = React.lazy(() =>
+  import("./pages/neighbor/RemoveNeighborPlaces.jsx")
+);
+const HouseRegister = React.lazy(() =>
+  import("./pages/houses/HouseRegister.jsx")
+);
+const HouseExtras = React.lazy(() => import("./pages/houses/HouseExtras.jsx"));
+const VehicleTypes = React.lazy(() =>
+  import("./pages/houses/VehicleTypes.jsx")
+);
+const PlaceTypes = React.lazy(() => import("./pages/houses/PlaceTypes.jsx"));
+const HouseInfo = React.lazy(() => import("./pages/houses/HouseInfo.jsx"));
+const AliquotRegister = React.lazy(() =>
+  import("./pages/aliquot/AliquotRegister.jsx")
+);
+const AliquotModify = React.lazy(() =>
+  import("./pages/aliquot/AliquotModify.jsx")
+);
 
 const router = createBrowserRouter([
   {
