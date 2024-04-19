@@ -179,23 +179,26 @@ function Wallet() {
         <div className=" flex justify-center items-end">
           <div className=" mt-5 h-[350px] md:h-[500px] overflow-x-auto overflow-y-auto w-[280px] sm:w-[600px] md:w-[680px]  lg:w-fit ">
             <table className=" h-[500px]  border-collapse text-[12px] lg:text-sm">
-              <tr>
-                <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]   px-[40px] py-2">
-                  N°
-                </th>
-                <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] lg:px-[120px] py-2">
-                  Cliente
-                </th>
-                <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] py-2">
-                  Tipo de pago
-                </th>
-                <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] py-2">
-                  N° comprobante
-                </th>
-                <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] py-2">
-                  CI/PA/RUC
-                </th>
-              </tr>
+              <thead className=" sticky top-0 ">
+                <tr>
+                  <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]   px-[40px] py-2">
+                    N°
+                  </th>
+                  <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] lg:px-[120px] py-2">
+                    Cliente
+                  </th>
+                  <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] py-2">
+                    Tipo de pago
+                  </th>
+                  <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] py-2">
+                    N° comprobante
+                  </th>
+                  <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] py-2">
+                    CI/PA/RUC
+                  </th>
+                </tr>
+              </thead>
+              <tbody></tbody>
             </table>
           </div>
         </div>
