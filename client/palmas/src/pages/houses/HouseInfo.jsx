@@ -16,7 +16,6 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import axios from "axios";
 
-// ! Falta dar funcionalidad a botón de pago
 function HouseInfo() {
   const { id } = useParams();
   const placeData = useLoaderData();
@@ -170,24 +169,6 @@ function HouseInfo() {
 
   console.log(place);
   console.log(selectedPay);
-
-  const upload = (id) => {
-    const formData = new FormData();
-    formData.append("myFile", file);
-    axios
-      .post("http://localhost:8081/api/upload", formData)
-      .then((res) => {
-        if (res.status === 200) {
-          const fileLocation = res.data.location;
-          const data = {
-            file: fileLocation,
-          };
-          console.log(fileLocation);
-          modifyPayment(id, data);
-        }
-      })
-      .catch((err) => console.log(err));
-  };
 
   const registerPayment = async (data) => {
     try {

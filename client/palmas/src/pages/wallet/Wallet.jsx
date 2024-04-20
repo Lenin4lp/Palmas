@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ContentComponent from "../../components/ContentComponent";
 import { useLoaderData, useNavigation, Link } from "react-router-dom";
 import { Toaster, toast } from "sonner";
@@ -6,14 +6,40 @@ import { Toaster, toast } from "sonner";
 function Wallet() {
   const walletData = useLoaderData();
   const places = walletData.places.data;
-  const debts = walletData.monthlyDebts.data;
+  const payments = walletData.payments.data;
   const navigation = useNavigation();
+  const [search, setSearch] = useState("");
+  const [paymentsTable, setPaymentsTable] = useState([]);
 
   const totalDebt = places.reduce(
     (acc, place) => acc + parseFloat(place.pending_value),
     0
   );
+  console.log(payments);
   const formattedTotalDebt = totalDebt.toFixed(2);
+
+  const handleChange = (e) => {
+    setSearch(e.target.value);
+    searchedPlaces(e.target.value);
+  };
+
+  const searchedPlaces = (search) => {
+    let results = payments.filter((payment) => {
+      if (
+        payment.monthlyDebt.place.place_name
+          .toLowerCase()
+          .includes(search.toLowerCase())
+      ) {
+        return payment;
+      }
+    });
+    setPaymentsTable(results);
+  };
+
+  function getPlaceFromDebt(placeId) {
+    const place = places.find((place) => place.place_id === placeId);
+    return place.place_name;
+  }
 
   if (navigation.state === "loading") {
   }
@@ -30,7 +56,7 @@ function Wallet() {
             xmlSpace="preserve"
             className=" h-[50px] fill-white"
           >
-            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
             <g
               id="SVGRepo_tracerCarrier"
               strokeLinecap="round"
@@ -56,11 +82,10 @@ function Wallet() {
           </div>
         </div>
         <div className=" flex m-5 justify-start items-center flex-wrap">
-          <div className=" p-2 h-[120px] w-[270px] flex justify-around items-center bg-gradient-to-t from-[#c4c4c4] rounded-lg to-[#e2e2e2]">
+          <div className=" my-2 mx-10 p-2 h-[120px] w-[270px] flex justify-center md:justify-around items-center bg-gradient-to-t from-[#c4c4c4] rounded-lg to-[#e2e2e2]">
             <svg
               viewBox="0 0 24 24"
               id="Layer_1"
-              data-name="Layer 1"
               xmlns="http://www.w3.org/2000/svg"
               className=" fill-none h-[60px] px-3"
             >
@@ -139,7 +164,7 @@ function Wallet() {
               </div>
             </div>
           </div>
-          <div className=" mx-10 p-2 h-[120px] w-[270px] flex justify-around items-center bg-gradient-to-t from-[#c4c4c4] rounded-lg to-[#e2e2e2]">
+          <div className=" my-2 mx-10 p-2 h-[120px] w-[270px] flex justify-around items-center bg-gradient-to-t from-[#c4c4c4] rounded-lg to-[#e2e2e2]">
             <svg
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
@@ -176,30 +201,184 @@ function Wallet() {
             </div>
           </div>
         </div>
-        <div className=" flex justify-center items-end">
-          <div className=" mt-5 h-[350px] md:h-[500px] overflow-x-auto overflow-y-auto w-[280px] sm:w-[600px] md:w-[680px]  lg:w-fit ">
-            <table className=" h-[500px]  border-collapse text-[12px] lg:text-sm">
-              <thead className=" sticky top-0 ">
-                <tr>
-                  <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]   px-[40px] py-2">
-                    N°
-                  </th>
-                  <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] lg:px-[120px] py-2">
-                    Cliente
-                  </th>
-                  <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] py-2">
-                    Tipo de pago
-                  </th>
-                  <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] py-2">
-                    N° comprobante
-                  </th>
-                  <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] py-2">
-                    CI/PA/RUC
-                  </th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+        <div className=" w-full h-[100px] flex justify-center items-center my-5 bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2]">
+          <svg
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+            className=" fill-none h-[60px] px-3"
+          >
+            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+            <g
+              id="SVGRepo_tracerCarrier"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            ></g>
+            <g id="SVGRepo_iconCarrier">
+              {" "}
+              <path
+                d="M17 13H21V19C21 20.1046 20.1046 21 19 21M17 13V19C17 20.1046 17.8954 21 19 21M17 13V5.75707C17 4.85168 17 4.39898 16.8098 4.13646C16.6439 3.90746 16.3888 3.75941 16.1076 3.72897C15.7853 3.69408 15.3923 3.91868 14.6062 4.36788L14.2938 4.54637C14.0045 4.7117 13.8598 4.79438 13.7062 4.82675C13.5702 4.85539 13.4298 4.85539 13.2938 4.82675C13.1402 4.79438 12.9955 4.7117 12.7062 4.54637L10.7938 3.45359C10.5045 3.28826 10.3598 3.20559 10.2062 3.17322C10.0702 3.14457 9.92978 3.14457 9.79383 3.17322C9.64019 3.20559 9.49552 3.28826 9.20618 3.4536L7.29382 4.54637C7.00448 4.71171 6.85981 4.79438 6.70617 4.82675C6.57022 4.85539 6.42978 4.85539 6.29383 4.82675C6.14019 4.79438 5.99552 4.71171 5.70618 4.54637L5.39382 4.36788C4.60772 3.91868 4.21467 3.69408 3.89237 3.72897C3.61123 3.75941 3.35611 3.90746 3.1902 4.13646C3 4.39898 3 4.85168 3 5.75707V16.2C3 17.8801 3 18.7202 3.32698 19.362C3.6146 19.9264 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H19M12 10.5C11.5 10.376 10.6851 10.3714 10 10.376C9.77091 10.3775 9.90941 10.3678 9.6 10.376C8.79258 10.4012 8.00165 10.7368 8 11.6875C7.99825 12.7003 9 13 10 13C11 13 12 13.2312 12 14.3125C12 15.1251 11.1925 15.4812 10.1861 15.5991C9.3861 15.5991 9 15.625 8 15.5M10 16V17M10 8.99998V9.99998"
+                className=" stroke-[#8f0e2a]"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              ></path>{" "}
+            </g>
+          </svg>
+          <h1 className=" text-[#8f0e2a] px-2 font-semibold text-xl sm:text-2xl md:text-3xl">
+            Comprobantes de pago
+          </h1>
+        </div>
+        <div className=" flex py-8 justify-center items-end">
+          <div className=" block">
+            <div className="flex justify-center md:justify-end items-center">
+              <div className="flex space-x-1">
+                <input
+                  type="text"
+                  onChange={handleChange}
+                  className="block w-full px-4 py-2 text-[#852655] bg-white border rounded-full focus:border-[#8f0e2a] focus:ring-purple-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                  placeholder="Search..."
+                />
+                <button className="px-4 text-white bg-white rounded-full ">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className=" h-4 md:w-5  w-4 md:h-5 stroke-[#8f0e2a]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            {search !== "" && paymentsTable.length === 0 ? (
+              <div className=" mx-5 flex justify-center items-center my-20">
+                <h1 className=" text-center font-bold text-xl text-white">
+                  No se encontraron resultados
+                </h1>
+              </div>
+            ) : (
+              <div className=" mt-5 h-[350px] md:h-[500px] overflow-x-auto overflow-y-auto w-[280px] sm:w-[600px] md:w-[680px]  lg:w-fit">
+                <table className=" h-[500px]  border-collapse text-[12px] lg:text-sm w-[280px] sm:w-[600px] md:w-[680px]  lg:w-fit">
+                  <thead className=" sticky top-0 ">
+                    <tr>
+                      <th className=" border border-slate-300 text-white bg-[#8f0e2a] w-[90px] py-2">
+                        N°
+                      </th>
+                      <th className=" border border-slate-300 text-white bg-[#8f0e2a] w-[120px] py-2">
+                        Fecha
+                      </th>
+                      <th className=" border border-slate-300 text-white bg-[#8f0e2a] w-[300px] py-2">
+                        Cliente
+                      </th>
+
+                      <th className=" border border-slate-300 text-white bg-[#8f0e2a] w-[120px] py-2">
+                        Inmueble
+                      </th>
+                      <th className=" border border-slate-300 text-white bg-[#8f0e2a] w-[130px] py-2">
+                        Tipo de pago
+                      </th>
+                      <th className=" border border-slate-300  text-white bg-[#8f0e2a] w-[125px] py-2">
+                        N° comprobante
+                      </th>
+                      <th className=" border border-slate-300  text-white bg-[#8f0e2a] w-[100px] py-2">
+                        Monto
+                      </th>
+                      <th className=" border border-slate-300 text-white bg-[#8f0e2a] w-[120px] py-2">
+                        Comprobante
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {search == ""
+                      ? payments.map((payment) => (
+                          <tr
+                            key={payment.payment_id}
+                            className=" text-[11px] lg:text-[12px]"
+                          >
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {payment.payment_id}
+                            </th>
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {payment.date}
+                            </th>
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {payment.customer}
+                            </th>
+
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {getPlaceFromDebt(payment.monthlyDebt.place_id)}
+                            </th>
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {payment.cash === null
+                                ? payment.deposit !== null
+                                  ? "Deposito"
+                                  : "Transferencia"
+                                : "Efectivo"}
+                            </th>
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {payment.cash === null
+                                ? payment.deposit !== null
+                                  ? payment.deposit
+                                  : payment.transfer
+                                : `---`}
+                            </th>
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {`$${payment.value}`}
+                            </th>
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              <a href={payment.file}>Descargar</a>
+                            </th>
+                          </tr>
+                        ))
+                      : paymentsTable.map((payment) => (
+                          <tr
+                            key={payment.payment_id}
+                            className=" text-[11px] lg:text-[12px]"
+                          >
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {payment.payment_id}
+                            </th>
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {payment.date}
+                            </th>
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {payment.customer}
+                            </th>
+
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {getPlaceFromDebt(payment.monthlyDebt.place_id)}
+                            </th>
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {payment.cash === null
+                                ? payment.deposit !== null
+                                  ? "Deposito"
+                                  : "Transferencia"
+                                : "Efectivo"}
+                            </th>
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {payment.cash === null
+                                ? payment.deposit !== null
+                                  ? payment.deposit
+                                  : payment.transfer
+                                : `---`}
+                            </th>
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              {`$${payment.value}`}
+                            </th>
+                            <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
+                              <a href={payment.file}>Descargar</a>
+                            </th>
+                          </tr>
+                        ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </div>

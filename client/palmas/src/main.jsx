@@ -15,6 +15,7 @@ import { getPlace, getPlaces, getPlaceTypes } from "./api/places.js";
 import HouseOutlet from "./middlewares/HouseOutlet.jsx";
 import { getVehicleTypes } from "./api/vehicles.js";
 import { getYears } from "./api/time.js";
+import { getPayments } from "./api/payment.js";
 import { getMonthlyDebts, getMonthlyFees, getMonthlyFee } from "./api/debt.js";
 const Dashboard = React.lazy(() => import("./pages/dashboard/Dashboard.jsx"));
 const Wallet = React.lazy(() => import("./pages/wallet/Wallet.jsx"));
@@ -71,15 +72,15 @@ const router = createBrowserRouter([
         element: <Wallet />,
         loader: async () => {
           const placesPromise = getPlaces();
-          const monthlyDebtsPromise = getMonthlyDebts();
+          const paymentsPromise = getPayments();
 
-          const [placesData, monthlyDebtsData] = await Promise.all([
+          const [placesData, paymentsData] = await Promise.all([
             placesPromise,
-            monthlyDebtsPromise,
+            paymentsPromise,
           ]);
           return {
             places: placesData,
-            monthlyDebts: monthlyDebtsData,
+            payments: paymentsData,
           };
         },
       },

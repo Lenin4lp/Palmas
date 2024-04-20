@@ -73,6 +73,12 @@ export class MonthlyDebt extends Model {
   @HasMany(() => Payment)
   payments!: Payment[];
 
+  @BelongsTo(() => Place)
+  place!: Place;
+
+  @BelongsTo(() => Month)
+  month!: Month;
+
   @BeforeCreate
   static generateMonthlyDebtId(monthlyDebt: MonthlyDebt) {
     const generatedUuid = uuidv4().substring(0, 5);

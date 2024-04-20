@@ -11,8 +11,10 @@ import { MonthlyFee } from "../models/monthlyFee.model";
 export const getPayments = async (req: Request, res: Response) => {
   try {
     const payments = await Payment.findAll({
-      include: [{ model: MonthlyDebt }],
+      include: [{ model: MonthlyDebt, include: [{ model: Place }] }],
+      order: [["payment_id", "DESC"]],
     });
+
     res.json(payments);
   } catch (error) {
     console.log(error);

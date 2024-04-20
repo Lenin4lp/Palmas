@@ -8,9 +8,6 @@ import {
   BeforeCreate,
   AutoIncrement,
 } from "sequelize-typescript";
-import { v4 as uuidv4 } from "uuid";
-import { Place } from "./place.model";
-import { Month } from "./month.model";
 import { MonthlyDebt } from "./monthlyDebt.model";
 
 @Table({

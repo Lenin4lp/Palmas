@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useLoaderData, useNavigation, Link } from "react-router-dom";
-import { createPayment } from "../../api/payment";
+import { createPayment, updatePayment } from "../../api/payment";
 import { useForm } from "react-hook-form";
 import { Toaster, toast } from "sonner";
+import Modal from "../../components/Modal";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import axios from "axios";
 
 // ! Falta dar funcionalidad a botón de pago
 function Aliquot() {
@@ -11,6 +15,7 @@ function Aliquot() {
   const places = aliquotData.places.data;
   const monthlyDebts = aliquotData.monthlyDebts.data;
   const navigation = useNavigation();
+  const { register, handleSubmit } = useForm();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [placeId, setPlaceId] = useState("");
@@ -18,6 +23,7 @@ function Aliquot() {
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedPay, setSelectedPay] = useState("");
+  const [openModal, setOpenModal] = useState(false);
 
   const toggleDropDown = () => {
     setIsOpen(!isOpen);
@@ -46,6 +52,20 @@ function Aliquot() {
     setSelectedPay(e.target.value);
   };
 
+  const modifyPayment = async (id, data) => {
+    try {
+      const res = await updatePayment(id, data);
+      if (res.status === 200) {
+        toast.success("Comprobante guardado con éxito");
+        setTimeout(() => {
+          window.location.href = `/alicuotas`;
+        }, 2000);
+      }
+    } catch (error) {
+      error.response.data.map((err) => toast.error(err));
+    }
+  };
+
   const searchedPlaces = (search) => {
     let results = places.filter((place) => {
       if (place.place_name.toLowerCase().includes(search.toLowerCase())) {
@@ -65,14 +85,70 @@ function Aliquot() {
       const res = await createPayment(data);
       if (res.status === 200) {
         toast.success("Pago registrado con éxito");
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 2000);
+        generatePDF(
+          res.data.payment_id,
+          res.data.id_document,
+          res.data.value,
+          res.data,
+          res.data.date,
+          res.data.customer
+        );
       }
     } catch (error) {
+      console.log(error);
       error.response.data.map((err) => toast.error(err));
     }
   };
+
+  const onSubmit = handleSubmit((data) => {
+    const modifiedData = {};
+
+    const neighbor =
+      selectedPlace &&
+      selectedPlace.neighbors.find(
+        (neighbor) => neighbor.neighbor_id == selectedCustomer
+      );
+
+    const monthDebt = monthlyDebts.find((monthlyDebt) => {
+      return (
+        monthlyDebt.month_id == selectedMonth &&
+        monthlyDebt.place_id == selectedPlace.place_id
+      );
+    });
+
+    if (data.id_document == "") {
+      data.id_document = neighbor.identity_document;
+    } else {
+      data.id_document = data.id_document;
+    }
+
+    if (selectedPay == "3") {
+      data.cash = 1;
+    }
+
+    data.customer = `${neighbor.neighbor_name} ${neighbor.neighbor_lastname}`;
+    if (data.value === null) {
+      data.value = "";
+    } else {
+      data.value = parseFloat(data.value);
+    }
+
+    data.monthlyDebt_id = monthDebt.monthlyDebt_id;
+
+    for (const key in data) {
+      if (data[key] !== "") {
+        modifiedData[key] = data[key];
+      }
+    }
+
+    if (selectedPay == 1 && data.deposit == "") {
+      toast.error("Se debe colocar el N° de comprobante del depósito");
+    } else if (selectedPay == 2 && data.transfer == "") {
+      toast.error("Se debe colocar el N° de comprobante de la transferencia");
+    } else {
+      registerPayment(modifiedData);
+    }
+  });
 
   const monthDebt =
     selectedMonth !== "" &&
@@ -81,6 +157,234 @@ function Aliquot() {
         monthlyDebt.month_id == selectedMonth && monthlyDebt.place_id == placeId
       );
     });
+
+  const generatePDF = async (
+    paymentId,
+    clientId,
+    value,
+    receipt,
+    date,
+    customer
+  ) => {
+    const doc = new jsPDF({
+      unit: "mm",
+      format: [79, 70],
+    });
+    let fontSize = 8;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    // Punto central en el eje X
+    const centerX = pageWidth / 2;
+    function textStartX(textWidth) {
+      return centerX - textWidth / 2;
+    }
+    doc.setFontSize(8);
+    doc.text(
+      "Cjto. Habitacional",
+      textStartX(
+        (doc.getStringUnitWidth(`Cjto. Habitacional`) * fontSize) /
+          doc.internal.scaleFactor
+      ),
+      4
+    );
+    doc.text(
+      "Casa Club Las Palmas",
+      textStartX(
+        (doc.getStringUnitWidth(`Casa Club Las Palmas`) * fontSize) /
+          doc.internal.scaleFactor
+      ),
+      8
+    );
+
+    doc.setFontSize(7);
+    fontSize = 7;
+
+    doc.text(
+      "RUC: 1792386772001",
+      textStartX(
+        (doc.getStringUnitWidth(`RUC:1792386772001`) * fontSize) /
+          doc.internal.scaleFactor
+      ),
+      12
+    );
+    doc.text("Dirección: Sangolquí", 5, 17);
+    doc.text("Calle 10 de diciembre y 10 de agosto", 5, 21);
+    doc.text(`Fecha: ${date}`, 5, 25);
+    doc.text(`Cliente: ${customer}`, 5, 29);
+    doc.text(`CI/PA/RUC: ${clientId}`, 5, 33);
+
+    function translateAbreviations(selectedMonth) {
+      if (selectedMonth.startsWith("JAN")) {
+        return "ENE" + selectedMonth.substring(3);
+      } else if (selectedMonth.startsWith("APR")) {
+        return "ABR" + selectedMonth.substring(3);
+      } else if (selectedMonth.startsWith("AUG")) {
+        return "AGO" + selectedMonth.substring(3);
+      } else if (selectedMonth.startsWith("DEC")) {
+        return "DIC" + selectedMonth.substring(3);
+      } else {
+        return selectedMonth;
+      }
+    }
+    doc.text(
+      `Comprobante de Pago N°${paymentId}`,
+      textStartX(
+        (doc.getStringUnitWidth(`Comprobante de Pago N°${paymentId}`) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      37
+    );
+    doc.text(
+      "____________________________________________",
+      textStartX(
+        (doc.getStringUnitWidth(
+          `____________________________________________`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      39
+    );
+    doc.text(
+      "Cant.                          Detalle                            V.Total",
+      5,
+      42
+    );
+
+    doc.text(
+      "____________________________________________",
+      textStartX(
+        (doc.getStringUnitWidth(
+          `____________________________________________`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      43
+    );
+    doc.text("1", 7, 47);
+
+    if (monthDebt && monthDebt.debt != 0) {
+      doc.text(`Pago alicuota ${translateAbreviations(selectedMonth)}`, 20, 47);
+    } else {
+      doc.text(
+        `Abono alicuota ${translateAbreviations(selectedMonth)}`,
+        19,
+        47
+      );
+    }
+    doc.text(`$${value}`, 55, 47);
+
+    doc.text(
+      "____________________________________________",
+      textStartX(
+        (doc.getStringUnitWidth(
+          `____________________________________________`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      52
+    );
+    doc.text(
+      "____________________________________________",
+      textStartX(
+        (doc.getStringUnitWidth(
+          `____________________________________________`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      53
+    );
+    doc.text("Forma de pago:", 5, 57);
+    let pay = "";
+    if (selectedPay == 1) {
+      pay = "Depósito";
+    } else if (selectedPay == 2) {
+      pay = "Transferencia";
+    } else if (selectedPay == 3) {
+      pay = "Efectivo";
+    } else {
+      pay = "";
+    }
+
+    doc.text("Subtotal:", 36, 57);
+    doc.text(`$${value}`, 55, 57);
+
+    doc.text("Valor total:", 36, 61);
+    doc.text(`$${value}`, 55, 61);
+
+    doc.setFontSize(6);
+    fontSize = 6;
+    const receiptObject = receipt;
+
+    doc.text(pay, 5, 60);
+    if (selectedPay == 1) {
+      doc.text(`N° ${receiptObject.deposit}`, 5, 63);
+    } else if (selectedPay == 2) {
+      doc.text(`N° ${receiptObject.transfer}`, 5, 63);
+    }
+
+    doc.text(
+      `_________________                _________________`,
+      textStartX(
+        (doc.getStringUnitWidth(
+          `_________________                _________________`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      70
+    );
+
+    doc.text(
+      `  Recibí conforme                        Firma autorizada`,
+      textStartX(
+        (doc.getStringUnitWidth(
+          `  Recibí conforme                        Firma autorizada`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      73
+    );
+
+    doc.text(
+      `   Copropietario                              Administración`,
+      textStartX(
+        (doc.getStringUnitWidth(
+          `   Copropietario                              Administración`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      76
+    );
+    const pdfBlob = doc.output("blob");
+
+    const formData = new FormData();
+    formData.append("myFile", pdfBlob, `Comprobante_N°_${paymentId}.pdf`);
+
+    axios
+      .post("http://localhost:8081/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          const fileLocation = res.data.location;
+          const data = {
+            file: fileLocation,
+          };
+          console.log(fileLocation);
+          doc.save(`Comprobante_N°_${paymentId}.pdf`);
+          modifyPayment(paymentId, data);
+        }
+      })
+      .catch((err) => console.log(err));
+  };
 
   console.log(monthlyDebts[0].month_id);
 
@@ -94,6 +398,40 @@ function Aliquot() {
   }
   return (
     <div className=" pb-[90px] md:py-0 w-screen h-fit min-h-screen md:pl-[70px]">
+      <Modal open={openModal} onClose={() => setOpenModal(false)}>
+        <div className=" block m-3">
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-lg font-bold">
+              Confirmación
+            </h1>
+          </div>
+          <div className=" my-3">
+            <h1 className=" text-center text-white text-base font-medium">
+              ¿Estás seguro de registrar el pago?
+            </h1>
+          </div>
+          <div className=" flex justify-center items-center">
+            <div className=" my-2 grid grid-cols-2">
+              <div className=" mx-4">
+                <button
+                  onClick={onSubmit}
+                  className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Aceptar
+                </button>
+              </div>
+              <div className=" mx-4">
+                <button
+                  onClick={() => setOpenModal(false)}
+                  className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
       <div className=" block">
         <div className=" px-5 w-full h-[70px] md:h-[100px] bg-gradient-to-r flex justify-start items-center from-[#852655] to-[#8f0e2a]">
           <svg
@@ -200,12 +538,12 @@ function Aliquot() {
                       class="w-5 h-5 ml-2 -mr-1"
                       viewBox="0 0 20 20"
                       fill="currentColor"
-                      aria-hidden="true"
+                      ariaHidden="true"
                     >
                       <path
-                        fill-rule="evenodd"
+                        fillRule="evenodd"
                         d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                        clip-rule="evenodd"
+                        clipRule="evenodd"
                       />
                     </svg>
                   </button>
@@ -222,7 +560,7 @@ function Aliquot() {
                         className="block w-full sticky top-0 px-4 py-2 text-gray-800 border rounded-md  border-gray-300 focus:outline-none"
                         type="text"
                         placeholder="Search items"
-                        autocomplete="off"
+                        autoComplete="off"
                       />
                       {filteredPlaces.map((place) => (
                         <div
@@ -258,7 +596,7 @@ function Aliquot() {
                       xmlns="http://www.w3.org/2000/svg"
                       className=" h-[80px] md:h-[100px] w-auto"
                     >
-                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                      <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
                       <g
                         id="SVGRepo_tracerCarrier"
                         strokeLinecap="round"
@@ -340,6 +678,7 @@ function Aliquot() {
                         <div className=" m-5 block md:flex justify-start items-center flex-wrap ">
                           <h1 className=" mr-2">Fecha de emisión:</h1>
                           <input
+                            {...register("date")}
                             type="date"
                             className=" border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                           />
@@ -489,6 +828,7 @@ function Aliquot() {
                                 <input
                                   type="number"
                                   className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
+                                  {...register("deposit")}
                                 />
                               </div>
                               <div className=" flex flex-wrap">
@@ -503,6 +843,7 @@ function Aliquot() {
                                       );
                                     }).identity_document
                                   }
+                                  {...register("id_document")}
                                   className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                 />
                               </div>
@@ -515,11 +856,22 @@ function Aliquot() {
                                 <div className=" flex flex-wrap">
                                   <h1 className=" mr-2">Valor total: $</h1>
                                   <input
+                                    {...register("value")}
                                     type="number"
                                     className=" w-[100px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                   />
                                 </div>
                               </div>
+                            </div>
+                            <div className=" my-5 flex justify-center items-center mb-5">
+                              <button
+                                onClick={() => setOpenModal(true)}
+                                className=" p-2 border-[1px] group border-white hover:bg-[#be3855] bg-[#8f0e2a] transition duration-300 text-white rounded-lg"
+                              >
+                                <h1 className=" text-white text-sm md:text-base  duration-300 transition">
+                                  Registrar pago
+                                </h1>
+                              </button>
                             </div>
                           </div>
                         )}
@@ -529,6 +881,7 @@ function Aliquot() {
                               <div className=" flex flex-wrap">
                                 <h1 className=" mr-2">N° de comprobante:</h1>
                                 <input
+                                  {...register("transfer")}
                                   type="number"
                                   className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                 />
@@ -545,6 +898,7 @@ function Aliquot() {
                                       );
                                     }).identity_document
                                   }
+                                  {...register("id_document")}
                                   className=" w-[160px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                 />
                               </div>
@@ -557,11 +911,22 @@ function Aliquot() {
                                 <div className=" flex flex-wrap">
                                   <h1 className=" mr-2">Valor total: $</h1>
                                   <input
+                                    {...register("value")}
                                     type="number"
                                     className=" w-[100px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                   />
                                 </div>
                               </div>
+                            </div>
+                            <div className=" my-5 flex justify-center items-center mb-5">
+                              <button
+                                onClick={() => setOpenModal(true)}
+                                className=" p-2 border-[1px] group border-white bg-[#8f0e2a] hover:bg-[#be3855] transition duration-300 text-white rounded-lg"
+                              >
+                                <h1 className=" text-white text-sm md:text-base  duration-300 transition">
+                                  Registrar pago
+                                </h1>
+                              </button>
                             </div>
                           </div>
                         )}
@@ -571,6 +936,7 @@ function Aliquot() {
                               <h1 className=" mr-2">CI/RUC:</h1>
                               <input
                                 type="number"
+                                {...register("id_document")}
                                 placeholder={
                                   selectedCustomer != "" &&
                                   selectedPlace.neighbors.find((neighbor) => {
@@ -584,25 +950,28 @@ function Aliquot() {
                             </div>
                             <div className=" rounded-lg min-h-[100px] mt-5 p-5 border-[1px] border-[#8f0e2a] flex justify-center items-center flex-wrap">
                               <div className=" block">
-                                <h1
-                                  className={`my-3 ${
-                                    monthDebt.month_status == null
-                                      ? "text-[#3e864a]"
-                                      : "text-[#8f0e2a]"
-                                  }`}
-                                >
-                                  {monthDebt.month_status == null
-                                    ? `Pago por adelantado`
-                                    : `Deuda del mes: ${monthDebt.debt}`}
+                                <h1 className=" my-3 text-[#8f0e2a]">
+                                  Deuda del mes: ${monthDebt.debt}
                                 </h1>
                                 <div className=" flex flex-wrap">
                                   <h1 className=" mr-2">Valor total: $</h1>
                                   <input
                                     type="number"
+                                    {...register("value")}
                                     className=" w-[100px] border-[1px] border-[#8f0e2a] rounded-lg pl-2"
                                   />
                                 </div>
                               </div>
+                            </div>
+                            <div className=" my-5 flex justify-center items-center mb-5">
+                              <button
+                                onClick={() => setOpenModal(true)}
+                                className=" p-2 border-[1px] group border-white bg-[#8f0e2a] hover:bg-[#be3855] transition duration-300 text-white rounded-lg"
+                              >
+                                <h1 className=" text-white text-sm md:text-base  duration-300 transition">
+                                  Registrar pago
+                                </h1>
+                              </button>
                             </div>
                           </div>
                         )}
@@ -615,6 +984,7 @@ function Aliquot() {
           </div>
         </div>
       </div>
+      <Toaster position="top-center" richColors />
     </div>
   );
 }
