@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useLoaderData, useNavigation, Link } from "react-router-dom";
 import ContentComponent from "../../components/ContentComponent";
+import { useAuth } from "../../auth/AuthProvider";
 
 function Neighbor() {
   const neighborsData = useLoaderData();
   const neighbors = neighborsData.data;
   const navigation = useNavigation();
+  const { user } = useAuth();
   const [neighborsTable, setNeighborsTable] = useState([]);
   const [search, setSearch] = useState("");
 
@@ -57,6 +59,7 @@ function Neighbor() {
         : "bg-green-100 text-green-700";
     return statusColor;
   }
+  const choosenNeighbors = search == "" ? neighbors : neighborsTable;
 
   if (navigation.state === "loading") {
     return <div>Cargando</div>;
@@ -116,62 +119,66 @@ function Neighbor() {
             <div className=" block md:mx-10">
               <div className=" mx-10 mt-10 flex justify-start items-center ">
                 <div className=" ">
-                  <Link to={"/vecinos/registrar"}>
-                    <button className=" group rounded grid grid-cols-5 px-1 py-2 hover:bg-[#852655] bg-transparent border border-[#852655] transition duration-500">
-                      <div className=" flex justify-center col-span-1 items-center ">
-                        <svg
-                          className=" h-[20px] md:h-[25px] w-auto"
-                          viewBox="-0.03 0 20.052 20.052"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill=""
-                        >
-                          <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                          <g
-                            id="SVGRepo_tracerCarrier"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          ></g>
-                          <g id="SVGRepo_iconCarrier">
-                            {" "}
-                            <g id="add-user-9" transform="translate(-2 -1.948)">
+                  {user.role_id !== 3 && (
+                    <Link to={"/vecinos/registrar"}>
+                      <button className=" group rounded grid grid-cols-5 px-1 py-2 hover:bg-[#852655] bg-transparent border border-[#852655] transition duration-500">
+                        <div className=" flex justify-center col-span-1 items-center ">
+                          <svg
+                            className=" h-[20px] md:h-[25px] w-auto"
+                            viewBox="-0.03 0 20.052 20.052"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill=""
+                          >
+                            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                            <g
+                              id="SVGRepo_tracerCarrier"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            ></g>
+                            <g id="SVGRepo_iconCarrier">
                               {" "}
-                              <path
-                                id="secondary"
-                                className=" fill-[#8f0e2a]  transition duration-500"
-                                d="M15.94,14.22a1,1,0,0,1-.28-1.45,5.91,5.91,0,0,0,.88-1.47,5.5,5.5,0,0,1-4-5.3,5.37,5.37,0,0,1,.65-2.58A5.85,5.85,0,0,0,11.73,3,6,6,0,0,0,5,9a5.94,5.94,0,0,0,1.34,3.77,1,1,0,0,1-.28,1.45A7,7,0,0,0,3,20a1,1,0,0,0,1,1H18a1,1,0,0,0,1-1,7,7,0,0,0-3.06-5.78Z"
-                              ></path>{" "}
-                              <path
-                                className=" stroke-[#852655] group-hover:stroke-white transition duration-500"
-                                id="primary"
-                                d="M17,5h4M19,3V7"
-                                fill="none"
-                                stroke="#000000"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                              ></path>{" "}
-                              <path
-                                id="primary-2"
-                                className=" stroke-[#852655] group-hover:stroke-white transition duration-500"
-                                dataName="primary"
-                                d="M16.65,11a5.71,5.71,0,0,1-1,1.77,1,1,0,0,0,.28,1.45A7,7,0,0,1,19,20a1,1,0,0,1-1,1H4a1,1,0,0,1-1-1,7,7,0,0,1,3.06-5.78,1,1,0,0,0,.28-1.45A5.94,5.94,0,0,1,5,9a6,6,0,0,1,6.73-6A5.47,5.47,0,0,1,13,3.3"
-                                fill="none"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                              ></path>{" "}
-                            </g>{" "}
-                          </g>
-                        </svg>
-                      </div>
+                              <g
+                                id="add-user-9"
+                                transform="translate(-2 -1.948)"
+                              >
+                                {" "}
+                                <path
+                                  id="secondary"
+                                  className=" fill-[#8f0e2a]  transition duration-500"
+                                  d="M15.94,14.22a1,1,0,0,1-.28-1.45,5.91,5.91,0,0,0,.88-1.47,5.5,5.5,0,0,1-4-5.3,5.37,5.37,0,0,1,.65-2.58A5.85,5.85,0,0,0,11.73,3,6,6,0,0,0,5,9a5.94,5.94,0,0,0,1.34,3.77,1,1,0,0,1-.28,1.45A7,7,0,0,0,3,20a1,1,0,0,0,1,1H18a1,1,0,0,0,1-1,7,7,0,0,0-3.06-5.78Z"
+                                ></path>{" "}
+                                <path
+                                  className=" stroke-[#852655] group-hover:stroke-white transition duration-500"
+                                  id="primary"
+                                  d="M17,5h4M19,3V7"
+                                  fill="none"
+                                  stroke="#000000"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                ></path>{" "}
+                                <path
+                                  id="primary-2"
+                                  className=" stroke-[#852655] group-hover:stroke-white transition duration-500"
+                                  d="M16.65,11a5.71,5.71,0,0,1-1,1.77,1,1,0,0,0,.28,1.45A7,7,0,0,1,19,20a1,1,0,0,1-1,1H4a1,1,0,0,1-1-1,7,7,0,0,1,3.06-5.78,1,1,0,0,0,.28-1.45A5.94,5.94,0,0,1,5,9a6,6,0,0,1,6.73-6A5.47,5.47,0,0,1,13,3.3"
+                                  fill="none"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                ></path>{" "}
+                              </g>{" "}
+                            </g>
+                          </svg>
+                        </div>
 
-                      <div className=" pr-2 col-span-4 flex justify-center items-center">
-                        <h1 className=" text-center font-semibold text-sm md:text-base text-[#852655] group-hover:text-white transition duration-500">
-                          Registrar vecino
-                        </h1>
-                      </div>
-                    </button>
-                  </Link>
+                        <div className=" pr-2 col-span-4 flex justify-center items-center">
+                          <h1 className=" text-center font-semibold text-sm md:text-base text-[#852655] group-hover:text-white transition duration-500">
+                            Registrar vecino
+                          </h1>
+                        </div>
+                      </button>
+                    </Link>
+                  )}
                 </div>
               </div>
               <div className=" mx-10 relative mt-10 mb-5 flex justify-center sm:justify-end rounded-lg bg-white ">
@@ -202,251 +209,274 @@ function Neighbor() {
                   </div>
                 </div>
               </div>
-              <div className="  flex justify-center items-center">
-                <div className="  mt-5 h-[350px] md:h-[500px] overflow-x-auto overflow-y-auto w-[280px] sm:w-[600px] md:w-[680px]  lg:w-fit ">
-                  <table className=" h-[500px]  border-collapse text-[12px] lg:text-sm">
-                    <thead className=" sticky top-0 ">
-                      <tr className="">
-                        <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]   px-[40px] py-2">
-                          ID
-                        </th>
-                        <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] lg:px-[120px] py-2">
-                          Nombres
-                        </th>
-                        <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]  px-[40px] py-2">
-                          Inmueble
-                        </th>
-                        <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]  px-[60px] py-2">
-                          Correo
-                        </th>
-                        <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]  px-[40px] py-2">
-                          Estado
-                        </th>
-                        <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]  px-[15px] py-2">
-                          Acciones
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {search === ""
-                        ? neighbors.map((neighbor) => (
-                            <tr
-                              key={neighbor.neighbor_id}
-                              className=" text-[11px] lg:text-[12px]"
-                            >
-                              <th className=" border border-slate-300 px-2 py-2">
-                                {neighbor.neighbor_id}
-                              </th>
-                              <th className=" text-left border border-slate-300 px-3 py-2">
-                                {`${neighbor.neighbor_lastname} ${neighbor.neighbor_name}`}
-                              </th>
-                              <th className=" border border-slate-300  py-2">
-                                {neighbor.places.length > 0
-                                  ? neighbor.places.length > 1
-                                    ? `${neighbor.places
-                                        .map((place) =>
-                                          place.place_name.match(/\d+/)
-                                            ? place.place_name.charAt(0) +
-                                              place.place_name.match(/\d+/)[0]
-                                            : ""
-                                        )
-                                        .join(", ")}`
-                                    : `${neighbor.places[0].place_name}`
-                                  : "Sin inmueble"}
-                              </th>
-                              <th className=" border border-slate-300  py-2">
-                                {neighbor.neighbor_email === null
-                                  ? "-"
-                                  : neighbor.neighbor_email}
-                              </th>
-                              <th
-                                className={`${getColor(
-                                  neighbor
-                                )} border text-[11px] border-slate-300  py-2`}
-                              >
-                                {getDebt(neighbor)}
-                              </th>
-                              <th className=" border grid grid-cols-2 border-slate-300  py-2">
-                                <div className=" flex justify-center border-none items-center">
-                                  <Link to={`/vecinos/${neighbor.neighbor_id}`}>
-                                    <svg
-                                      className=" h-[19px] hover:cursor-pointer"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <g
-                                        id="SVGRepo_bgCarrier"
-                                        strokeWidth="0"
-                                      ></g>
-                                      <g
-                                        id="SVGRepo_tracerCarrier"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      ></g>
-                                      <g id="SVGRepo_iconCarrier">
-                                        {" "}
-                                        <circle
-                                          cx="12"
-                                          cy="12"
-                                          r="3"
-                                          stroke="#ababab"
-                                          strokeWidth="2"
-                                        ></circle>{" "}
-                                        <path
-                                          d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
-                                          stroke="#ababab"
-                                          strokeWidth="2"
-                                        ></path>{" "}
-                                      </g>
-                                    </svg>
-                                  </Link>
-                                </div>
-                                <div className=" flex justify-center items-center">
-                                  <Link
-                                    to={`/vecinos/modificar/${neighbor.neighbor_id}`}
-                                  >
-                                    <svg
-                                      className=" h-[19px] cursor-pointer"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <g
-                                        id="SVGRepo_bgCarrier"
-                                        strokeWidth="0"
-                                      ></g>
-                                      <g
-                                        id="SVGRepo_tracerCarrier"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      ></g>
-                                      <g id="SVGRepo_iconCarrier">
-                                        {" "}
-                                        <path
-                                          fillRule="evenodd"
-                                          clipRule="evenodd"
-                                          d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z"
-                                          fill="#852655"
-                                        ></path>{" "}
-                                      </g>
-                                    </svg>
-                                  </Link>
-                                </div>
-                              </th>
-                            </tr>
-                          ))
-                        : neighborsTable.map((neighbor) => (
-                            <tr
-                              key={neighbor.neighbor_id}
-                              className=" text-[12px]"
-                            >
-                              <th className=" border  border-slate-300  py-2">
-                                {neighbor.neighbor_id}
-                              </th>
-                              <th className=" text-left border border-slate-300 px-3 py-2">
-                                {`${neighbor.neighbor_lastname} ${neighbor.neighbor_name}`}
-                              </th>
-                              <th className=" border border-slate-300  py-2">
-                                {neighbor.places.length > 0
-                                  ? neighbor.places.length > 1
-                                    ? `${neighbor.places
-                                        .map((place) =>
-                                          place.place_name.match(/\d+/)
-                                            ? place.place_name.charAt(0) +
-                                              place.place_name.match(/\d+/)[0]
-                                            : ""
-                                        )
-                                        .join(", ")}`
-                                    : `${neighbor.places[0].place_name}`
-                                  : "Sin inmueble"}
-                              </th>
-                              <th className=" border border-slate-300  py-2">
-                                {neighbor.neighbor_email === null
-                                  ? "-"
-                                  : neighbor.neighbor_email}
-                              </th>
-                              <th
-                                className={`${getColor(
-                                  neighbor
-                                )} border border-slate-300  py-2`}
-                              >
-                                {getDebt(neighbor)}
-                              </th>
-                              <th className=" h-full border grid grid-cols-2 border-slate-300  py-2">
-                                <div className=" flex justify-center border-none items-center">
-                                  <Link to={`/vecinos/${neighbor.neighbor_id}`}>
-                                    <svg
-                                      className=" h-[19px] hover:cursor-pointer"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <g
-                                        id="SVGRepo_bgCarrier"
-                                        strokeWidth="0"
-                                      ></g>
-                                      <g
-                                        id="SVGRepo_tracerCarrier"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      ></g>
-                                      <g id="SVGRepo_iconCarrier">
-                                        {" "}
-                                        <circle
-                                          cx="12"
-                                          cy="12"
-                                          r="3"
-                                          stroke="#ababab"
-                                          strokeWidth="2"
-                                        ></circle>{" "}
-                                        <path
-                                          d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
-                                          stroke="#ababab"
-                                          strokeWidth="2"
-                                        ></path>{" "}
-                                      </g>
-                                    </svg>
-                                  </Link>
-                                </div>
-                                <div className=" flex justify-center items-center">
-                                  <Link
-                                    to={`/vecinos/modificar/${neighbor.neighbor_id}`}
-                                  >
-                                    <svg
-                                      className=" h-[19px] cursor-pointer"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <g
-                                        id="SVGRepo_bgCarrier"
-                                        strokeWidth="0"
-                                      ></g>
-                                      <g
-                                        id="SVGRepo_tracerCarrier"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      ></g>
-                                      <g id="SVGRepo_iconCarrier">
-                                        {" "}
-                                        <path
-                                          fillRule="evenodd"
-                                          clipRule="evenodd"
-                                          d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z"
-                                          fill="#852655"
-                                        ></path>{" "}
-                                      </g>
-                                    </svg>
-                                  </Link>
-                                </div>
-                              </th>
-                            </tr>
-                          ))}
-                    </tbody>
-                  </table>
+              {choosenNeighbors.length === 0 && (
+                <div className=" my-20 flex justify-center items-center">
+                  <h1 className=" text-[#8f0e2a]">No se encontraron vecinos</h1>
                 </div>
-              </div>
+              )}
+              {choosenNeighbors.length > 0 && (
+                <div className=" pb-10 flex justify-center items-center">
+                  <div className="  mt-5 h-[350px] md:h-[500px] overflow-x-auto overflow-y-auto w-[280px] sm:w-[600px] md:w-[680px]  lg:w-fit ">
+                    <table className=" h-[500px]  border-collapse text-[12px] lg:text-sm">
+                      <thead className=" sticky top-0 ">
+                        <tr className="">
+                          <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]   px-[40px] py-2">
+                            ID
+                          </th>
+                          <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] px-[100px] lg:px-[120px] py-2">
+                            Nombres
+                          </th>
+                          <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]  px-[40px] py-2">
+                            Inmueble
+                          </th>
+                          <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]  px-[60px] py-2">
+                            Correo
+                          </th>
+                          <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]  px-[40px] py-2">
+                            Estado
+                          </th>
+                          <th
+                            className={` border  border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a] ${
+                              user.role_id === 3 ? "hidden" : ""
+                            } px-[15px] py-2`}
+                          >
+                            Acciones
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {search === ""
+                          ? neighbors.map((neighbor) => (
+                              <tr
+                                key={neighbor.neighbor_id}
+                                className=" text-[11px] lg:text-[12px]"
+                              >
+                                <th className=" border border-slate-300 px-2 py-2">
+                                  {neighbor.neighbor_id}
+                                </th>
+                                <th className=" text-left border border-slate-300 px-3 py-2">
+                                  {`${neighbor.neighbor_lastname} ${neighbor.neighbor_name}`}
+                                </th>
+                                <th className=" border border-slate-300  py-2">
+                                  {neighbor.places.length > 0
+                                    ? neighbor.places.length > 1
+                                      ? `${neighbor.places
+                                          .map((place) =>
+                                            place.place_name.match(/\d+/)
+                                              ? place.place_name.charAt(0) +
+                                                place.place_name.match(/\d+/)[0]
+                                              : ""
+                                          )
+                                          .join(", ")}`
+                                      : `${neighbor.places[0].place_name}`
+                                    : "Sin inmueble"}
+                                </th>
+                                <th className=" border border-slate-300  py-2">
+                                  {neighbor.neighbor_email === null
+                                    ? "-"
+                                    : neighbor.neighbor_email}
+                                </th>
+                                <th
+                                  className={`${getColor(
+                                    neighbor
+                                  )} border text-[11px] border-slate-300  py-2`}
+                                >
+                                  {getDebt(neighbor)}
+                                </th>
+                                <th
+                                  className={`border ${
+                                    user.role_id === 3 ? "hidden" : ""
+                                  } grid grid-cols-2 border-slate-300  py-2`}
+                                >
+                                  <div className=" flex justify-center border-none items-center">
+                                    <Link
+                                      to={`/vecinos/${neighbor.neighbor_id}`}
+                                    >
+                                      <svg
+                                        className=" h-[19px] hover:cursor-pointer"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <g
+                                          id="SVGRepo_bgCarrier"
+                                          strokeWidth="0"
+                                        ></g>
+                                        <g
+                                          id="SVGRepo_tracerCarrier"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        ></g>
+                                        <g id="SVGRepo_iconCarrier">
+                                          {" "}
+                                          <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="3"
+                                            stroke="#ababab"
+                                            strokeWidth="2"
+                                          ></circle>{" "}
+                                          <path
+                                            d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
+                                            stroke="#ababab"
+                                            strokeWidth="2"
+                                          ></path>{" "}
+                                        </g>
+                                      </svg>
+                                    </Link>
+                                  </div>
+                                  <div className=" flex justify-center items-center">
+                                    <Link
+                                      to={`/vecinos/modificar/${neighbor.neighbor_id}`}
+                                    >
+                                      <svg
+                                        className=" h-[19px] cursor-pointer"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <g
+                                          id="SVGRepo_bgCarrier"
+                                          strokeWidth="0"
+                                        ></g>
+                                        <g
+                                          id="SVGRepo_tracerCarrier"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        ></g>
+                                        <g id="SVGRepo_iconCarrier">
+                                          {" "}
+                                          <path
+                                            fillRule="evenodd"
+                                            clipRule="evenodd"
+                                            d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z"
+                                            fill="#852655"
+                                          ></path>{" "}
+                                        </g>
+                                      </svg>
+                                    </Link>
+                                  </div>
+                                </th>
+                              </tr>
+                            ))
+                          : neighborsTable.map((neighbor) => (
+                              <tr
+                                key={neighbor.neighbor_id}
+                                className=" text-[12px]"
+                              >
+                                <th className=" border  border-slate-300  py-2">
+                                  {neighbor.neighbor_id}
+                                </th>
+                                <th className=" text-left border border-slate-300 px-3 py-2">
+                                  {`${neighbor.neighbor_lastname} ${neighbor.neighbor_name}`}
+                                </th>
+                                <th className=" border border-slate-300  py-2">
+                                  {neighbor.places.length > 0
+                                    ? neighbor.places.length > 1
+                                      ? `${neighbor.places
+                                          .map((place) =>
+                                            place.place_name.match(/\d+/)
+                                              ? place.place_name.charAt(0) +
+                                                place.place_name.match(/\d+/)[0]
+                                              : ""
+                                          )
+                                          .join(", ")}`
+                                      : `${neighbor.places[0].place_name}`
+                                    : "Sin inmueble"}
+                                </th>
+                                <th className=" border border-slate-300  py-2">
+                                  {neighbor.neighbor_email === null
+                                    ? "-"
+                                    : neighbor.neighbor_email}
+                                </th>
+                                <th
+                                  className={`${getColor(
+                                    neighbor
+                                  )} border border-slate-300  py-2`}
+                                >
+                                  {getDebt(neighbor)}
+                                </th>
+                                <th
+                                  className={`border ${
+                                    user.role_id === 3 ? "hidden" : ""
+                                  } grid grid-cols-2 border-slate-300  py-2`}
+                                >
+                                  <div className=" flex justify-center border-none items-center">
+                                    <Link
+                                      to={`/vecinos/${neighbor.neighbor_id}`}
+                                    >
+                                      <svg
+                                        className=" h-[19px] hover:cursor-pointer"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <g
+                                          id="SVGRepo_bgCarrier"
+                                          strokeWidth="0"
+                                        ></g>
+                                        <g
+                                          id="SVGRepo_tracerCarrier"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        ></g>
+                                        <g id="SVGRepo_iconCarrier">
+                                          {" "}
+                                          <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="3"
+                                            stroke="#ababab"
+                                            strokeWidth="2"
+                                          ></circle>{" "}
+                                          <path
+                                            d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
+                                            stroke="#ababab"
+                                            strokeWidth="2"
+                                          ></path>{" "}
+                                        </g>
+                                      </svg>
+                                    </Link>
+                                  </div>
+                                  <div className=" flex justify-center items-center">
+                                    <Link
+                                      to={`/vecinos/modificar/${neighbor.neighbor_id}`}
+                                    >
+                                      <svg
+                                        className=" h-[19px] cursor-pointer"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <g
+                                          id="SVGRepo_bgCarrier"
+                                          strokeWidth="0"
+                                        ></g>
+                                        <g
+                                          id="SVGRepo_tracerCarrier"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        ></g>
+                                        <g id="SVGRepo_iconCarrier">
+                                          {" "}
+                                          <path
+                                            fillRule="evenodd"
+                                            clipRule="evenodd"
+                                            d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z"
+                                            fill="#852655"
+                                          ></path>{" "}
+                                        </g>
+                                      </svg>
+                                    </Link>
+                                  </div>
+                                </th>
+                              </tr>
+                            ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

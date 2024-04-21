@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 
 const SideBar = ({ children }) => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const handleSideBar = () => {
     setIsOpen(!isOpen);
   };
+
+  console.log(user);
 
   return (
     <div className=" flex overflow-hidden relative">
@@ -221,7 +223,7 @@ const SideBar = ({ children }) => {
             </div>
           </div>
         </div>
-        <div>{children}</div>
+        <div className=" ">{children}</div>
       </div>
     </div>
   );

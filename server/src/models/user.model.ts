@@ -33,7 +33,7 @@ export class User extends Model {
 
   @Column({
     type: DataType.STRING(40),
-    allowNull: false,
+    allowNull: true,
     field: "correo_usuario",
     unique: true,
   })
@@ -45,6 +45,13 @@ export class User extends Model {
     field: "contrasena_usuario",
   })
   user_password!: string;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: true,
+    field: "estado",
+  })
+  status!: boolean;
 
   @ForeignKey(() => Role)
   @Column({

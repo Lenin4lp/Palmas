@@ -1,16 +1,10 @@
 import React, { useState } from "react";
-import {
-  useLoaderData,
-  useParams,
-  useNavigation,
-  Link,
-} from "react-router-dom";
+import { useLoaderData, useNavigation, Link } from "react-router-dom";
 import { deleteNeighbor } from "../../api/neighbors";
 import { toast, Toaster } from "sonner";
 import Modal from "../../components/Modal";
 
 function NeighborInfo() {
-  const { id } = useParams();
   const neighbordata = useLoaderData();
   const neighbor = neighbordata.data.neighbor;
   const navigation = useNavigation();
@@ -30,8 +24,6 @@ function NeighborInfo() {
     }
   };
 
-  console.log(neighbor);
-
   if (navigation.state === "loading") {
     return <div>Cargando</div>;
   }
@@ -46,7 +38,7 @@ function NeighborInfo() {
           </div>
           <div className=" my-3">
             <h1 className=" text-center text-white text-base font-medium">
-              ¿Estás seguro de eliminar el tipo de inmueble?
+              ¿Estás seguro de eliminar este vecino?
             </h1>
           </div>
           <div className=" flex justify-center items-center">
@@ -245,6 +237,7 @@ function NeighborInfo() {
               <div className=" my-10 flex justify-start items-start flex-wrap">
                 {neighbor.places.map((place) => (
                   <Link
+                    key={place.place_id}
                     className=" h-fit w-fit group rounded-full"
                     to={`/inmuebles/${place.place_id}`}
                   >

@@ -19,7 +19,6 @@ function ModifyNeighbor() {
 
   const { register, handleSubmit } = useForm();
 
-  console.log(neighbor);
   const modifyNeighbor = async (id, neighbor) => {
     try {
       const res = await updateNeighbor(id, neighbor);
@@ -70,9 +69,9 @@ function ModifyNeighbor() {
               version="1.1"
               id="Capa_1"
               xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
               viewBox="0 0 29.536 29.536"
-              xml:space="preserve"
+              xmlSpace="preserve"
             >
               <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
               <g

@@ -1,25 +1,30 @@
 import React, { useState } from "react";
 import { useLoaderData, useNavigation, Link } from "react-router-dom";
-import { Toaster, toast } from "sonner";
+import { useForm } from "react-hook-form";
 import ContentComponent from "../../components/ContentComponent";
 import Modal from "../../components/Modal";
+import { toast, Toaster } from "sonner";
 import { updateUser } from "../../api/user";
-import { useForm } from "react-hook-form";
 
-function UserInfo() {
+function ModifyUser() {
   const userData = useLoaderData();
   const user = userData.data.user;
   const navigation = useNavigation();
-  const [open, setOpen] = useState("");
+  const [open, setOpen] = useState(false);
+  const [open2, setOpen2] = useState(false);
+  const [userStatus, setUserStatus] = useState();
   const { register, handleSubmit } = useForm();
+
+  console.log(user);
 
   const modifyUser = async (id, data) => {
     try {
+      console.log(data);
       const res = await updateUser(id, data);
       if (res.status === 200) {
         toast.success("Usuario modificado con éxito");
         setTimeout(() => {
-          window.location.href = "/dashboard";
+          window.location.href = "/superadmin/usuarios";
         }, 2000);
       }
     } catch (error) {
@@ -35,11 +40,18 @@ function UserInfo() {
         modifiedData[key] = data[key];
       }
     }
+
     modifyUser(user.user_id, modifiedData);
   });
 
+  const onSubmit2 = handleSubmit((data) => {
+    data.status = userStatus;
+
+    modifyUser(user.user_id, { status: userStatus });
+  });
+
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <div>Loading...</div>;
   }
   return (
     <ContentComponent>
@@ -53,7 +65,7 @@ function UserInfo() {
             </div>
             <div className=" my-3">
               <h1 className=" text-center text-white text-base font-medium">
-                ¿Estás seguro de cambiar la contraseña?
+                ¿Estás seguro de modificar el usuario?
               </h1>
             </div>
             <div className=" flex justify-center items-center">
@@ -69,6 +81,42 @@ function UserInfo() {
                 <div className=" mx-4">
                   <button
                     onClick={() => setOpen(false)}
+                    className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Modal>
+        <Modal open={open2} onClose={() => setOpen2(false)}>
+          <div className=" block m-3">
+            <div className=" my-3">
+              <h1 className=" text-center text-white text-lg font-bold">
+                Confirmación
+              </h1>
+            </div>
+            <div className=" my-3">
+              <h1 className=" text-center text-white text-base font-medium">
+                {user.status === 1 || user.status === null
+                  ? "¿Estás seguro de bloquear el usuario?"
+                  : "¿Estás seguro de desbloquear el usuario?"}
+              </h1>
+            </div>
+            <div className=" flex justify-center items-center">
+              <div className=" my-2 grid grid-cols-2">
+                <div className=" mx-4">
+                  <button
+                    onClick={onSubmit2}
+                    className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                  >
+                    Aceptar
+                  </button>
+                </div>
+                <div className=" mx-4">
+                  <button
+                    onClick={() => setOpen2(false)}
                     className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
                   >
                     Cancelar
@@ -111,7 +159,7 @@ function UserInfo() {
             </svg>
             <div className=" flex justify-center items-center">
               <h1 className=" text-xl md:text-2xl lg:text-3xl font-bold text-white">
-                {user.role.role.toUpperCase()}
+                {`Modificación de usuario - ${user.user_name}`}
               </h1>
             </div>
           </div>
@@ -140,38 +188,130 @@ function UserInfo() {
                 </g>
               </svg>
               <div className=" flex justify-center items-center">
-                <h1 className=" text-base md:text-lg text-[#8f0e2a] font-bold">
-                  Usuario:
-                </h1>
+                <h1 className=" text-[#8f0e2a] text-lg font-bold">Usuario:</h1>
               </div>
               <div className=" flex justify-center items-center">
-                <h1 className=" text-lg text-[#8f0e2a] ">{user.user_name}</h1>
+                <h1 className=" text-[#8f0e2a] ">{user.user_name}</h1>
+              </div>
+              <div className=" my-5 flex justify-center items-center">
+                <h1 className=" text-[#8f0e2a] font-bold">
+                  {user.role_id === 1
+                    ? "Superadministrador"
+                    : user.role_id === 2
+                    ? "Administrador"
+                    : "Asistente"}
+                </h1>
               </div>
             </div>
           </div>
-          <div className=" my-5 flex justify-center items-center">
-            <form className="block">
-              <div>
-                <h1 className=" text-[#8f0e2a] text-center font-bold">
-                  Cambia tu contraseña
-                </h1>
+          <div className=" flex justify-center items-center">
+            <form className=" block md:grid gap-10 grid-cols-2">
+              <div className=" flex justify-start items-center">
+                <div className=" block">
+                  <h1 className=" text-[#8f0e2a]">Nombre de usuario</h1>
+                  <input
+                    className=" my-2 p-2 w-[200px] border-[2px] border-[#8f0e2a] rounded-lg"
+                    type="text"
+                    placeholder={user.user_name}
+                    {...register("user_name")}
+                  />
+                </div>
               </div>
-              <input
-                type="password"
-                className=" my-5 p-2 border-[2px] rounded-lg border-[#8f0e2a] w-[250px]"
-                {...register("user_password", {
-                  required: true,
-                })}
-              />
+              <div className="flex justify-start items-center">
+                <div className=" block">
+                  <h1 className=" text-[#8f0e2a]">Contraseña</h1>
+                  <input
+                    className=" my-2 p-2 w-[200px] border-[2px] border-[#8f0e2a] rounded-lg"
+                    type="password"
+                    {...register("user_password")}
+                  />
+                </div>
+              </div>
+              <div className=" my-5 md:my-0 col-span-2 flex justify-center  items-center"></div>
             </form>
           </div>
-          <div className=" my-5 flex justify-center items-center">
+          <div className=" flex justify-center items-center">
             <button
               onClick={() => setOpen(true)}
               className=" bg-[#8f0e2a] p-2 rounded-lg text-white hover:border-[1px] hover:scale-95 transition duration-300 border-black"
             >
               <h1>Guardar</h1>
             </button>
+          </div>
+          <div className=" my-5 flex justify-center items-center">
+            {user.status == 1 || user.status == null ? (
+              <button
+                onClick={() => {
+                  if (user.status == true || user.status == null) {
+                    setUserStatus(0);
+                  } else if (user.status == false) {
+                    setUserStatus(1);
+                  }
+                  setOpen2(true);
+                }}
+                className=" flex items-center bg-[#b4471b] p-2 rounded-lg text-white hover:border-[1px] hover:bg-[#c0582e] hover:scale-95 transition duration-300 border-black"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className=" h-[30px] fill-none mr-2 w-auto"
+                >
+                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    {" "}
+                    <path
+                      d="M12 14.5V16.5M7 10.0288C7.47142 10 8.05259 10 8.8 10H15.2C15.9474 10 16.5286 10 17 10.0288M7 10.0288C6.41168 10.0647 5.99429 10.1455 5.63803 10.327C5.07354 10.6146 4.6146 11.0735 4.32698 11.638C4 12.2798 4 13.1198 4 14.8V16.2C4 17.8802 4 18.7202 4.32698 19.362C4.6146 19.9265 5.07354 20.3854 5.63803 20.673C6.27976 21 7.11984 21 8.8 21H15.2C16.8802 21 17.7202 21 18.362 20.673C18.9265 20.3854 19.3854 19.9265 19.673 19.362C20 18.7202 20 17.8802 20 16.2V14.8C20 13.1198 20 12.2798 19.673 11.638C19.3854 11.0735 18.9265 10.6146 18.362 10.327C18.0057 10.1455 17.5883 10.0647 17 10.0288M7 10.0288V8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8V10.0288"
+                      className=" stroke-white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></path>{" "}
+                  </g>
+                </svg>
+                <h1>Bloquear usuario</h1>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  if (user.status == 1 || user.status == null) {
+                    setUserStatus(0);
+                  } else if (user.status == 0) {
+                    setUserStatus(1);
+                  }
+                  setOpen2(true);
+                }}
+                className=" flex items-center bg-[#245c9c] p-2 rounded-lg text-white hover:border-[1px] hover:bg-[#3367a3] hover:scale-95 transition duration-300 border-black"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className=" h-[30px] fill-none mr-2 w-auto"
+                >
+                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    {" "}
+                    <path
+                      d="M3 3L21 21M17 10V8C17 5.23858 14.7614 3 12 3C11.0283 3 10.1213 3.27719 9.35386 3.75681M7.08383 7.08338C7.02878 7.38053 7 7.6869 7 8V10.0288M19.5614 19.5618C19.273 20.0348 18.8583 20.4201 18.362 20.673C17.7202 21 16.8802 21 15.2 21H8.8C7.11984 21 6.27976 21 5.63803 20.673C5.07354 20.3854 4.6146 19.9265 4.32698 19.362C4 18.7202 4 17.8802 4 16.2V14.8C4 13.1198 4 12.2798 4.32698 11.638C4.6146 11.0735 5.07354 10.6146 5.63803 10.327C5.99429 10.1455 6.41168 10.0647 7 10.0288M19.9998 14.4023C19.9978 12.9831 19.9731 12.227 19.673 11.638C19.3854 11.0735 18.9265 10.6146 18.362 10.327C17.773 10.0269 17.0169 10.0022 15.5977 10.0002M10 10H8.8C8.05259 10 7.47142 10 7 10.0288"
+                      className=" stroke-white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></path>{" "}
+                  </g>
+                </svg>
+                <h1>Desbloquear usuario</h1>
+              </button>
+            )}
           </div>
         </div>
         <Toaster position="top-center" richColors />
@@ -180,4 +320,4 @@ function UserInfo() {
   );
 }
 
-export default UserInfo;
+export default ModifyUser;

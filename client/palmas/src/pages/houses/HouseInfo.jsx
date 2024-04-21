@@ -660,11 +660,13 @@ function HouseInfo() {
             </div>
           </div>
           <div className=" flex justify-center items-center">
-            <button className=" group hover:bg-[#8f0e2a] transition duration-300 p-2 md:p-3 border-[1px] border-[#8f0e2a] rounded-lg flex justify-center items-center">
-              <h1 className=" text-center group-hover:text-white text-[12px] md:text-sm lg:text-base transition duration-300 text-[#8f0e2a]">
-                Recibos de pago
-              </h1>
-            </button>
+            <Link to={`/inmuebles/${place.place_id}/recibos`}>
+              <button className=" group hover:bg-[#8f0e2a] transition duration-300 p-2 md:p-3 border-[1px] border-[#8f0e2a] rounded-lg flex justify-center items-center">
+                <h1 className=" text-center group-hover:text-white text-[12px] md:text-sm lg:text-base transition duration-300 text-[#8f0e2a]">
+                  Recibos de pago
+                </h1>
+              </button>
+            </Link>
           </div>
         </div>
         <div className=" my-5 h-[1px] w-full bg-[#8f0e2a]"></div>

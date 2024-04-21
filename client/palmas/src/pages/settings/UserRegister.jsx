@@ -1,25 +1,27 @@
 import React, { useState } from "react";
-import { useLoaderData, useNavigation, Link } from "react-router-dom";
-import { Toaster, toast } from "sonner";
-import ContentComponent from "../../components/ContentComponent";
-import Modal from "../../components/Modal";
-import { updateUser } from "../../api/user";
 import { useForm } from "react-hook-form";
+import { Link, useNavigate, useLoaderData } from "react-router-dom";
+import ContentComponent from "../../components/ContentComponent";
+import { Toaster, toast } from "sonner";
+import Modal from "../../components/Modal";
+import { registerRequest } from "../../api/auth";
 
-function UserInfo() {
-  const userData = useLoaderData();
-  const user = userData.data.user;
-  const navigation = useNavigation();
-  const [open, setOpen] = useState("");
-  const { register, handleSubmit } = useForm();
+function UserRegister() {
+  const { handleSubmit, register } = useForm();
+  const navigate = useNavigate();
+  const rolesData = useLoaderData();
+  const roles = rolesData.data;
+  const [open, setOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("");
+  console.log(roles);
 
-  const modifyUser = async (id, data) => {
+  const registerUser = async (data) => {
     try {
-      const res = await updateUser(id, data);
+      const res = await registerRequest(data);
       if (res.status === 200) {
-        toast.success("Usuario modificado con éxito");
+        toast.success("Usuario registrado con éxito");
         setTimeout(() => {
-          window.location.href = "/dashboard";
+          window.location.href = "/usuarios";
         }, 2000);
       }
     } catch (error) {
@@ -27,20 +29,22 @@ function UserInfo() {
     }
   };
 
-  const onSubmit = handleSubmit((data) => {
-    const modifiedData = {};
+  const handleSelectedRole = (event) => {
+    setSelectedRole(event.target.value);
+  };
 
-    for (const key in data) {
-      if (data[key] !== "") {
-        modifiedData[key] = data[key];
-      }
+  console.log(selectedRole);
+
+  const onSubmit = handleSubmit((data) => {
+    data.role_id = selectedRole;
+    if (data.role_id === "") {
+      toast.error("Debes seleccionar un rol");
+    } else {
+      data.role_id = parseInt(data.role_id);
+      registerUser(data);
     }
-    modifyUser(user.user_id, modifiedData);
   });
 
-  if (navigation.state === "loading") {
-    return <div>Cargando</div>;
-  }
   return (
     <ContentComponent>
       <div className=" flex justify-center min-h-screen h-fit items-start w-screen">
@@ -111,7 +115,7 @@ function UserInfo() {
             </svg>
             <div className=" flex justify-center items-center">
               <h1 className=" text-xl md:text-2xl lg:text-3xl font-bold text-white">
-                {user.role.role.toUpperCase()}
+                Registro de usuario
               </h1>
             </div>
           </div>
@@ -139,30 +143,51 @@ function UserInfo() {
                   ></path>{" "}
                 </g>
               </svg>
-              <div className=" flex justify-center items-center">
-                <h1 className=" text-base md:text-lg text-[#8f0e2a] font-bold">
-                  Usuario:
-                </h1>
-              </div>
-              <div className=" flex justify-center items-center">
-                <h1 className=" text-lg text-[#8f0e2a] ">{user.user_name}</h1>
-              </div>
             </div>
           </div>
           <div className=" my-5 flex justify-center items-center">
-            <form className="block">
-              <div>
-                <h1 className=" text-[#8f0e2a] text-center font-bold">
-                  Cambia tu contraseña
-                </h1>
+            <form className=" my-5 block md:grid gap-10 grid-cols-2">
+              <div className=" flex justify-start items-center">
+                <div className=" block">
+                  <h1 className=" text-[#8f0e2a]">Nombre de usuario</h1>
+                  <input
+                    className=" my-2 p-2 w-[200px] border-[2px] border-[#8f0e2a] rounded-lg"
+                    type="text"
+                    {...register("user_name")}
+                  />
+                </div>
               </div>
-              <input
-                type="password"
-                className=" my-5 p-2 border-[2px] rounded-lg border-[#8f0e2a] w-[250px]"
-                {...register("user_password", {
-                  required: true,
-                })}
-              />
+              <div className="flex justify-start items-center">
+                <div className=" block">
+                  <h1 className=" text-[#8f0e2a]">Contraseña</h1>
+                  <input
+                    className=" my-2 p-2 w-[200px] border-[2px] border-[#8f0e2a] rounded-lg"
+                    type="password"
+                    {...register("user_password")}
+                  />
+                </div>
+              </div>
+              <div className=" my-5 md:my-0 col-span-2 flex justify-center  items-center">
+                <div className=" block">
+                  <h1 className=" mb-2 text-[#8f0e2a] text-center">
+                    Selecciona un rol
+                  </h1>
+                  <select
+                    onChange={handleSelectedRole}
+                    value={selectedRole}
+                    className="bg-gray-50 border-[2px] border-[#8f0e2a] text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                  >
+                    <option value="" defaultValue>
+                      Selecciona un rol
+                    </option>
+                    {roles.map((role) => (
+                      <option key={role.role_id} value={role.role_id}>
+                        {role.role}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </form>
           </div>
           <div className=" my-5 flex justify-center items-center">
@@ -180,4 +205,4 @@ function UserInfo() {
   );
 }
 
-export default UserInfo;
+export default UserRegister;

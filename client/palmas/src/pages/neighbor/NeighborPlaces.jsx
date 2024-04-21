@@ -11,7 +11,6 @@ function NeighborPlaces() {
   const neighbor = neighborData.neighbor.data.neighbor;
   const places = neighborData.places.data;
   const navigation = useNavigation();
-  console.log(neighborData);
   const [selectedPlaces, setSelectedPlaces] = useState([]);
   const [search, setSearch] = useState("");
   const [placesTable, setPlacesTable] = useState([]);
@@ -22,8 +21,6 @@ function NeighborPlaces() {
       (neighborModel) => neighborModel.neighbor_id === neighbor.neighbor_id
     );
   });
-  console.log(filteredPlaces);
-
   const handleChange = (e) => {
     setSearch(e.target.value);
     searchedPlaces(e.target.value);

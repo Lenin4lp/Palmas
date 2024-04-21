@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.jsx";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -9,6 +8,7 @@ import {
 import "./index.css";
 import Login from "./pages/login/Login.jsx";
 import ProtectedRoutes from "./middlewares/ProtectedRoutes.jsx";
+import SuperAdminRoutes from "./middlewares/SuperAdminRoutes.jsx";
 import { AuthProvider } from "./auth/AuthProvider.jsx";
 import { getNeighbors, getNeighbor, getRoles } from "./api/neighbors.js";
 import { getPlace, getPlaces, getPlaceTypes } from "./api/places.js";
@@ -16,7 +16,11 @@ import HouseOutlet from "./middlewares/HouseOutlet.jsx";
 import { getVehicleTypes } from "./api/vehicles.js";
 import { getYears } from "./api/time.js";
 import { getPayments } from "./api/payment.js";
+import { getUserRoles } from "./api/user.js";
 import { getMonthlyDebts, getMonthlyFees, getMonthlyFee } from "./api/debt.js";
+import { getUser, getUsers } from "./api/user.js";
+import UserRegister from "./pages/settings/UserRegister.jsx";
+import ModifyUser from "./pages/settings/ModifyUser.jsx";
 const Dashboard = React.lazy(() => import("./pages/dashboard/Dashboard.jsx"));
 const Wallet = React.lazy(() => import("./pages/wallet/Wallet.jsx"));
 const Houses = React.lazy(() => import("./pages/houses/Houses.jsx"));
@@ -53,6 +57,11 @@ const AliquotRegister = React.lazy(() =>
 const AliquotModify = React.lazy(() =>
   import("./pages/aliquot/AliquotModify.jsx")
 );
+const HouseReceipts = React.lazy(() =>
+  import("./pages/houses/HouseReceipts.jsx")
+);
+const UserInfo = React.lazy(() => import("./pages/settings/UserInfo.jsx"));
+const Users = React.lazy(() => import("./pages/settings/Users.jsx"));
 
 const router = createBrowserRouter([
   {
@@ -153,6 +162,24 @@ const router = createBrowserRouter([
                 place: placeData,
                 vehicleTypes: vehicleTypesData,
                 monthlyDebts: getMonthlyDebtsData,
+              };
+            },
+          },
+          {
+            path: "/inmuebles/:id/recibos",
+            element: <HouseReceipts />,
+            loader: async ({ params }) => {
+              const { id } = params;
+              const placePromise = getPlace(id);
+              const paymentsPromise = getPayments();
+
+              const [placeData, paymentsData] = await Promise.all([
+                placePromise,
+                paymentsPromise,
+              ]);
+              return {
+                place: placeData,
+                payments: paymentsData,
               };
             },
           },
@@ -281,6 +308,39 @@ const router = createBrowserRouter([
             types: typesData,
           };
         },
+      },
+      {
+        path: "/perfil/:id",
+        element: <UserInfo />,
+        loader: async ({ params }) => {
+          const { id } = params;
+          return getUser(id);
+        },
+      },
+
+      {
+        path: "/superadmin",
+        element: <SuperAdminRoutes />,
+        children: [
+          {
+            path: "/superadmin/usuarios",
+            element: <Users />,
+            loader: () => getUsers(),
+          },
+          {
+            path: "/superadmin/usuarios/registrar",
+            element: <UserRegister />,
+            loader: () => getUserRoles(),
+          },
+          {
+            path: "/superadmin/usuarios/:id",
+            element: <ModifyUser />,
+            loader: async ({ params }) => {
+              const { id } = params;
+              return getUser(id);
+            },
+          },
+        ],
       },
     ],
   },

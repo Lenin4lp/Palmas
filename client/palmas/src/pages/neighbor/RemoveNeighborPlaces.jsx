@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ContentComponent from "../../components/ContentComponent";
 import { useLoaderData, useNavigation, Link } from "react-router-dom";
-import {
-  addPlaceFromNeighbor,
-  deletePlaceFromNeighbor,
-} from "../../api/neighbors";
+import { deletePlaceFromNeighbor } from "../../api/neighbors";
 import { Toaster, toast } from "sonner";
 import PlaceButton from "../../components/PlaceButton";
 import Modal from "../../components/Modal";
@@ -14,7 +11,6 @@ function RemoveNeighborPlaces() {
   const neighbor = neighborData.neighbor.data.neighbor;
   const places = neighborData.places.data;
   const navigation = useNavigation();
-  console.log(neighborData);
   const [selectedPlaces, setSelectedPlaces] = useState([]);
   const [search, setSearch] = useState("");
   const [placesTable, setPlacesTable] = useState([]);
@@ -36,7 +32,6 @@ function RemoveNeighborPlaces() {
       (neighborModel) => neighborModel.neighbor_id === neighbor.neighbor_id
     );
   });
-  console.log(filteredPlaces);
 
   const handleChange = (e) => {
     setSearch(e.target.value);

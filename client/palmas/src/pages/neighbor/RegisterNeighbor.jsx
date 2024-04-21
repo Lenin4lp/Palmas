@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ContentComponent from "../../components/ContentComponent";
 import RoleCard from "../../components/RoleCard";
-import {
-  useLoaderData,
-  useNavigation,
-  Link,
-  useParams,
-} from "react-router-dom";
+import { useLoaderData, useNavigation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { createNeighbor } from "../../api/neighbors";
 import { Toaster, toast } from "sonner";

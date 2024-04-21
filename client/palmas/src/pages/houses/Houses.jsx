@@ -4,12 +4,14 @@ import { useLoaderData, useNavigation, Link } from "react-router-dom";
 import { Toaster, toast } from "sonner";
 import Modal from "../../components/Modal";
 import { deletePlace } from "../../api/places";
+import { useAuth } from "../../auth/AuthProvider";
 
 function Houses() {
   const placesData = useLoaderData();
   const places = placesData.places.data;
   const types = placesData.types.data;
   const navigation = useNavigation();
+  const { user } = useAuth();
   const [selectedOrder, setSelectedOrder] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [search, setSearch] = useState("");
@@ -40,7 +42,9 @@ function Houses() {
           window.location.href = `/inmuebles`;
         }, 2000);
       }
-    } catch (error) {}
+    } catch (error) {
+      error.response.data.map((err) => toast.error(err));
+    }
   };
 
   function sortByPendingValue(places) {
@@ -98,90 +102,131 @@ function Houses() {
   if (navigation.state === "loading") {
     return <div>Cargando</div>;
   }
+
+  console.log(user.role_id);
   return (
     <ContentComponent>
       <div className=" w-full m-5 mb-0">
-        <Modal open={open} onClose={() => setOpen(false)}>
-          {Object.keys(selectedPlace).length != 0 &&
-          selectedPlace.months.length === 0 ? (
-            <div className=" block m-3">
-              <div className=" my-3">
-                <h1 className=" text-center text-white text-lg font-bold">
-                  Confirmación
-                </h1>
-              </div>
-              <div className=" my-3">
-                <h1 className=" text-center text-white text-base font-medium">
-                  ¿Estás seguro de eliminar el inmueble?
-                </h1>
-              </div>
-              <div className=" flex justify-center items-center">
-                <div className=" my-2 grid grid-cols-2">
-                  <div className=" mx-4">
-                    <button
-                      onClick={() => removePlace(selectedPlace.place_id)}
-                      className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
-                    >
-                      Aceptar
-                    </button>
-                  </div>
-                  <div className=" mx-4">
-                    <button
-                      onClick={() => setOpen(false)}
-                      className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
-                    >
-                      Cancelar
-                    </button>
+        {user.role_id == 1 && (
+          <Modal open={open} onClose={() => setOpen(false)}>
+            {Object.keys(selectedPlace).length != 0 &&
+            selectedPlace.months.length === 0 ? (
+              <div className=" block m-3">
+                <div className=" my-3">
+                  <h1 className=" text-center text-white text-lg font-bold">
+                    Confirmación
+                  </h1>
+                </div>
+                <div className=" my-3">
+                  <h1 className=" text-center text-white text-base font-medium">
+                    ¿Estás seguro de eliminar el inmueble?
+                  </h1>
+                </div>
+                <div className=" flex justify-center items-center">
+                  <div className=" my-2 grid grid-cols-2">
+                    <div className=" mx-4">
+                      <button
+                        onClick={() => removePlace(selectedPlace.place_id)}
+                        className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                      >
+                        Aceptar
+                      </button>
+                    </div>
+                    <div className=" mx-4">
+                      <button
+                        onClick={() => setOpen(false)}
+                        className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className=" block m-3">
-              <div className=" my-3">
-                <h1 className=" text-center text-white text-lg font-bold">
-                  Confirmación
-                </h1>
-              </div>
-              <div className=" py-3">
-                <h1 className=" text-center text-white text-base font-medium">
-                  ¿Estás seguro de eliminar el tipo de inmueble?
-                </h1>
-              </div>
-              <div className=" pb-1">
-                <h1 className=" text-center text-white text-base font-medium">
-                  Se borrarán todas las deudas y registros de pagos
-                  correspondientes
-                </h1>
-              </div>
-              <div className=" pb-3">
-                <h1 className=" text-center text-white text-base font-medium">
-                  al inmueble
-                </h1>
-              </div>
-              <div className=" flex justify-center items-center">
-                <div className=" my-2 grid grid-cols-2">
-                  <div className=" mx-4">
-                    <button
-                      onClick={() => removePlace(selectedPlace.place_id)}
-                      className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
-                    >
-                      Aceptar
-                    </button>
-                  </div>
-                  <div className=" mx-4">
-                    <button
-                      onClick={() => setOpen(false)}
-                      className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
-                    >
-                      Cancelar
-                    </button>
+            ) : (
+              <div className=" block m-3">
+                <div className=" my-3">
+                  <h1 className=" text-center text-white text-lg font-bold">
+                    Confirmación
+                  </h1>
+                </div>
+                <div className=" py-3">
+                  <h1 className=" text-center text-white text-base font-medium">
+                    ¿Estás seguro de eliminar el tipo de inmueble?
+                  </h1>
+                </div>
+                <div className=" pb-1">
+                  <h1 className=" text-center text-white text-base font-medium">
+                    Se borrarán todas las deudas y registros de pagos
+                    correspondientes
+                  </h1>
+                </div>
+                <div className=" pb-3">
+                  <h1 className=" text-center text-white text-base font-medium">
+                    al inmueble
+                  </h1>
+                </div>
+                <div className=" flex justify-center items-center">
+                  <div className=" my-2 grid grid-cols-2">
+                    <div className=" mx-4">
+                      <button
+                        onClick={() => removePlace(selectedPlace.place_id)}
+                        className=" p-2 active:transform active:scale-90 border border-white bg-[#384c85]  rounded-lg hover:bg-[#146898] text-white hover:text-white text-[12px] md:text-sm lg:text-base duration-500"
+                      >
+                        Aceptar
+                      </button>
+                    </div>
+                    <div className=" mx-4">
+                      <button
+                        onClick={() => setOpen(false)}
+                        className=" p-2 text-white active:transform active:scale-90 border border-gray-400 rounded-lg bg-[#ad2c2c] hover:bg-[#b94d4d]  text-[12px] md:text-sm lg:text-base duration-500"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
+            )}
+          </Modal>
+        )}
+        {user.role_id == 2 && (
+          <Modal open={open} onClose={() => setOpen(false)}>
+            <div className=" block m-3">
+              <div className=" my-3">
+                <h1 className=" text-center text-white text-xl font-bold">
+                  IMPORTANTE
+                </h1>
+              </div>
+              <div className=" py-3 flex justify-center items-center">
+                <svg
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className=" h-[80px] fill-white"
+                >
+                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path d="M13.995 1.827a1.745 1.745 0 0 0-2.969 0l-9.8 17.742a1.603 1.603 0 0 0 0 1.656 1.678 1.678 0 0 0 1.48.775H22.28a1.68 1.68 0 0 0 1.484-.775 1.608 1.608 0 0 0 .003-1.656zM12 8h1v7h-1zm.5 10.5a1 1 0 1 1 1-1 1.002 1.002 0 0 1-1 1z"></path>
+                    <path fill="none" d="M0 0h24v24H0z"></path>
+                  </g>
+                </svg>
+              </div>
+              <div className=" pt-5 flex justify-center items-center">
+                <h1 className=" text-white">No se pueden eliminar las casas</h1>
+              </div>
+              <div className="  flex justify-center items-center">
+                <h1 className=" text-white">
+                  Para soporte seguro contactar con el administrador.
+                </h1>
+              </div>
             </div>
-          )}
-        </Modal>
+          </Modal>
+        )}
         <div className="block">
           <div className=" block md:flex mx-5 ">
             <div className=" flex justify-center ">
@@ -411,7 +456,11 @@ function Houses() {
                               <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]  px-[10px] py-2">
                                 Monto pendiente
                               </th>
-                              <th className=" border border-slate-300 bg-opacity-80 text-white bg-[#8f0e2a]  px-[15px] py-2">
+                              <th
+                                className={`border border-slate-300 ${
+                                  user.role_id == 3 ? "hidden" : ""
+                                } bg-opacity-80 text-white bg-[#8f0e2a]  px-[15px] py-2`}
+                              >
                                 Acciones
                               </th>
                             </tr>
@@ -443,7 +492,11 @@ function Houses() {
                                 <th className="border border-slate-300 px-2 py-2">
                                   {place.pending_value}
                                 </th>
-                                <th className=" border grid grid-cols-2 h-full border-slate-300  py-2">
+                                <th
+                                  className={`border grid grid-cols-2 h-full border-slate-300 ${
+                                    user.role_id == 3 ? "hidden" : ""
+                                  } py-2`}
+                                >
                                   <div className=" flex justify-center border-none items-center">
                                     <Link to={`/inmuebles/${place.place_id}`}>
                                       <svg

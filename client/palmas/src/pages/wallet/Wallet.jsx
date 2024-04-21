@@ -331,7 +331,7 @@ function Wallet() {
                               {`$${payment.value}`}
                             </th>
                             <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
-                              <a href={payment.file}>Descargar</a>
+                              <a href={payment.file}>Ver PDF</a>
                             </th>
                           </tr>
                         ))
@@ -371,7 +371,7 @@ function Wallet() {
                               {`$${payment.value}`}
                             </th>
                             <th className="border bg-gradient-to-t from-[#c4c4c4] to-[#e2e2e2] border-[#8f0e2a] px-2 py-2">
-                              <a href={payment.file}>Descargar</a>
+                              <a href={payment.file}>Ver PDF</a>
                             </th>
                           </tr>
                         ))}

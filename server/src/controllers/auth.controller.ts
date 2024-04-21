@@ -4,13 +4,14 @@ import { TOKEN_SECRET } from "../config/config";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { createAccesToken } from "../libs/jwt";
+import { Role } from "../models/userRole.model";
 
 //? User Register
 export const userRegister = async (req: Request, res: Response) => {
-  const { user_name, user_email, user_password, role_id } = req.body;
+  const { user_name, user_password, role_id } = req.body;
   try {
     const userFound = await User.findOne({
-      where: { user_email: user_email, user_name: user_name },
+      where: { user_name: user_name },
     });
     if (userFound)
       return res
@@ -20,16 +21,14 @@ export const userRegister = async (req: Request, res: Response) => {
 
     const newUser = await User.create({
       user_name,
-      user_email,
       user_password: passwordHash,
       role_id,
     });
 
     res.json({
       message: "Usuario registrado con exito",
-      id: newUser.user_id,
+      user_id: newUser.user_id,
       user_name: newUser.user_name,
-      user_email: newUser.user_email,
       role_id: newUser.role_id,
     });
   } catch (error) {
@@ -47,6 +46,7 @@ export const login = async (req: Request, res: Response) => {
       where: {
         user_name: user_name,
       },
+      include: [{ model: Role }],
     });
     if (!userFound) return res.status(400).json(["El usuario no existe"]);
 
@@ -56,6 +56,10 @@ export const login = async (req: Request, res: Response) => {
     );
     if (!isMatch) return res.status(400).json(["Contraseña incorrecta"]);
 
+    if (userFound.status == false) {
+      return res.status(400).json(["El usuario se encuentra bloqueado"]);
+    }
+
     const token = await createAccesToken({
       id: userFound.user_id,
     });
@@ -64,9 +68,10 @@ export const login = async (req: Request, res: Response) => {
 
     res.json({
       message: "Ingreso Exitoso",
-      id: userFound.user_id,
+      user_id: userFound.user_id,
       user_name: userFound.user_name,
-      user_email: userFound.user_email,
+      role_id: userFound.role_id,
+      role: userFound.role,
       token,
     });
   } catch (error) {
@@ -99,7 +104,7 @@ export const verifyToken = async (req: Request, res: Response) => {
     return res.json({
       user_id: userFound.user_id,
       user_name: userFound.user_name,
-      user_email: userFound.user_email,
+      role_id: userFound.role_id,
       createdAt: userFound.createdAt,
       updatedAt: userFound.updatedAt,
     });

@@ -2,13 +2,10 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../auth/AuthProvider";
 import { Navigate } from "react-router-dom";
+import { Toaster, toast } from "sonner";
 
 const Login = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+  const { register, handleSubmit } = useForm();
 
   const {
     signin,
@@ -21,6 +18,10 @@ const Login = () => {
   const onSubmit = handleSubmit((data) => {
     signin(data);
   });
+
+  if (SigninErrors.length > 0) {
+    toast.error(SigninErrors[0]);
+  }
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" />;
@@ -154,6 +155,7 @@ const Login = () => {
           </div>
         </div>
       </div>
+      <Toaster position="top-center" richColors />
     </div>
   );
 };

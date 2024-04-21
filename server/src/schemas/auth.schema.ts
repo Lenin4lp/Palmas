@@ -13,12 +13,11 @@ export const registerSchema = z.object({
     }),
 
   user_email: z
-    .string({
-      required_error: "El email es requerido",
-    })
+    .string()
     .email({
       message: "El email es invalido",
-    }),
+    })
+    .optional(),
   user_password: z
     .string({
       required_error: "La contraseña es requerida",
@@ -29,6 +28,9 @@ export const registerSchema = z.object({
     .max(50, {
       message: "La contraseña debe tener como maximo 50 caracteres",
     }),
+  role_id: z.number({
+    required_error: "El rol es requerido",
+  }),
 });
 
 export const updateSchema = z.object({
@@ -42,14 +44,6 @@ export const updateSchema = z.object({
     })
     .optional(),
 
-  user_email: z
-    .string({
-      required_error: "El email es requerido",
-    })
-    .email({
-      message: "El email es invalido",
-    })
-    .optional(),
   user_password: z
     .string()
     .min(5, {
@@ -75,8 +69,8 @@ export const loginSchema = z.object({
     .string({
       required_error: "La contraseña es requerida",
     })
-    .min(6, {
-      message: "La contraseña debe tener como mínimo 6 caracteres",
+    .min(5, {
+      message: "La contraseña debe tener como mínimo 5 caracteres",
     })
     .max(50, {
       message: "La contraseña debe tener como maximo 50 caracteres",
