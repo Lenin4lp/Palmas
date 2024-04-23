@@ -21,7 +21,7 @@ function UserRegister() {
       if (res.status === 200) {
         toast.success("Usuario registrado con éxito");
         setTimeout(() => {
-          window.location.href = "/usuarios";
+          window.location.href = "/superadmin/usuarios";
         }, 2000);
       }
     } catch (error) {

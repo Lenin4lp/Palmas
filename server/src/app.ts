@@ -21,18 +21,22 @@ import { MonthlyFee } from "./models/monthlyFee.model";
 import { Place } from "./models/place.model";
 import MonthlyDebtRoutes from "./routes/monthlyDebt.routes";
 import { Year } from "./models/year.model";
-import { createYear } from "./controllers/year.controller";
 import { PlaceType } from "./models/placeType.model";
 import PaymentRoutes from "./routes/payment.routes";
 import uploadRoutes from "./routes/upload.routes";
 import userRoutes from "./routes/user.routes";
 import userRolesRoutes from "./routes/role.routes";
+import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { readFile } from "fs/promises";
+import { writeFile } from "fs/promises";
 
 const app = express();
 
 app.use(morgan("dev"));
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(
+  cors({ origin: "https://aliquot1.softdeveral.com", credentials: true })
+);
 
 app.use(urlencoded({ extended: false }));
 
@@ -64,6 +68,142 @@ app.listen(PORT, () => {
 });
 connectionDB();
 export default app;
+
+//? Modify PDF
+async function ModifyPDF(month: string, year: string) {
+  const filePath = "public/uploads/accountFormat.pdf";
+  const existingPdfBytes = await readFile(filePath);
+  const pdfDoc = await PDFDocument.load(existingPdfBytes);
+  const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const pages = pdfDoc.getPages();
+  const firstPage = pages[0];
+  const width = firstPage.getWidth();
+  const height = firstPage.getHeight();
+
+  const centerX = width / 2;
+
+  function textStartX(textWidth: number) {
+    return centerX - textWidth / 2;
+  }
+
+  function translateAbreviations(month: string) {
+    if (month.startsWith("JAN")) {
+      return "ENE" + month.substring(3);
+    } else if (month.startsWith("APR")) {
+      return "ABR" + month.substring(3);
+    } else if (month.startsWith("AUG")) {
+      return "AGO" + month.substring(3);
+    } else if (month.startsWith("DEC")) {
+      return "DIC" + month.substring(3);
+    } else {
+      return month;
+    }
+  }
+
+  firstPage.drawRectangle({
+    x: 75,
+    y: 190,
+    width: 70,
+    height: 30,
+    borderWidth: 1,
+    color: rgb(1, 1, 1),
+  });
+  firstPage.drawRectangle({
+    x: 75,
+    y: 160,
+    width: 70,
+    height: 30,
+    borderWidth: 1,
+    color: rgb(1, 1, 1),
+  });
+
+  firstPage.drawText("Inmueble", {
+    x: 90,
+    y: 200,
+    size: 10,
+    font: helveticaFont,
+    color: rgb(0, 0, 0),
+  });
+
+  firstPage.drawRectangle({
+    x: 145,
+    y: 190,
+    width: 120,
+    height: 30,
+    borderWidth: 1,
+    color: rgb(1, 1, 1),
+  });
+  firstPage.drawRectangle({
+    x: 145,
+    y: 160,
+    width: 120,
+    height: 30,
+    borderWidth: 1,
+    color: rgb(1, 1, 1),
+  });
+
+  firstPage.drawText("Saldo pendiente", {
+    x: 168,
+    y: 200,
+    size: 10,
+    font: helveticaFont,
+    color: rgb(0, 0, 0),
+  });
+
+  firstPage.drawRectangle({
+    x: 265,
+    y: 190,
+    width: 145,
+    height: 30,
+    borderWidth: 1,
+    color: rgb(1, 1, 1),
+  });
+  firstPage.drawRectangle({
+    x: 265,
+    y: 160,
+    width: 145,
+    height: 30,
+    borderWidth: 1,
+    color: rgb(1, 1, 1),
+  });
+
+  firstPage.drawText(`Valor alicuota ${translateAbreviations(month)}-${year}`, {
+    x: 285,
+    y: 200,
+    size: 10,
+    font: helveticaFont,
+    color: rgb(0, 0, 0),
+  });
+
+  firstPage.drawRectangle({
+    x: 410,
+    y: 190,
+    width: 120,
+    height: 30,
+    borderWidth: 1,
+    color: rgb(1, 1, 1),
+  });
+  firstPage.drawRectangle({
+    x: 410,
+    y: 160,
+    width: 120,
+    height: 30,
+    borderWidth: 1,
+    color: rgb(1, 1, 1),
+  });
+
+  firstPage.drawText(`Total`, {
+    x: 460,
+    y: 200,
+    size: 10,
+    font: helveticaFont,
+    color: rgb(0, 0, 0),
+  });
+
+  const modifiedPdfBytes = await pdfDoc.save();
+
+  await writeFile("public/uploads/accountFormatEdited.pdf", modifiedPdfBytes);
+}
 
 // ? ObtainMonth
 function ObtainMonth(date: string): string {
@@ -121,6 +261,16 @@ const ChangeMonth = async (currentMonth: string, currentYear: string) => {
     return error;
   }
 };
+
+cron.schedule("2 28 00 23 4 *", async () => {
+  const currentDateString = new Date().toString();
+  const currentYear = new Date().getFullYear().toString();
+  const currentMonth = ObtainMonth(currentDateString);
+
+  ModifyPDF(currentMonth, currentYear).then(() =>
+    console.log("Se hizo o no la carnita asada?")
+  );
+});
 
 // ? Prueba node-cron
 cron.schedule(" 1 20 4 5 * *", async () => {

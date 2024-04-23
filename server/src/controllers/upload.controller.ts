@@ -25,7 +25,7 @@ export const uploadFile = async (req: Request, res: Response) => {
   const file = req.file;
   if (!file) return res.status(400).send("Please upload a file");
 
-  const fileLocation = `public/uploads/${file.originalname}`;
+  const fileLocation = `https://aliquot.api.softdeveral.com/uploads/${file.originalname}`;
 
   const fileName = file.originalname;
   const paymentId = fileName.match(/\d+/g)?.join("");
@@ -54,7 +54,7 @@ export const uploadFile = async (req: Request, res: Response) => {
             attachments: [
               {
                 filename: `${file.originalname}`,
-                content: `https://aliquot.api.softdeveral.com/uploads/Comprobante_NÂ°_122.pdf`,
+                content: `https://aliquot.api.softdeveral.com/uploads/${file.originalname}`,
               },
             ],
           });

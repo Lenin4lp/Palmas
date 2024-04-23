@@ -24,7 +24,7 @@ const Login = () => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" />;
+    return <Navigate to="/inmuebles" />;
   }
   return (
     <div className=" font-mono h-screen w-screen flex justify-center items-center bg-white md:bg-gradient-to-br from-[#852655] to-[#8f0e2a]">

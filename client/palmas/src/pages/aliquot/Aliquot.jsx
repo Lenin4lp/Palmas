@@ -168,7 +168,7 @@ function Aliquot() {
   ) => {
     const doc = new jsPDF({
       unit: "mm",
-      format: [79, 70],
+      format: [79, 50],
     });
     let fontSize = 8;
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -184,7 +184,7 @@ function Aliquot() {
         (doc.getStringUnitWidth(`Cjto. Habitacional`) * fontSize) /
           doc.internal.scaleFactor
       ),
-      4
+      2
     );
     doc.text(
       "Casa Club Las Palmas",
@@ -206,11 +206,11 @@ function Aliquot() {
       ),
       12
     );
-    doc.text("Dirección: Sangolquí", 5, 17);
-    doc.text("Calle 10 de diciembre y 10 de agosto", 5, 21);
-    doc.text(`Fecha: ${date}`, 5, 25);
-    doc.text(`Cliente: ${customer}`, 5, 29);
-    doc.text(`CI/PA/RUC: ${clientId}`, 5, 33);
+    doc.text("Dirección: Sangolquí", 2, 17);
+    doc.text("Calle 10 de diciembre y 10 de agosto", 2, 21);
+    doc.text(`Fecha: ${date}`, 2, 25);
+    doc.text(`Cliente: ${customer}`, 2, 29);
+    doc.text(`CI/PA/RUC: ${clientId}/ ${selectedPlace.place_name}`, 2, 33);
 
     function translateAbreviations(selectedMonth) {
       if (selectedMonth.startsWith("JAN")) {
@@ -235,45 +235,37 @@ function Aliquot() {
       37
     );
     doc.text(
-      "____________________________________________",
+      "________________________________________",
       textStartX(
-        (doc.getStringUnitWidth(
-          `____________________________________________`
-        ) *
+        (doc.getStringUnitWidth(`________________________________________`) *
           fontSize) /
           doc.internal.scaleFactor
       ),
       39
     );
-    doc.text(
-      "Cant.                          Detalle                            V.Total",
-      5,
-      42
-    );
+    doc.text("Cant.                 Detalle                  V.Total", 2, 42);
 
     doc.text(
-      "____________________________________________",
+      "________________________________________",
       textStartX(
-        (doc.getStringUnitWidth(
-          `____________________________________________`
-        ) *
+        (doc.getStringUnitWidth(`________________________________________`) *
           fontSize) /
           doc.internal.scaleFactor
       ),
       43
     );
-    doc.text("1", 7, 47);
+    doc.text("1", 3, 47);
 
     if (monthDebt && monthDebt.debt != 0) {
-      doc.text(`Pago alicuota ${translateAbreviations(selectedMonth)}`, 20, 47);
+      doc.text(`Pago alicuota ${translateAbreviations(selectedMonth)}`, 10, 47);
     } else {
       doc.text(
         `Abono alicuota ${translateAbreviations(selectedMonth)}`,
-        19,
+        10,
         47
       );
     }
-    doc.text(`$${value}`, 55, 47);
+    doc.text(`$${value}`, 42, 47);
 
     doc.text(
       "____________________________________________",
@@ -297,7 +289,7 @@ function Aliquot() {
       ),
       53
     );
-    doc.text("Forma de pago:", 5, 57);
+    doc.text("Forma de pago:", 2, 57);
     let pay = "";
     if (selectedPay == 1) {
       pay = "Depósito";
@@ -309,28 +301,28 @@ function Aliquot() {
       pay = "";
     }
 
-    doc.text("Subtotal:", 36, 57);
-    doc.text(`$${value}`, 55, 57);
+    doc.text("Subtotal:", 26, 57);
+    doc.text(`$${value}`, 42, 57);
 
-    doc.text("Valor total:", 36, 61);
-    doc.text(`$${value}`, 55, 61);
+    doc.text("Valor total:", 26, 61);
+    doc.text(`$${value}`, 42, 61);
 
     doc.setFontSize(6);
     fontSize = 6;
     const receiptObject = receipt;
 
-    doc.text(pay, 5, 60);
+    doc.text(pay, 2, 60);
     if (selectedPay == 1) {
-      doc.text(`N° ${receiptObject.deposit}`, 5, 63);
+      doc.text(`N° ${receiptObject.deposit}`, 2, 63);
     } else if (selectedPay == 2) {
-      doc.text(`N° ${receiptObject.transfer}`, 5, 63);
+      doc.text(`N° ${receiptObject.transfer}`, 2, 63);
     }
 
     doc.text(
-      `_________________                _________________`,
+      ` _________________           _________________`,
       textStartX(
         (doc.getStringUnitWidth(
-          `_________________                _________________`
+          ` _________________           _________________`
         ) *
           fontSize) /
           doc.internal.scaleFactor
@@ -339,10 +331,10 @@ function Aliquot() {
     );
 
     doc.text(
-      `  Recibí conforme                        Firma autorizada`,
+      `  Recibí conforme                  Firma autorizada`,
       textStartX(
         (doc.getStringUnitWidth(
-          `  Recibí conforme                        Firma autorizada`
+          `  Recibí conforme                  Firma autorizada`
         ) *
           fontSize) /
           doc.internal.scaleFactor
@@ -351,10 +343,10 @@ function Aliquot() {
     );
 
     doc.text(
-      `   Copropietario                              Administración`,
+      `    Copropietario                      Administración`,
       textStartX(
         (doc.getStringUnitWidth(
-          `   Copropietario                              Administración`
+          `    Copropietario                      Administración`
         ) *
           fontSize) /
           doc.internal.scaleFactor
@@ -367,7 +359,7 @@ function Aliquot() {
     formData.append("myFile", pdfBlob, `Comprobante_N°_${paymentId}.pdf`);
 
     axios
-      .post("http://localhost:8081/api/upload", formData, {
+      .post("https://aliquot.api.softdeveral.com/api/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -385,13 +377,6 @@ function Aliquot() {
       })
       .catch((err) => console.log(err));
   };
-
-  console.log(monthlyDebts[0].month_id);
-
-  console.log(monthDebt);
-  console.log(selectedCustomer);
-  console.log(selectedPlace);
-  console.log(selectedMonth);
 
   if (navigation.state === "loading") {
     return <div>Cargando</div>;
