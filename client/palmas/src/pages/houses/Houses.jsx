@@ -5,6 +5,7 @@ import { Toaster, toast } from "sonner";
 import Modal from "../../components/Modal";
 import { deletePlace } from "../../api/places";
 import { useAuth } from "../../auth/AuthProvider";
+import Loader from "../../components/Loader";
 
 function Houses() {
   const placesData = useLoaderData();
@@ -100,7 +101,7 @@ function Houses() {
   };
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
 
   console.log(user.role_id);

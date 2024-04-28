@@ -29,14 +29,15 @@ import userRolesRoutes from "./routes/role.routes";
 import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { readFile } from "fs/promises";
 import { writeFile } from "fs/promises";
+import { Neighbor } from "./models/neighbor.model";
+import { Resend } from "resend";
+import { Model } from "sequelize";
 
 const app = express();
 
 app.use(morgan("dev"));
 
-app.use(
-  cors({ origin: "https://aliquot1.softdeveral.com", credentials: true })
-);
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 app.use(urlencoded({ extended: false }));
 
@@ -69,9 +70,16 @@ app.listen(PORT, () => {
 connectionDB();
 export default app;
 
-//? Modify PDF
-async function ModifyPDF(month: string, year: string) {
-  const filePath = "public/uploads/accountFormat.pdf";
+const resend = new Resend(process.env.RESEND_API);
+
+async function ModifyPDF(
+  month: string,
+  year: string,
+  place: string,
+  amount: number,
+  debt: number
+) {
+  const filePath = "public/uploads/estadoCuenta.pdf";
   const existingPdfBytes = await readFile(filePath);
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -124,6 +132,13 @@ async function ModifyPDF(month: string, year: string) {
     font: helveticaFont,
     color: rgb(0, 0, 0),
   });
+  firstPage.drawText(`${place}`, {
+    x: 90,
+    y: 170,
+    size: 10,
+    font: helveticaFont,
+    color: rgb(0, 0, 0),
+  });
 
   firstPage.drawRectangle({
     x: 145,
@@ -145,6 +160,13 @@ async function ModifyPDF(month: string, year: string) {
   firstPage.drawText("Saldo pendiente", {
     x: 168,
     y: 200,
+    size: 10,
+    font: helveticaFont,
+    color: rgb(0, 0, 0),
+  });
+  firstPage.drawText(`$${(amount - debt).toFixed(2)}`, {
+    x: 190,
+    y: 170,
     size: 10,
     font: helveticaFont,
     color: rgb(0, 0, 0),
@@ -174,6 +196,13 @@ async function ModifyPDF(month: string, year: string) {
     font: helveticaFont,
     color: rgb(0, 0, 0),
   });
+  firstPage.drawText(`$${debt}`, {
+    x: 318,
+    y: 170,
+    size: 10,
+    font: helveticaFont,
+    color: rgb(0, 0, 0),
+  });
 
   firstPage.drawRectangle({
     x: 410,
@@ -199,11 +228,81 @@ async function ModifyPDF(month: string, year: string) {
     font: helveticaFont,
     color: rgb(0, 0, 0),
   });
+  firstPage.drawText(`$${amount}`, {
+    x: 450,
+    y: 170,
+    size: 10,
+    font: helveticaFont,
+    color: rgb(0, 0, 0),
+  });
 
   const modifiedPdfBytes = await pdfDoc.save();
 
-  await writeFile("public/uploads/accountFormatEdited.pdf", modifiedPdfBytes);
+  await writeFile(
+    `public/uploads/EstadoDeCuenta-${month}-${year}-${place}.pdf`,
+    modifiedPdfBytes
+  );
+
+  return modifiedPdfBytes;
 }
+
+cron.schedule("2 51 19 * * *", async () => {
+  const currentDateString = new Date().toString();
+  const currentYear = new Date().getFullYear().toString();
+  const currentMonth = ObtainMonth(currentDateString);
+
+  const monthId = `${currentMonth}-${currentYear}`;
+
+  const places = await Place.findAll({
+    include: [{ model: Neighbor }, { model: Month }],
+  });
+
+  places.forEach(async (place) => {
+    const monthlyDebt = await MonthlyDebt.findOne({
+      where: {
+        place_id: place.place_id,
+        month_id: monthId,
+      },
+    });
+    if (monthlyDebt) {
+      ModifyPDF(
+        currentMonth,
+        currentYear,
+        place.place_name,
+        place.pending_value,
+        monthlyDebt.debt
+      ).then((modifiedPdfBytes) => {
+        const pdfBuffer = Buffer.from(modifiedPdfBytes);
+        place.neighbors.forEach(async (neighbor) => {
+          console.log(neighbor.neighbor_id, monthId);
+          if (neighbor.neighbor_email !== null) {
+            try {
+              const { data, error } = await resend.emails.send({
+                from: "LasPalmas <aliquot@softdeveral.com>",
+                to: neighbor.neighbor_email,
+                subject: `Estado de cuenta Conjunto Las Palmas - ${currentMonth} - ${currentYear}`,
+                text: "Buen día vecino. A continuación se adjunta su estado de cuenta. Gracias por su colaboración.\n\nAtentamente,\nAdministración de Cnjto. las Palmas",
+                attachments: [
+                  {
+                    filename: `Estado de cuenta ${currentMonth}-${currentYear}-${place.place_name}.pdf`,
+
+                    content: pdfBuffer,
+                  },
+                ],
+              });
+            } catch (error) {
+              console.log("Algo malio sal", error);
+            }
+          } else {
+            console.log("No hay correo mijooo");
+          }
+        });
+        console.log("Si se hizo la carnita :)");
+      });
+      console.log("Mensaje de comprobaciones");
+    }
+  });
+});
 
 // ? ObtainMonth
 function ObtainMonth(date: string): string {
@@ -261,16 +360,6 @@ const ChangeMonth = async (currentMonth: string, currentYear: string) => {
     return error;
   }
 };
-
-cron.schedule("2 28 00 23 4 *", async () => {
-  const currentDateString = new Date().toString();
-  const currentYear = new Date().getFullYear().toString();
-  const currentMonth = ObtainMonth(currentDateString);
-
-  ModifyPDF(currentMonth, currentYear).then(() =>
-    console.log("Se hizo o no la carnita asada?")
-  );
-});
 
 // ? Prueba node-cron
 cron.schedule(" 1 20 4 5 * *", async () => {

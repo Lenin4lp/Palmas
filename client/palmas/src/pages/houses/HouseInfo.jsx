@@ -15,6 +15,7 @@ import { deletePlaceFromNeighbor } from "../../api/neighbors";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import axios from "axios";
+import Loader from "../../components/Loader";
 
 function HouseInfo() {
   const { id } = useParams();
@@ -281,7 +282,7 @@ function HouseInfo() {
     doc.text(`Fecha: ${selectedDate}`, 2, 25);
     doc.text(
       `Cliente: ${selectedCostumerJSON?.neighbor_name} ${selectedCostumerJSON?.neighbor_lastname}`,
-      5,
+      2,
       29
     );
     doc.text(`CI/PA/RUC: ${clientId} / ${place.place_name}`, 2, 33);
@@ -455,7 +456,7 @@ function HouseInfo() {
   };
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
   return (
     <div className="  md:pl-[70px] pb-[90px] md:py-0 w-screen min-h-screen h-fit">

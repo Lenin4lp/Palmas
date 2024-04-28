@@ -6,6 +6,7 @@ import ContentComponent from "../../components/ContentComponent";
 import Modal from "../../components/Modal";
 import { deleteUser } from "../../api/user";
 import { set } from "react-hook-form";
+import Loader from "../../components/Loader";
 
 function Users() {
   const usersData = useLoaderData();
@@ -34,7 +35,7 @@ function Users() {
 
   console.log(users);
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
   return (
     <ContentComponent>

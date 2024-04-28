@@ -13,6 +13,7 @@ import {
   useParams,
 } from "react-router-dom";
 import Modal from "../../components/Modal";
+import Loader from "../../components/Loader";
 
 function AliquotModify() {
   const { id } = useParams();
@@ -67,7 +68,7 @@ function AliquotModify() {
   });
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
   return (
     <div className=" md:pl-[70px] h-fit min-h-screen w-screen md:py-0 pb-[90px] flex justify-center items-start">

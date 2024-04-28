@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { createVehicleType, deleteVehicleType } from "../../api/vehicles";
 import { Toaster, toast } from "sonner";
 import Modal from "../../components/Modal";
+import Loader from "../../components/Loader";
 
 function VehicleTypes() {
   const typesData = useLoaderData();
@@ -53,7 +54,7 @@ function VehicleTypes() {
     registerType(data);
   });
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
   return (
     <ContentComponent>

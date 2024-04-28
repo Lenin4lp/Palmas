@@ -6,6 +6,7 @@ import { Toaster, toast } from "sonner";
 import RoleCard from "../../components/RoleCard";
 import Modal from "../../components/Modal";
 import { updateNeighbor } from "../../api/neighbors";
+import Loader from "../../components/Loader";
 
 function ModifyNeighbor() {
   const { id } = useParams();
@@ -57,7 +58,7 @@ function ModifyNeighbor() {
   });
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
   return (
     <ContentComponent>

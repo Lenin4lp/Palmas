@@ -3,6 +3,7 @@ import { useLoaderData, useNavigation, Link } from "react-router-dom";
 import { deleteNeighbor } from "../../api/neighbors";
 import { toast, Toaster } from "sonner";
 import Modal from "../../components/Modal";
+import Loader from "../../components/Loader";
 
 function NeighborInfo() {
   const neighbordata = useLoaderData();
@@ -25,7 +26,7 @@ function NeighborInfo() {
   };
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
   return (
     <div className="  h-fit min-h-screen w-screen md:pl-[70px] md:py-0 pb-[90px]">

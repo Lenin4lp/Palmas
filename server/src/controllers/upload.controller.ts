@@ -10,7 +10,7 @@ const resend = new Resend(process.env.RESEND_API);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "public/uploads");
+    cb(null, "uploads");
   },
   filename: (req, file, cb) => {
     cb(null, `${file.originalname}`);

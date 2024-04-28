@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ContentComponent from "../../components/ContentComponent";
 import { useLoaderData, useNavigation, Link } from "react-router-dom";
+import Loader from "../../components/Loader";
 
 function Calendar() {
   const yearsData = useLoaderData();
@@ -28,7 +29,7 @@ function Calendar() {
       : places.filter((place) => place.placeType_id == selectedType);
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
   return (
     <ContentComponent>

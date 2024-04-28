@@ -5,6 +5,7 @@ import ContentComponent from "../../components/ContentComponent";
 import Modal from "../../components/Modal";
 import { updateUser } from "../../api/user";
 import { useForm } from "react-hook-form";
+import Loader from "../../components/Loader";
 
 function UserInfo() {
   const userData = useLoaderData();
@@ -39,7 +40,7 @@ function UserInfo() {
   });
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
   return (
     <ContentComponent>

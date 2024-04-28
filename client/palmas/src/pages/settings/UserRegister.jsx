@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate, useLoaderData } from "react-router-dom";
+import { Link, useNavigation, useLoaderData } from "react-router-dom";
 import ContentComponent from "../../components/ContentComponent";
 import { Toaster, toast } from "sonner";
 import Modal from "../../components/Modal";
 import { registerRequest } from "../../api/auth";
+import Loader from "../../components/Loader";
 
 function UserRegister() {
   const { handleSubmit, register } = useForm();
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const rolesData = useLoaderData();
   const roles = rolesData.data;
   const [open, setOpen] = useState(false);
@@ -44,6 +45,10 @@ function UserRegister() {
       registerUser(data);
     }
   });
+
+  if (navigation.state === "loading") {
+    return <Loader />;
+  }
 
   return (
     <ContentComponent>

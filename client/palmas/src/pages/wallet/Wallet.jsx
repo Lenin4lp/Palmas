@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ContentComponent from "../../components/ContentComponent";
 import { useLoaderData, useNavigation, Link } from "react-router-dom";
 import { Toaster, toast } from "sonner";
+import Loader from "../../components/Loader";
 
 function Wallet() {
   const walletData = useLoaderData();
@@ -42,6 +43,7 @@ function Wallet() {
   }
 
   if (navigation.state === "loading") {
+    return <Loader />;
   }
   return (
     <div className=" md:pl-[70px] pb-[90px] md:py-0 w-screen h-fit min-h-screen bg-gradient-to-bl from-[#852655] to-[#8f0e2a] ">

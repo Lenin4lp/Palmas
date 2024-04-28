@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { createNeighbor } from "../../api/neighbors";
 import { Toaster, toast } from "sonner";
 import Modal from "../../components/Modal";
+import Loader from "../../components/Loader";
 
 function RegisterNeighbor() {
   const [errors, setErrors] = useState([]);
@@ -54,7 +55,7 @@ function RegisterNeighbor() {
   });
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
 
   return (

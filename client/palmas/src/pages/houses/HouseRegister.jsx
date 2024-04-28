@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { Toaster, toast } from "sonner";
 import { createPlace } from "../../api/places";
 import Modal from "../../components/Modal";
+import Loader from "../../components/Loader";
 
 function HouseRegister() {
   const typesdata = useLoaderData();
@@ -52,7 +53,7 @@ function HouseRegister() {
   };
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
 
   return (

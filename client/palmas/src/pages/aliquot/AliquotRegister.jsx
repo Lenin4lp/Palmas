@@ -4,6 +4,7 @@ import { toast, Toaster } from "sonner";
 import { useForm } from "react-hook-form";
 import { useNavigation, Link } from "react-router-dom";
 import Modal from "../../components/Modal";
+import Loader from "../../components/Loader";
 
 function AliquotRegister() {
   const [open, setOpen] = useState(false);
@@ -38,7 +39,7 @@ function AliquotRegister() {
   });
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
   return (
     <div className=" md:pl-[70px] h-fit min-h-screen w-screen md:py-0 pb-[90px] flex justify-center items-start">

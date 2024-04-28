@@ -5,6 +5,7 @@ import ContentComponent from "../../components/ContentComponent";
 import Modal from "../../components/Modal";
 import { toast, Toaster } from "sonner";
 import { updateUser } from "../../api/user";
+import Loader from "../../components/Loader";
 
 function ModifyUser() {
   const userData = useLoaderData();
@@ -51,7 +52,7 @@ function ModifyUser() {
   });
 
   if (navigation.state === "loading") {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
   return (
     <ContentComponent>

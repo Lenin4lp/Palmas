@@ -6,6 +6,7 @@ import {
   useParams,
 } from "react-router-dom";
 import "./index.css";
+import Error from "./pages/error/Error.jsx";
 import Login from "./pages/login/Login.jsx";
 import ProtectedRoutes from "./middlewares/ProtectedRoutes.jsx";
 import SuperAdminRoutes from "./middlewares/SuperAdminRoutes.jsx";
@@ -67,10 +68,12 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Login />,
+    errorElement: <Error />,
   },
   {
     path: "/",
     element: <ProtectedRoutes />,
+    errorElement: <Error />,
     children: [
       {
         path: "/dashboard",
@@ -96,6 +99,7 @@ const router = createBrowserRouter([
       {
         path: "/inmuebles",
         element: <HouseOutlet />,
+        errorElement: <Error />,
         children: [
           {
             path: "/inmuebles",
@@ -321,6 +325,7 @@ const router = createBrowserRouter([
       {
         path: "/superadmin",
         element: <SuperAdminRoutes />,
+        errorElement: <Error />,
         children: [
           {
             path: "/superadmin/usuarios",

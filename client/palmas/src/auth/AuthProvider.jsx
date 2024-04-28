@@ -81,12 +81,9 @@ export function AuthProvider({ children }) {
       value={{ signin, isLoading, logout, user, isAuthenticated, errors }}
     >
       {isLoading ? (
-        <div className="flex justify-center items-center w-screen h-screen bg-white">
-          <div className="block">
-            <div className="w-20 h-20 rounded-full animate-spin border-x-[3px] border-solid border-[#146898] border-t-transparent shadow-md"></div>
-            <h4 className=" text-center text-[#146898]  font-semibold mt-5">
-              Cargando...
-            </h4>
+        <div className="flex justify-center items-center w-screen h-screen bg-[#8f0e2a]">
+          <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-[#852655] to-white animate-spin">
+            <div class="h-9 w-9 rounded-full bg-[#8f0e2a]"></div>
           </div>
         </div>
       ) : (

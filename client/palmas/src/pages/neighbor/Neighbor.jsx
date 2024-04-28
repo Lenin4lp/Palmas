@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLoaderData, useNavigation, Link } from "react-router-dom";
 import ContentComponent from "../../components/ContentComponent";
 import { useAuth } from "../../auth/AuthProvider";
+import Loader from "../../components/Loader";
 
 function Neighbor() {
   const neighborsData = useLoaderData();
@@ -62,7 +63,7 @@ function Neighbor() {
   const choosenNeighbors = search == "" ? neighbors : neighborsTable;
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
   return (
     <ContentComponent>

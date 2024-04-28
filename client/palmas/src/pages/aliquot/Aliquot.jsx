@@ -7,6 +7,7 @@ import Modal from "../../components/Modal";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import axios from "axios";
+import Loader from "../../components/Loader";
 
 // ! Falta dar funcionalidad a botón de pago
 function Aliquot() {
@@ -379,7 +380,7 @@ function Aliquot() {
   };
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
   return (
     <div className=" pb-[90px] md:py-0 w-screen h-fit min-h-screen md:pl-[70px]">

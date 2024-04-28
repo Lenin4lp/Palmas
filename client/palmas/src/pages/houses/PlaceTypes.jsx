@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { createPlaceType, deletePlaceType } from "../../api/places";
 import { Toaster, toast } from "sonner";
 import Modal from "../../components/Modal";
+import Loader from "../../components/Loader";
 
 function PlaceTypes() {
   const typesData = useLoaderData();
@@ -77,10 +78,8 @@ function PlaceTypes() {
     return formattedTotalDebt;
   }
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
-
-  console.log(selectedPlaceType);
 
   return (
     <ContentComponent>

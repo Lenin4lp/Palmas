@@ -5,6 +5,7 @@ import { addPlaceFromNeighbor } from "../../api/neighbors";
 import { Toaster, toast } from "sonner";
 import PlaceButton from "../../components/PlaceButton";
 import Modal from "../../components/Modal";
+import Loader from "../../components/Loader";
 
 function NeighborPlaces() {
   const neighborData = useLoaderData();
@@ -62,7 +63,7 @@ function NeighborPlaces() {
   };
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
   return (
     <ContentComponent>

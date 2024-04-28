@@ -5,6 +5,7 @@ import { deletePlaceFromNeighbor } from "../../api/neighbors";
 import { Toaster, toast } from "sonner";
 import PlaceButton from "../../components/PlaceButton";
 import Modal from "../../components/Modal";
+import Loader from "../../components/Loader";
 
 function RemoveNeighborPlaces() {
   const neighborData = useLoaderData();
@@ -64,7 +65,7 @@ function RemoveNeighborPlaces() {
   };
 
   if (navigation.state === "loading") {
-    return <div>Cargando</div>;
+    return <Loader />;
   }
 
   return (

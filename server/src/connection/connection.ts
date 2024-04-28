@@ -18,9 +18,9 @@ import { Role } from "../models/userRole.model";
 export const connection = new Sequelize({
   dialect: "mysql",
   host: "localhost",
-  username: "softdeve_aliquot1",
+  username: "root",
   password: process.env.DB_PASSWORD,
-  database: "softdeve_aliquot1",
+  database: "palmas",
   port: 3306,
   models: [
     User,
