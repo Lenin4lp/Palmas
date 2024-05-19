@@ -5,6 +5,8 @@ import { Payment } from "../models/payment.model";
 import { MonthlyDebt } from "../models/monthlyDebt.model";
 import { Place } from "../models/place.model";
 import { Neighbor } from "../models/neighbor.model";
+import { readFile } from "fs/promises";
+import { PDFDocument } from "pdf-lib";
 
 const resend = new Resend(process.env.RESEND_API);
 
@@ -29,6 +31,10 @@ export const uploadFile = async (req: Request, res: Response) => {
 
   const fileName = file.originalname;
   const paymentId = fileName.match(/\d+/g)?.join("");
+  const pdfBytes = await readFile(`uploads/${file.originalname}`);
+  const pdfDoc = await PDFDocument.load(pdfBytes);
+  const buffer = await pdfDoc.save();
+  const bu = Buffer.from(buffer);
 
   const payment = await Payment.findByPk(paymentId, {
     include: [
@@ -50,11 +56,11 @@ export const uploadFile = async (req: Request, res: Response) => {
             from: "LasPalmas <aliquot@softdeveral.com>",
             to: email,
             subject: `Envío de comprobante de pago: ${file.originalname}`,
-            text: "Buen día vecino. A continuación se adjunta el comprobante de pago. Gracias por su colaboración.\n\nAtentamente,\nAdministración de Cnjto. las Palmas",
+            text: "Buen día vecino. A continuación se adjunta el comprobante de pago. Gracias por su colaboración.\n\nAtentamente,\nAdministración de Conjunto Casa Club las Palmas",
             attachments: [
               {
                 filename: `${file.originalname}`,
-                content: `https://aliquot.api.softdeveral.com/uploads/${file.originalname}`,
+                content: bu,
               },
             ],
           });

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const HouseBar = () => {
   return (
-    <div className=" md:px-[70px] flex justify-around  w-screen h-[50px] md:h-[80px] bg-gradient-to-r from-[#852655] to-[#8f0e2a]">
+    <div className="  flex justify-around  w-screen h-[50px] md:h-[80px] bg-gradient-to-r from-[#852655] to-[#8f0e2a]">
       <div className=" flex justify-center items-center">
         <div className=" md:pl-[70px] w-screen h-full grid grid-cols-3">
           <Link

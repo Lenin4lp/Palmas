@@ -5,7 +5,7 @@ const Modal = ({ open, onClose, children }) => {
     <>
       <div
         onClick={onClose}
-        className={`fixed z-50 h-screen inset-0 justify-center items-center transition-colors ${
+        className={`fixed z-40 h-screen inset-0 justify-center items-center transition-colors ${
           open ? "visible bg-black/50" : "invisible"
         }`}
       >

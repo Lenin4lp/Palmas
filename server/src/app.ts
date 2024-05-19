@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express, { urlencoded } from "express";
+import express, { urlencoded, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
@@ -32,6 +32,21 @@ import { writeFile } from "fs/promises";
 import { Neighbor } from "./models/neighbor.model";
 import { Resend } from "resend";
 import { Model } from "sequelize";
+import extraPaymentRoutes from "./routes/extraPayment.routes";
+import extraPTypesRoutes from "./routes/extraPTypes.routes";
+
+function setCorsHeaders(req: Request, res: Response, next: NextFunction) {
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    "https://aliquot1.softdeveral.com"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+}
 
 const app = express();
 
@@ -43,6 +58,8 @@ app.use(urlencoded({ extended: false }));
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(setCorsHeaders);
 
 app.use("/api", authRoutes);
 app.use("/api", neighborRoutes);
@@ -59,6 +76,8 @@ app.use("/api", PaymentRoutes);
 app.use("/api", uploadRoutes);
 app.use("/api", userRoutes);
 app.use("/api", userRolesRoutes);
+app.use("/api", extraPaymentRoutes);
+app.use("/api", extraPTypesRoutes);
 
 app.get("/", (_req, res) => {
   res.send("Hola mundo");
@@ -79,7 +98,7 @@ async function ModifyPDF(
   amount: number,
   debt: number
 ) {
-  const filePath = "public/uploads/estadoCuenta.pdf";
+  const filePath = "uploads/estadoCuenta.pdf";
   const existingPdfBytes = await readFile(filePath);
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -239,14 +258,14 @@ async function ModifyPDF(
   const modifiedPdfBytes = await pdfDoc.save();
 
   await writeFile(
-    `public/uploads/EstadoDeCuenta-${month}-${year}-${place}.pdf`,
+    `uploads/EstadoDeCuenta-${month}-${year}-${place}.pdf`,
     modifiedPdfBytes
   );
 
   return modifiedPdfBytes;
 }
 
-cron.schedule("2 51 19 * * *", async () => {
+cron.schedule("2 30 9 4 * *", async () => {
   const currentDateString = new Date().toString();
   const currentYear = new Date().getFullYear().toString();
   const currentMonth = ObtainMonth(currentDateString);
@@ -285,7 +304,6 @@ cron.schedule("2 51 19 * * *", async () => {
                 attachments: [
                   {
                     filename: `Estado de cuenta ${currentMonth}-${currentYear}-${place.place_name}.pdf`,
-
                     content: pdfBuffer,
                   },
                 ],
@@ -362,7 +380,7 @@ const ChangeMonth = async (currentMonth: string, currentYear: string) => {
 };
 
 // ? Prueba node-cron
-cron.schedule(" 1 20 4 5 * *", async () => {
+cron.schedule(" 1 20 4 3 * *", async () => {
   const currentDateString = new Date().toString();
   const currentYear = new Date().getFullYear().toString();
   const currentMonth = ObtainMonth(currentDateString);
@@ -373,7 +391,7 @@ cron.schedule(" 1 20 4 5 * *", async () => {
   console.log(`${currentMonth}-${currentYear}`);
 });
 
-cron.schedule("1 20 4 2 1 *", async () => {
+cron.schedule("1 20 4 1 1 *", async () => {
   const currentYear = new Date().getFullYear().toString();
   const foundYear = await Year.findOne({ where: { year: currentYear } });
 

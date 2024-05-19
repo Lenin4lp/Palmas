@@ -18,6 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Place } from "./place.model";
 import { Month } from "./month.model";
 import { Payment } from "./payment.model";
+import { ExtraPayment } from "./extraPayment.model";
 
 @Table({
   tableName: "deuda_mensual",
@@ -79,6 +80,9 @@ export class MonthlyDebt extends Model {
   @BelongsTo(() => Month)
   month!: Month;
 
+  @HasMany(() => ExtraPayment)
+  extraPayments!: ExtraPayment[];
+
   @BeforeCreate
   static generateMonthlyDebtId(monthlyDebt: MonthlyDebt) {
     const generatedUuid = uuidv4().substring(0, 5);
@@ -132,6 +136,9 @@ export class MonthlyDebt extends Model {
   @BeforeDestroy
   static async destroyMonthlyDebtRelations(monthlyDebt: MonthlyDebt) {
     await Payment.destroy({
+      where: { monthlyDebt_id: monthlyDebt.monthlyDebt_id },
+    });
+    await ExtraPayment.destroy({
       where: { monthlyDebt_id: monthlyDebt.monthlyDebt_id },
     });
   }

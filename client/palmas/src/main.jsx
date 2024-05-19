@@ -22,6 +22,9 @@ import { getMonthlyDebts, getMonthlyFees, getMonthlyFee } from "./api/debt.js";
 import { getUser, getUsers } from "./api/user.js";
 import UserRegister from "./pages/settings/UserRegister.jsx";
 import ModifyUser from "./pages/settings/ModifyUser.jsx";
+import ExtraPayment from "./pages/extra/ExtraPayment.jsx";
+import AliquotRegister from "./pages/aliquot/AliquotRegister.jsx";
+import { getExtraPayments, getExtraPTypes } from "./api/extraPayment.js";
 const Dashboard = React.lazy(() => import("./pages/dashboard/Dashboard.jsx"));
 const Wallet = React.lazy(() => import("./pages/wallet/Wallet.jsx"));
 const Houses = React.lazy(() => import("./pages/houses/Houses.jsx"));
@@ -52,9 +55,6 @@ const VehicleTypes = React.lazy(() =>
 );
 const PlaceTypes = React.lazy(() => import("./pages/houses/PlaceTypes.jsx"));
 const HouseInfo = React.lazy(() => import("./pages/houses/HouseInfo.jsx"));
-const AliquotRegister = React.lazy(() =>
-  import("./pages/aliquot/AliquotRegister.jsx")
-);
 const AliquotModify = React.lazy(() =>
   import("./pages/aliquot/AliquotModify.jsx")
 );
@@ -184,6 +184,36 @@ const router = createBrowserRouter([
               return {
                 place: placeData,
                 payments: paymentsData,
+              };
+            },
+          },
+          {
+            path: "/inmuebles/:id/pagoextra",
+            element: <ExtraPayment />,
+            loader: async ({ params }) => {
+              const { id } = params;
+              const placePromise = getPlace(id);
+              const extraPaymentsPromise = getExtraPayments();
+              const extraPTypesPromise = getExtraPTypes();
+              const monthlyDebtsPromise = getMonthlyDebts();
+
+              const [
+                placeData,
+                extraPaymentsData,
+                extraPTypesData,
+                monthlyDebtsData,
+              ] = await Promise.all([
+                placePromise,
+                extraPaymentsPromise,
+                extraPTypesPromise,
+                monthlyDebtsPromise,
+              ]);
+
+              return {
+                place: placeData,
+                extraPayments: extraPaymentsData,
+                extraPTypes: extraPTypesData,
+                monthlyDebts: monthlyDebtsData,
               };
             },
           },
