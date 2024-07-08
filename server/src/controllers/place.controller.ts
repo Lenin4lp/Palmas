@@ -10,14 +10,20 @@ import { NeighborRole } from "../models/neighborRole.model";
 import { Vehicle } from "../models/vehicle.model";
 import { VehicleType } from "../models/vehicleType.model";
 import { MonthlyFee } from "../models/monthlyFee.model";
+import { ExtraPPayment } from "../models/extraPPayment.model";
+import { ExtraPayment } from "../models/extraPayment.model";
+import { MonthlyDebt } from "../models/monthlyDebt.model";
 
 // ? Obtain all places
 export const getPlaces = async (req: Request, res: Response) => {
   try {
     const places = await Place.findAll({
       include: [
-        { model: Neighbor },
+        { model: Neighbor, include: [{ model: NeighborRole }] },
         { model: Month, order: [["month_year", "ASC"]] },
+        { model: PlaceType, include: [{ model: MonthlyFee }] },
+        { model: Vehicle, include: [{ model: VehicleType }] },
+        { model: ExtraPayment },
       ],
       order: [
         ["placeType_id", "ASC"],

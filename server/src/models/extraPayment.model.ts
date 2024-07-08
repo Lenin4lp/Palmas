@@ -6,10 +6,17 @@ import {
   ForeignKey,
   BelongsTo,
   BeforeCreate,
+  AfterUpdate,
+  AfterCreate,
+  AfterSync,
+  BeforeUpdate,
+  HasMany,
 } from "sequelize-typescript";
 import { ExtraPType } from "./extraPType.model";
 import { MonthlyDebt } from "./monthlyDebt.model";
 import { v4 as uuidv4 } from "uuid";
+import { Place } from "./place.model";
+import { ExtraPPayment } from "./extraPPayment.model";
 
 @Table({
   tableName: "pago_extra",
@@ -46,6 +53,13 @@ export class ExtraPayment extends Model {
   })
   description!: string;
 
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    field: "estado",
+  })
+  status!: boolean;
+
   @ForeignKey(() => ExtraPType)
   @Column({
     type: DataType.INTEGER,
@@ -54,27 +68,59 @@ export class ExtraPayment extends Model {
   })
   extraPType_id!: number;
 
-  @ForeignKey(() => MonthlyDebt)
+  @ForeignKey(() => Place)
   @Column({
-    type: DataType.STRING(20),
+    type: DataType.STRING(11),
     allowNull: false,
-    field: "id_deuda",
+    field: "id_inmueble",
   })
-  monthlyDebt_id!: string;
+  place_id!: string;
 
   @BelongsTo(() => ExtraPType)
   extraPType!: ExtraPType;
 
-  @BelongsTo(() => MonthlyDebt)
-  monthlyDebt!: MonthlyDebt;
+  @BelongsTo(() => Place)
+  place!: Place;
+
+  @HasMany(() => ExtraPPayment)
+  extraPPayments!: ExtraPPayment[];
 
   @BeforeCreate
   static generateExtraPaymentId(extraPayment: ExtraPayment) {
     const generatedUuid = uuidv4().substring(0, 7);
     const extraPType = ExtraPType.findByPk(extraPayment.extraPType_id);
-    extraPayment.extra_payment_id = `EP${generatedUuid}-${extraPayment.monthlyDebt_id.substring(
+    extraPayment.extra_payment_id = `EP${generatedUuid}-${extraPayment.place_id.substring(
       0,
       4
     )}`;
+  }
+
+  @BeforeUpdate
+  static updateExtraPaymentStatus(extraPayment: ExtraPayment) {
+    if (extraPayment.value > 0) {
+      extraPayment.status = true;
+    } else {
+      extraPayment.status = false;
+    }
+  }
+
+  @AfterCreate
+  @AfterUpdate
+  static async updateDebt(extraPayment: ExtraPayment) {
+    const feeDebt =
+      (await MonthlyDebt.sum("debt", {
+        where: { place_id: extraPayment.place_id },
+      })) ?? 0;
+
+    const extraDebt = await ExtraPayment.sum("value", {
+      where: { place_id: extraPayment.place_id },
+    });
+
+    const totalDebt = feeDebt + extraDebt;
+    const place = await Place.findByPk(extraPayment.place_id);
+    if (place) {
+      await place.update({ pending_value: totalDebt });
+      place.save();
+    }
   }
 }

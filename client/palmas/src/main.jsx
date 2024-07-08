@@ -24,7 +24,14 @@ import UserRegister from "./pages/settings/UserRegister.jsx";
 import ModifyUser from "./pages/settings/ModifyUser.jsx";
 import ExtraPayment from "./pages/extra/ExtraPayment.jsx";
 import AliquotRegister from "./pages/aliquot/AliquotRegister.jsx";
-import { getExtraPayments, getExtraPTypes } from "./api/extraPayment.js";
+import {
+  getExtraPayment,
+  getExtraPayments,
+  getExtraPTypes,
+} from "./api/extraPayment.js";
+import DebtPayment from "./pages/extra/DebtPayment.jsx";
+import AccountState from "./pages/wallet/AccountState.jsx";
+import { getAccountStates } from "./api/accounState.js";
 const Dashboard = React.lazy(() => import("./pages/dashboard/Dashboard.jsx"));
 const Wallet = React.lazy(() => import("./pages/wallet/Wallet.jsx"));
 const Houses = React.lazy(() => import("./pages/houses/Houses.jsx"));
@@ -63,6 +70,9 @@ const HouseReceipts = React.lazy(() =>
 );
 const UserInfo = React.lazy(() => import("./pages/settings/UserInfo.jsx"));
 const Users = React.lazy(() => import("./pages/settings/Users.jsx"));
+const accountState = React.lazy(() =>
+  import("./pages/wallet/AccountState.jsx")
+);
 
 const router = createBrowserRouter([
   {
@@ -195,26 +205,27 @@ const router = createBrowserRouter([
               const placePromise = getPlace(id);
               const extraPaymentsPromise = getExtraPayments();
               const extraPTypesPromise = getExtraPTypes();
-              const monthlyDebtsPromise = getMonthlyDebts();
 
-              const [
-                placeData,
-                extraPaymentsData,
-                extraPTypesData,
-                monthlyDebtsData,
-              ] = await Promise.all([
-                placePromise,
-                extraPaymentsPromise,
-                extraPTypesPromise,
-                monthlyDebtsPromise,
-              ]);
+              const [placeData, extraPaymentsData, extraPTypesData] =
+                await Promise.all([
+                  placePromise,
+                  extraPaymentsPromise,
+                  extraPTypesPromise,
+                ]);
 
               return {
                 place: placeData,
                 extraPayments: extraPaymentsData,
                 extraPTypes: extraPTypesData,
-                monthlyDebts: monthlyDebtsData,
               };
+            },
+          },
+          {
+            path: "/inmuebles/pagoextra/pago/:id",
+            element: <DebtPayment />,
+            loader: async ({ params }) => {
+              const { id } = params;
+              return await getExtraPayment(id);
             },
           },
         ],
@@ -341,6 +352,13 @@ const router = createBrowserRouter([
             monthlyDebts: monthlyDebtsData,
             types: typesData,
           };
+        },
+      },
+      {
+        path: "/estados_de_cuenta",
+        element: <AccountState />,
+        loader: () => {
+          return getAccountStates();
         },
       },
       {

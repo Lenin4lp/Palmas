@@ -10,7 +10,6 @@ function ExtraPayment() {
   const extraPaymentData = useLoaderData();
   const extraPayments = extraPaymentData.extraPayments.data;
   const extraPTypes = extraPaymentData.extraPTypes.data;
-  const monthlyDebts = extraPaymentData.monthlyDebts.data;
   const place = extraPaymentData.place.data.place;
   const navigation = useNavigation();
   const { register, handleSubmit } = useForm();
@@ -20,8 +19,10 @@ function ExtraPayment() {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [waiting, setWaiting] = useState(false);
 
+  console.log(extraPayments);
+
   const filteredExtraPayments = extraPayments.filter(
-    (extraPayment) => extraPayment.monthlyDebt.place_id === place.place_id
+    (extraPayment) => extraPayment.place_id === place.place_id
   );
   const registerExtraPayment = async (data) => {
     try {
@@ -53,9 +54,7 @@ function ExtraPayment() {
       data.extraPType_id = selectedExtraPType;
     }
 
-    if (selectedMonth !== "") {
-      data.monthlyDebt_id = selectedMonth;
-    }
+    data.place_id = place.place_id;
 
     if (data.value === null) {
       data.value = "";
@@ -152,13 +151,13 @@ function ExtraPayment() {
             <div className=" m-5 flex justify-start items-center">
               <button
                 onClick={() => window.history.back()}
-                className=" p-3 mr-5 hover:bg-white text-sm sm:text-base bg-gradient-to-br from-[#8f0e2a] to-[#852655] hover:text-[#8f0e2a] hover:border-[1px] hover:border-[#8f0e2a] hover:from-gray-300 hover:to-white transition duration-300 text-white rounded-lg "
+                className=" p-3 mr-5 hover:bg-white text-[13px] sm:text-base bg-gradient-to-br from-[#8f0e2a] to-[#852655] hover:text-[#8f0e2a] hover:border-[1px] hover:border-[#8f0e2a] hover:from-gray-300 hover:to-white transition duration-300 text-white rounded-lg "
               >
                 <h1>Regresar</h1>
               </button>
               <button
                 onClick={() => setContent(1)}
-                className=" p-3 hover:bg-white text-sm sm:text-base bg-gradient-to-br from-[#8f0e2a] to-[#852655] hover:text-[#8f0e2a] hover:border-[1px] hover:border-[#8f0e2a] hover:from-gray-300 hover:to-white transition duration-300 text-white rounded-lg "
+                className=" p-3 hover:bg-white text-[13px] sm:text-base bg-gradient-to-br from-[#8f0e2a] to-[#852655] hover:text-[#8f0e2a] hover:border-[1px] hover:border-[#8f0e2a] hover:from-gray-300 hover:to-white transition duration-300 text-white rounded-lg "
               >
                 <h1>Registrar pago extra</h1>
               </button>
@@ -174,7 +173,7 @@ function ExtraPayment() {
               <div className=" w-full mb-10 block ">
                 {filteredExtraPayments.map((extraPayment) => (
                   <div
-                    className=" flex justify-start items-center mx-2"
+                    className={`flex justify-start items-center mx-2`}
                     key={extraPayment.extra_payment_id}
                   >
                     <div className=" block">
@@ -184,15 +183,19 @@ function ExtraPayment() {
                         </h1>
                       </div>
                       <div className=" my-1 bg-[#8f0e2a] h-[2px] w-screen"></div>
-                      <div className=" my-1 flex justify-evenly  items-center">
-                        <div className=" hidden md:block">
+                      <div
+                        className={` py-1 flex justify-stretch gap-x-24 items-center  ${
+                          extraPayment.status == true
+                            ? "bg-[#d6a8a8] text-white"
+                            : "bg-[#8ac28d] text-white"
+                        }`}
+                      >
+                        <div className=" mx-2 hidden md:block">
                           <h1 className=" my-1 text-sm md:text-base text-[#8f0e2a] font-bold">
                             Mes de adeudo:
                           </h1>
                           <h1 className=" my-1 text-sm md:text-base text-black font-medium">
-                            {translateAbreviations(
-                              extraPayment.monthlyDebt_id.substring(0, 8)
-                            )}
+                            {extraPayment.date}
                           </h1>
                         </div>
                         <div className=" block">
@@ -212,13 +215,44 @@ function ExtraPayment() {
                           </h1>
                         </div>
                       </div>
-                      <div className="  flex">
+                      <div
+                        className={`flex pr-5 py-5 pl-2 md:pr-20 ${
+                          extraPayment.status == true
+                            ? "bg-[#d6a8a8] text-white"
+                            : "bg-[#8ac28d] text-white"
+                        }`}
+                      >
                         <h1 className=" my-1 text-sm md:text-base text-[#8f0e2a] font-bold">
                           Descripción:
                         </h1>
                         <h1 className=" mx-3 my-1 text-sm md:text-base text-black font-medium">
                           {extraPayment.description}
                         </h1>
+                      </div>
+                      <div className="  mt-1 bg-[#8f0e2a] h-[2px] w-screen"></div>
+                      <div className=" flex p-3">
+                        {extraPayment.status == false ? (
+                          <button
+                            onClick={() => {
+                              extraPayment.extraPPayments.map(
+                                (extraPPayment) => {
+                                  window.open(extraPPayment.file, "_blank");
+                                }
+                              );
+                            }}
+                            className=" p-3 text-[13px]  sm:text-base border-[1px] border-[#8f0e2a] hover:bg-[#8f0e2a] transition duration-300 text-[#8f0e2a] hover:text-white rounded-lg "
+                          >
+                            Obtener comprobante
+                          </button>
+                        ) : (
+                          <Link
+                            to={`/inmuebles/pagoextra/pago/${extraPayment.extra_payment_id}`}
+                          >
+                            <button className=" p-3 border-[1px] border-[#8f0e2a] hover:bg-[#8f0e2a] transition duration-300 text-[#8f0e2a] hover:text-white rounded-lg ">
+                              Pagar
+                            </button>
+                          </Link>
+                        )}
                       </div>
                       <div className=" mb-5 bg-[#8f0e2a] h-[1px] w-screen"></div>
                     </div>
@@ -319,77 +353,7 @@ function ExtraPayment() {
                       </select>
                     </div>
                   </div>
-                  <div className=" w-full flex justify-start items-center">
-                    <div className="block">
-                      <div className=" mb-2 flex justify-start items-center">
-                        <label>Mes:</label>
-                      </div>
-                      <select
-                        onChange={handleSelectedMonth}
-                        value={selectedMonth}
-                        className=" border-[#8f0e2a] bg-gray-50 border  overflow-x-auto overflow-y-auto text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[170px] p-1 "
-                      >
-                        <option value="" defaultValue>
-                          Selecciona un mes
-                        </option>
-                        {place.months
-                          .sort((a, b) => {
-                            const monthNames = [
-                              "January",
-                              "February",
-                              "March",
-                              "April",
-                              "May",
-                              "June",
-                              "July",
-                              "August",
-                              "September",
-                              "October",
-                              "November",
-                              "December",
-                            ];
-                            return (
-                              monthNames.indexOf(a.month) -
-                              monthNames.indexOf(b.month)
-                            );
-                          })
-                          .filter(
-                            (month) => month.MonthlyDebt.month_status !== null
-                          )
-                          .map((month) => (
-                            <option
-                              value={month.MonthlyDebt.monthlyDebt_id}
-                              key={month.month_id}
-                            >
-                              {month.month_id.substring(0, 3).includes("JAN") &&
-                                `ENE-${month.month_year}`}
-                              {month.month_id.substring(0, 3).includes("FEB") &&
-                                `FEB-${month.month_year}`}
-                              {month.month_id.substring(0, 3).includes("MAR") &&
-                                `MAR-${month.month_year}`}
-                              {month.month_id.substring(0, 3).includes("APR") &&
-                                `ABR-${month.month_year}`}
-                              {month.month_id.substring(0, 3).includes("MAY") &&
-                                `MAY-${month.month_year}`}
-                              {month.month_id.substring(0, 3).includes("JUN") &&
-                                `JUN-${month.month_year}`}
-                              {month.month_id.substring(0, 3).includes("JUL") &&
-                                `JUL-${month.month_year}`}
-                              {month.month_id.substring(0, 3).includes("AUG") &&
-                                `AGO-${month.month_year}`}
-                              {month.month_id.substring(0, 3).includes("SEP") &&
-                                `SEP-${month.month_year}`}
-                              {month.month_id.substring(0, 3).includes("OCT") &&
-                                `OCT-${month.month_year}`}
-                              {month.month_id.substring(0, 3).includes("NOV") &&
-                                `NOV-${month.month_year}`}
-                              {month.month_id.substring(0, 3).includes("DEC") &&
-                                `DIC-${month.month_year}`}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-                  </div>
+
                   <div className=" w-full flex justify-start items-center sm:col-span-2">
                     <div className="block">
                       <div className=" mb-2 flex justify-start items-center">

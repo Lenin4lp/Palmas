@@ -41,6 +41,9 @@ export class ExtraPType extends Model {
         extraPType: "Multa",
       },
       {
+        extraPType: "Casa comunal",
+      },
+      {
         extraPType: "Servicios",
       },
       {

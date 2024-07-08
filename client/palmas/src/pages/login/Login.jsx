@@ -74,7 +74,7 @@ const Login = () => {
             <div className=" flex justify-center items-center">
               <img
                 className=" h-[80px] md:h-[100px]"
-                src="https://softdeveral.com/AliQuo/AliQuoPay.png"
+                src="/AliQuoPay.png"
                 alt=""
               />
             </div>

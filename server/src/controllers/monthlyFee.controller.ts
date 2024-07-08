@@ -32,16 +32,17 @@ export const getMonthlyFee = async (req: Request, res: Response) => {
 
 // ? Create a monthly fee
 export const createMonthlyFee = async (req: Request, res: Response) => {
-  const { monthlyFee_value } = req.body;
+  const { monthlyFee_value, monthlyFee_name } = req.body;
   try {
     const monthlyFeeFound = await MonthlyFee.findOne({
-      where: { monthlyFee_value: monthlyFee_value },
+      where: { monthlyFee_name: monthlyFee_name },
     });
     if (monthlyFeeFound) {
       return res.status(500).json(["Ya existe una alicuota con este monto"]);
     }
     const newMonth = await MonthlyFee.create({
       monthlyFee_value,
+      monthlyFee_name,
     });
     res.json(newMonth);
   } catch (error) {

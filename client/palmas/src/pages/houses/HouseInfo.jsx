@@ -230,8 +230,10 @@ function HouseInfo() {
 
     if (selectedPay == 1 && data.deposit == "") {
       toast.error("Se debe colocar el N° de comprobante del depósito");
+      setWaiting(false);
     } else if (selectedPay == 2 && data.transfer == "") {
       toast.error("Se debe colocar el N° de comprobante de la transferencia");
+      setWaiting(false);
     } else {
       registerPayment(modifiedData);
     }
@@ -339,7 +341,13 @@ function HouseInfo() {
     doc.text("1", 3, 47);
 
     if (monthDebt && monthDebt.debt != 0) {
-      doc.text(`Pago alicuota ${translateAbreviations(selectedMonth)}`, 10, 47);
+      doc.text(
+        `Pago ${
+          place.placeType.monthlyFee.monthlyFee_name
+        } ${translateAbreviations(selectedMonth)}`,
+        10,
+        47
+      );
     } else {
       doc.text(
         `Abono alicuota ${translateAbreviations(selectedMonth)}`,
@@ -442,7 +450,7 @@ function HouseInfo() {
     formData.append("myFile", pdfBlob, `Comprobante_N°_${paymentId}.pdf`);
 
     axios
-      .post("https://aliquot.api.softdeveral.com/api/upload", formData, {
+      .post("http://localhost:8081/api/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -1589,16 +1597,18 @@ function HouseInfo() {
                           )}
                         </div>
                       </form>
-                      <div className=" flex justify-center items-center mb-5">
-                        <button
-                          onClick={() => setOpenModal3(true)}
-                          className=" p-2 border-[1px] group border-white hover:text-[#8f0e2a] hover:bg-white transition duration-300 text-white rounded-lg"
-                        >
-                          <h1 className=" text-white text-sm md:text-base group-hover:text-[#8f0e2a] duration-300 transition">
-                            Registrar pago
-                          </h1>
-                        </button>
-                      </div>
+                      {selectedPay != "" && (
+                        <div className=" flex justify-center items-center mb-5">
+                          <button
+                            onClick={() => setOpenModal3(true)}
+                            className=" p-2 border-[1px] group border-white hover:text-[#8f0e2a] hover:bg-white transition duration-300 text-white rounded-lg"
+                          >
+                            <h1 className=" text-white text-sm md:text-base group-hover:text-[#8f0e2a] duration-300 transition">
+                              Registrar pago
+                            </h1>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

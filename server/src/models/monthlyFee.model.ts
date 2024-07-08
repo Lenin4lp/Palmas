@@ -26,6 +26,14 @@ export class MonthlyFee extends Model {
   monthlyFee_id!: number;
 
   @Column({
+    type: DataType.STRING(20),
+    field: "concepto",
+    allowNull: true,
+    unique: true,
+  })
+  monthlyFee_name!: string;
+
+  @Column({
     type: DataType.DECIMAL(8, 2),
     field: "alicuota",
     allowNull: true,
@@ -39,11 +47,13 @@ export class MonthlyFee extends Model {
   static createDefaultMonthlyFee = async () => {
     const defaultMonthlyFee = {
       monthlyFee_value: 30,
+      monthlyFee_name: "Alicuota",
     };
     try {
       await MonthlyFee.findOrCreate({
         where: {
           monthlyFee_value: defaultMonthlyFee.monthlyFee_value,
+          monthlyFee_name: defaultMonthlyFee.monthlyFee_name,
         },
         defaults: defaultMonthlyFee,
       });

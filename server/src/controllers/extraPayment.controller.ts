@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { ExtraPayment } from "../models/extraPayment.model";
 import { ExtraPType } from "../models/extraPType.model";
-import { MonthlyDebt } from "../models/monthlyDebt.model";
+import { Place } from "../models/place.model";
+import { Neighbor } from "../models/neighbor.model";
+import { ExtraPPayment } from "../models/extraPPayment.model";
 
 // ? Obtain all extra payments
 export const getExtraPayments = async (req: Request, res: Response) => {
@@ -12,7 +14,10 @@ export const getExtraPayments = async (req: Request, res: Response) => {
           model: ExtraPType,
         },
         {
-          model: MonthlyDebt,
+          model: Place,
+        },
+        {
+          model: ExtraPPayment,
         },
       ],
     });
@@ -31,7 +36,8 @@ export const getExtraPayment = async (req: Request, res: Response) => {
         model: ExtraPType,
       },
       {
-        model: MonthlyDebt,
+        model: Place,
+        include: [{ model: Neighbor }],
       },
     ],
   });
@@ -41,21 +47,21 @@ export const getExtraPayment = async (req: Request, res: Response) => {
 
 // ? Create an extra Payment
 export const createExtraPayment = async (req: Request, res: Response) => {
-  const { extraPType_id, monthlyDebt_id, value, date, description } = req.body;
+  const { extraPType_id, place_id, value, date, description, status } =
+    req.body;
   try {
-    const monthlyDebt = await MonthlyDebt.findByPk(monthlyDebt_id);
+    const monthlyDebt = await Place.findByPk(place_id);
 
     if (monthlyDebt) {
       const newExtraPayment = await ExtraPayment.create({
         extraPType_id,
-        monthlyDebt_id,
+        place_id,
         value,
         date,
         description,
+        status: status ?? true,
       });
-      const totalDebt = Number(monthlyDebt.debt) + Number(value);
-      monthlyDebt.debt = totalDebt;
-      await monthlyDebt.save();
+
       res.json(newExtraPayment);
     } else {
       res.status(404).json(["Deuda no encontrada"]);
@@ -67,12 +73,12 @@ export const createExtraPayment = async (req: Request, res: Response) => {
 };
 
 export const updateExtraPayment = async (req: Request, res: Response) => {
-  const { extraPType_id, monthlyDebt_id, value, date, description } = req.body;
+  const { extraPType_id, place_id, value, date, description } = req.body;
   const extraPayment = await ExtraPayment.findByPk(req.params.id);
   if (extraPayment) {
     await extraPayment.update({
       extraPType_id,
-      monthlyDebt_id,
+      place_id,
       value,
       date,
       description,

@@ -14,6 +14,8 @@ import rolesRoutes from "./routes/neighborRoles.routes";
 import placeTypesRoutes from "./routes/placeTypes.routes";
 import vehicleTypeRoutes from "./routes/vehicleTypes.routes";
 import vehicleRoutes from "./routes/vehicle.routes";
+import accountStateRoutes from "./routes/accountState.routes";
+import extraPPaymentRoutes from "./routes/extraPPayment.routes";
 import cron from "node-cron";
 import { Month } from "./models/month.model";
 import { MonthlyDebt } from "./models/monthlyDebt.model";
@@ -34,12 +36,10 @@ import { Resend } from "resend";
 import { Model } from "sequelize";
 import extraPaymentRoutes from "./routes/extraPayment.routes";
 import extraPTypesRoutes from "./routes/extraPTypes.routes";
+import { AccountState } from "./models/accounState.model";
 
 function setCorsHeaders(req: Request, res: Response, next: NextFunction) {
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "https://aliquot1.softdeveral.com"
-  );
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, PATCH, DELETE"
@@ -78,6 +78,8 @@ app.use("/api", userRoutes);
 app.use("/api", userRolesRoutes);
 app.use("/api", extraPaymentRoutes);
 app.use("/api", extraPTypesRoutes);
+app.use("/api", extraPPaymentRoutes);
+app.use("/api", accountStateRoutes);
 
 app.get("/", (_req, res) => {
   res.send("Hola mundo");
@@ -258,14 +260,14 @@ async function ModifyPDF(
   const modifiedPdfBytes = await pdfDoc.save();
 
   await writeFile(
-    `uploads/EstadoDeCuenta-${month}-${year}-${place}.pdf`,
+    `uploads/estados_cuenta/EstadoDeCuenta-${month}-${year}-${place}.pdf`,
     modifiedPdfBytes
   );
 
   return modifiedPdfBytes;
 }
 
-cron.schedule("2 30 9 4 * *", async () => {
+cron.schedule("2 30 1 7 * *", async () => {
   const currentDateString = new Date().toString();
   const currentYear = new Date().getFullYear().toString();
   const currentMonth = ObtainMonth(currentDateString);
@@ -276,7 +278,9 @@ cron.schedule("2 30 9 4 * *", async () => {
     include: [{ model: Neighbor }, { model: Month }],
   });
 
-  places.forEach(async (place) => {
+  const mergedPdfDoc = await PDFDocument.create();
+
+  for (const place of places) {
     const monthlyDebt = await MonthlyDebt.findOne({
       where: {
         place_id: place.place_id,
@@ -290,36 +294,59 @@ cron.schedule("2 30 9 4 * *", async () => {
         place.place_name,
         place.pending_value,
         monthlyDebt.debt
-      ).then((modifiedPdfBytes) => {
-        const pdfBuffer = Buffer.from(modifiedPdfBytes);
-        place.neighbors.forEach(async (neighbor) => {
-          console.log(neighbor.neighbor_id, monthId);
-          if (neighbor.neighbor_email !== null) {
-            try {
-              const { data, error } = await resend.emails.send({
-                from: "LasPalmas <aliquot@softdeveral.com>",
-                to: neighbor.neighbor_email,
-                subject: `Estado de cuenta Conjunto Las Palmas - ${currentMonth} - ${currentYear}`,
-                text: "Buen día vecino. A continuación se adjunta su estado de cuenta. Gracias por su colaboración.\n\nAtentamente,\nAdministración de Cnjto. las Palmas",
-                attachments: [
-                  {
-                    filename: `Estado de cuenta ${currentMonth}-${currentYear}-${place.place_name}.pdf`,
-                    content: pdfBuffer,
-                  },
-                ],
-              });
-            } catch (error) {
-              console.log("Algo malio sal", error);
+      )
+        .then(async (modifiedPdfBytes) => {
+          const pdfBuffer = Buffer.from(modifiedPdfBytes);
+          place.neighbors.forEach(async (neighbor) => {
+            console.log(neighbor.neighbor_id, monthId);
+            if (neighbor.neighbor_email !== null) {
+              try {
+                const { data, error } = await resend.emails.send({
+                  from: "LasPalmas <aliquot@aliquopalmas.co.uk>",
+                  to: neighbor.neighbor_email,
+                  subject: `Estado de cuenta Conjunto Las Palmas - ${currentMonth} - ${currentYear}`,
+                  text: "Buen día vecino. A continuación se adjunta su estado de cuenta. Gracias por su colaboración.\n\nAtentamente,\nAdministración de Cnjto. las Palmas",
+                  attachments: [
+                    {
+                      filename: `Estado de cuenta ${currentMonth}-${currentYear}-${place.place_name}.pdf`,
+                      content: pdfBuffer,
+                    },
+                  ],
+                });
+              } catch (error) {
+                console.log("Algo malio sal", error);
+              }
+            } else {
+              console.log("No hay correo mijooo");
             }
-          } else {
-            console.log("No hay correo mijooo");
-          }
+          });
+          const pdf = await PDFDocument.load(modifiedPdfBytes);
+          const copiedPages = await mergedPdfDoc.copyPages(
+            pdf,
+            pdf.getPageIndices()
+          );
+          await Promise.all(
+            copiedPages.map((copiedPage) => mergedPdfDoc.addPage(copiedPage))
+          );
+        })
+        .catch((error) => {
+          console.log("Error al modificar el pdf", error);
         });
-        console.log("Si se hizo la carnita :)");
-      });
+      const mergedPdfBytes = await mergedPdfDoc.save();
+      await writeFile(
+        `uploads/estados_cuenta_general/EstadosDeCuenta-${currentMonth}-${currentYear}.pdf`,
+        mergedPdfBytes
+      );
+
       console.log("Mensaje de comprobaciones");
     }
+  }
+  const accountState = await AccountState.create({
+    accountState_name: `Estados de cuenta ${currentMonth}-${currentYear}`,
+    accountState_file: `uploads/estados_cuenta_general/EstadosDeCuenta-${currentMonth}-${currentYear}.pdf`,
+    // Reemplazar `https://dominio.com/uploads/estados_cuenta_general/EstadosDeCuenta-${currentMonth}-${currentYear}.pdf`
   });
+  console.log("Mensaje de comprobaciones");
 });
 
 // ? ObtainMonth
@@ -380,7 +407,7 @@ const ChangeMonth = async (currentMonth: string, currentYear: string) => {
 };
 
 // ? Prueba node-cron
-cron.schedule(" 1 20 4 3 * *", async () => {
+cron.schedule("2 2 8 2 * *", async () => {
   const currentDateString = new Date().toString();
   const currentYear = new Date().getFullYear().toString();
   const currentMonth = ObtainMonth(currentDateString);
@@ -391,7 +418,7 @@ cron.schedule(" 1 20 4 3 * *", async () => {
   console.log(`${currentMonth}-${currentYear}`);
 });
 
-cron.schedule("1 20 4 1 1 *", async () => {
+cron.schedule("1 20 9 1 1 *", async () => {
   const currentYear = new Date().getFullYear().toString();
   const foundYear = await Year.findOne({ where: { year: currentYear } });
 

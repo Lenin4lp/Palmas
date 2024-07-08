@@ -80,9 +80,6 @@ export class MonthlyDebt extends Model {
   @BelongsTo(() => Month)
   month!: Month;
 
-  @HasMany(() => ExtraPayment)
-  extraPayments!: ExtraPayment[];
-
   @BeforeCreate
   static generateMonthlyDebtId(monthlyDebt: MonthlyDebt) {
     const generatedUuid = uuidv4().substring(0, 5);
@@ -104,15 +101,23 @@ export class MonthlyDebt extends Model {
   static async updateAutoDebt(monthlyDebt: MonthlyDebt) {
     const places = await Place.findAll();
     for (const place of places) {
-      const totalDebt = await MonthlyDebt.sum("debt", {
-        where: {
-          place_id: place.place_id,
-        },
-      });
-      console.log(totalDebt);
+      const feeDebt =
+        (await MonthlyDebt.sum("debt", {
+          where: {
+            place_id: place.place_id,
+          },
+        })) ?? 0;
+      const extraDebt =
+        (await ExtraPayment.sum("value", {
+          where: {
+            place_id: place.place_id,
+          },
+        })) ?? 0;
+      const totalDebt = feeDebt + extraDebt;
 
       try {
         await place.update({ pending_value: totalDebt });
+        place.save();
       } catch (error) {
         console.log(error);
       }
@@ -121,12 +126,21 @@ export class MonthlyDebt extends Model {
 
   @AfterUpdate
   static async updateDebt(monthlyDebt: MonthlyDebt) {
-    const totalDebt = await MonthlyDebt.sum("debt", {
-      where: {
-        place_id: monthlyDebt.place_id,
-      },
-    });
     const place = await Place.findByPk(monthlyDebt.place_id);
+    const feeDebt =
+      (await MonthlyDebt.sum("debt", {
+        where: {
+          place_id: place?.place_id,
+        },
+      })) ?? 0;
+    const extraDebt =
+      (await ExtraPayment.sum("value", {
+        where: {
+          place_id: place?.place_id,
+        },
+      })) ?? 0;
+    const totalDebt = feeDebt + extraDebt;
+
     if (place) {
       await place.update({ pending_value: totalDebt });
       place.save();
@@ -136,9 +150,6 @@ export class MonthlyDebt extends Model {
   @BeforeDestroy
   static async destroyMonthlyDebtRelations(monthlyDebt: MonthlyDebt) {
     await Payment.destroy({
-      where: { monthlyDebt_id: monthlyDebt.monthlyDebt_id },
-    });
-    await ExtraPayment.destroy({
       where: { monthlyDebt_id: monthlyDebt.monthlyDebt_id },
     });
   }

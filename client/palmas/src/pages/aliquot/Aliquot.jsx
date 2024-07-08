@@ -29,7 +29,7 @@ function Aliquot() {
   const toggleDropDown = () => {
     setIsOpen(!isOpen);
   };
-
+  console.log(places);
   useEffect(() => {
     setSelectedCustomer("");
     setSelectedMonth("");
@@ -146,8 +146,10 @@ function Aliquot() {
 
     if (selectedPay == 1 && data.deposit == "") {
       toast.error("Se debe colocar el N° de comprobante del depósito");
+      setWaiting(false);
     } else if (selectedPay == 2 && data.transfer == "") {
       toast.error("Se debe colocar el N° de comprobante de la transferencia");
+      setWaiting(false);
     } else {
       registerPayment(modifiedData);
     }
@@ -260,7 +262,13 @@ function Aliquot() {
     doc.text("1", 3, 47);
 
     if (monthDebt && monthDebt.debt != 0) {
-      doc.text(`Pago alicuota ${translateAbreviations(selectedMonth)}`, 10, 47);
+      doc.text(
+        `Pago ${
+          selectedPlace.placeType.monthlyFee.monthlyFee_name
+        } ${translateAbreviations(selectedMonth)}`,
+        10,
+        47
+      );
     } else {
       doc.text(
         `Abono alicuota ${translateAbreviations(selectedMonth)}`,
@@ -362,7 +370,7 @@ function Aliquot() {
     formData.append("myFile", pdfBlob, `Comprobante_N°_${paymentId}.pdf`);
 
     axios
-      .post("https://aliquot.api.softdeveral.com/api/upload", formData, {
+      .post("http://localhost:8081/api/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -500,7 +508,7 @@ function Aliquot() {
                     </div>
                     <div className="block">
                       <div className=" m-1 flex justify-center items-center">
-                        <h1 className=" text-white text-sm md:text-base lg:text-lg font-semibold">{`Alicuota N° ${aliquot.monthlyFee_id}`}</h1>
+                        <h1 className=" text-white text-sm md:text-base lg:text-lg font-semibold">{`${aliquot.monthlyFee_name}`}</h1>
                       </div>
                       <div className=" m-1 flex justify-center items-center">
                         <h1 className=" text-white text-base font-medium">{`c/mensual`}</h1>

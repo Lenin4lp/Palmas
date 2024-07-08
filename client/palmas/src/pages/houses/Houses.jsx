@@ -6,6 +6,8 @@ import Modal from "../../components/Modal";
 import { deletePlace } from "../../api/places";
 import { useAuth } from "../../auth/AuthProvider";
 import Loader from "../../components/Loader";
+import "jspdf-autotable";
+import jsPDF from "jspdf";
 
 function Houses() {
   const placesData = useLoaderData();
@@ -43,6 +45,34 @@ function Houses() {
       setWaiting(false);
     }
   };
+
+  function translateAbreviations(month) {
+    if (month == "January") {
+      return "Enero";
+    } else if (month == "February") {
+      return "Febrero";
+    } else if (month == "March") {
+      return "Marzo";
+    } else if (month == "April") {
+      return "Abril";
+    } else if (month == "May") {
+      return "Mayo";
+    } else if (month == "June") {
+      return "Junio";
+    } else if (month == "July") {
+      return "Julio";
+    } else if (month == "August") {
+      return "Agosto";
+    } else if (month == "September") {
+      return "Septiembre";
+    } else if (month == "October") {
+      return "Octubre";
+    } else if (month == "November") {
+      return "Noviembre";
+    } else if (month == "December") {
+      return "Diciembre";
+    }
+  }
 
   function sortByPendingValue(places) {
     return places.sort((a, b) => {
@@ -99,6 +129,148 @@ function Houses() {
   if (navigation.state === "loading") {
     return <Loader />;
   }
+
+  const generatePDF = async () => {
+    const doc = new jsPDF();
+
+    let fontSize = 11;
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Punto central en el eje X
+    const centerX = pageWidth / 2;
+
+    // Posición de inicio del texto
+    function textStartX(textWidth) {
+      return centerX - textWidth / 2;
+    }
+    doc.setFontSize(11);
+
+    doc.text(
+      `Reporte de deuda`,
+      textStartX(
+        (doc.getStringUnitWidth(`Reporte de deuda`) * fontSize) /
+          doc.internal.scaleFactor
+      ),
+      15
+    );
+
+    doc.text(
+      "Cjto. Habitacional Casa Club Las Palmas",
+      textStartX(
+        (doc.getStringUnitWidth(`Cjto. Habitacional Casa Club Las Palmas`) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      23
+    );
+
+    doc.text(
+      `Obtenido el ${new Date().toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })}`,
+      40,
+      40
+    );
+
+    doc.text(
+      `Registro de deudas por casa`,
+      textStartX(
+        (doc.getStringUnitWidth(`Registro de deudas por casa`) * fontSize) /
+          doc.internal.scaleFactor
+      ),
+      60
+    );
+
+    doc.autoTable({
+      head: [
+        [
+          {
+            content: `Inmueble`,
+            styles: {
+              halign: "center",
+              valign: "middle",
+            },
+            colSpan: 3,
+          },
+          {
+            content: `Propietario`,
+            styles: {
+              halign: "center",
+              valign: "middle",
+            },
+            colSpan: 3,
+          },
+          {
+            content: `Deuda`,
+            styles: {
+              halign: "center",
+              valign: "middle",
+            },
+            colSpan: 3,
+          },
+        ],
+      ],
+      body: places.map((place) => {
+        return [
+          {
+            content: `${place.place_name}`,
+            styles: {
+              halign: "center",
+              valign: "middle",
+              cellWidth: 35,
+            },
+            colSpan: 3,
+          },
+          {
+            content: `${
+              place.neighbors.filter((neighbor) => neighbor.role_id === 1)
+                .length > 0
+                ? `${
+                    place.neighbors.filter(
+                      (neighbor) => neighbor.role_id === 1
+                    )[0].neighbor_name || ""
+                  } ${
+                    place.neighbors.filter(
+                      (neighbor) => neighbor.role_id === 1
+                    )[0].neighbor_lastname || ""
+                  }`
+                : "N/A"
+            }`,
+            styles: {
+              halign: "left",
+              valign: "middle",
+              cellWidth: 50,
+            },
+            colSpan: 3,
+          },
+          {
+            content: `${place.pending_value}`,
+            colSpan: 3,
+            cellWidth: 10,
+          },
+        ];
+      }),
+      theme: "plain",
+      margin: { left: 38, right: 38 },
+      startY: 70,
+      tableWidth: 125,
+      headStyles: {
+        halign: "center",
+        lineWidth: 0.2,
+        lineColor: [0, 0, 0],
+        fontSize: 7,
+      },
+      bodyStyles: {
+        halign: "center",
+        fontSize: 7,
+        lineWidth: 0.05,
+        lineColor: [0, 0, 0],
+      },
+    });
+    doc.save(`Reporte_.pdf`);
+  };
 
   return (
     <>
@@ -422,6 +594,22 @@ function Houses() {
                           </label>
                         </div>
                       </div>
+                    </div>
+                    <div className=" m-5 flex justify-center items-center">
+                      <div
+                        onClick={generatePDF}
+                        className=" cursor-pointer hover:bg-[#8f0e2a] duration-300 hover:scale-105 rounded-lg bg-[#852655] p-3"
+                      >
+                        <h1 className=" text-white">Obtener Reporte</h1>
+                      </div>
+                    </div>
+                    <div className=" m-5 flex justify-center items-center">
+                      <Link
+                        to={"/estados_de_cuenta"}
+                        className=" cursor-pointer hover:bg-[#852655] duration-300 hover:scale-105 rounded-lg  bg-[#8f0e2a] p-3"
+                      >
+                        <h1 className=" text-white">Estados de cuenta</h1>
+                      </Link>
                     </div>
                   </div>
                 </div>

@@ -262,18 +262,33 @@ function AliquotRegister() {
               </g>
             </svg>
           </div>
-          <div className=" m-5 flex justify-center items-center">
-            <h1 className=" text-center text-[#8f0e2a]">
-              Introduce el valor de la nueva alicuota
-            </h1>
-          </div>
+
           <form className=" flex justify-center items-center" action="">
-            <h1 className=" px-2 text-3xl text-[#8f0e2a]">$</h1>
-            <input
-              type="number"
-              {...register("monthlyFee_value", { required: true })}
-              className=" border-[1px] text-lg p-2 border-[#8f0e2a] h-[40px] rounded-lg w-[200px]"
-            />
+            <div className=" block">
+              <div className=" m-5 flex justify-center items-center">
+                <h1 className=" text-center text-[#8f0e2a]">Concepto:</h1>
+              </div>
+              <div className=" flex justify-center">
+                <input
+                  type="text"
+                  {...register("monthlyFee_name", { required: true })}
+                  className=" border-[1px] text-lg p-2 border-[#8f0e2a] h-[40px] rounded-lg w-[200px]"
+                />
+              </div>
+              <div className=" m-5 flex justify-center items-center">
+                <h1 className=" text-center text-[#8f0e2a]">
+                  Introduce el valor de la nueva alicuota
+                </h1>
+              </div>
+              <div className=" flex justify-center">
+                <h1 className=" px-2 text-3xl text-[#8f0e2a]">$</h1>
+                <input
+                  type="number"
+                  {...register("monthlyFee_value", { required: true })}
+                  className=" border-[1px] text-lg p-2 border-[#8f0e2a] h-[40px] rounded-lg w-[200px]"
+                />
+              </div>
+            </div>
           </form>
           <div className=" m-9 flex justify-center items-center">
             <button

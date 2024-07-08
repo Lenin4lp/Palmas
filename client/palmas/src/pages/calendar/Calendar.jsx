@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ContentComponent from "../../components/ContentComponent";
 import { useLoaderData, useNavigation, Link } from "react-router-dom";
 import Loader from "../../components/Loader";
+import "jspdf-autotable";
+import jsPDF from "jspdf";
 
 function Calendar() {
   const yearsData = useLoaderData();
@@ -11,22 +13,609 @@ function Calendar() {
   const types = yearsData.types.data;
   const navigation = useNavigation();
   const [selectedYear, setSelectedYear] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedType, setSelectedType] = useState("");
+  const [reportContent, setReportContent] = useState("");
+  const [reportType, setReportType] = useState(0);
 
-  console.log(years);
-  console.log(places);
-  console.log(selectedYear);
   console.log(monthlyDebts);
-  console.log(types);
+  console.log(places);
 
   const handleSelectedType = (e) => {
     setSelectedType(e.target.value);
   };
 
+  const handleReportType = (e) => {
+    setReportType(e.target.value);
+  };
+
+  const handleSelectedMonth = (e) => {
+    setSelectedMonth(e.target.value);
+  };
+
+  function translateAbreviations(month) {
+    if (month == "January") {
+      return "Enero";
+    } else if (month == "February") {
+      return "Febrero";
+    } else if (month == "March") {
+      return "Marzo";
+    } else if (month == "April") {
+      return "Abril";
+    } else if (month == "May") {
+      return "Mayo";
+    } else if (month == "June") {
+      return "Junio";
+    } else if (month == "July") {
+      return "Julio";
+    } else if (month == "August") {
+      return "Agosto";
+    } else if (month == "September") {
+      return "Septiembre";
+    } else if (month == "October") {
+      return "Octubre";
+    } else if (month == "November") {
+      return "Noviembre";
+    } else if (month == "December") {
+      return "Diciembre";
+    }
+  }
+  console.log(selectedMonth);
+
+  const year =
+    selectedYear !== "" && years.find((year) => year.year == selectedYear);
+
+  const selectedMonthObject =
+    selectedMonth !== "" &&
+    year.months.find((month) => month.month == selectedMonth);
+
+  console.log(selectedMonthObject);
+
   const filteredPlaces =
     selectedType == ""
       ? places
       : places.filter((place) => place.placeType_id == selectedType);
+
+  const monthlyDebtArray =
+    selectedMonth !== "" &&
+    monthlyDebts.filter(
+      (monthlyDebt) => monthlyDebt.month_id == selectedMonthObject.month_id
+    );
+
+  const anualDebtArray =
+    selectedYear !== "" &&
+    monthlyDebts.filter((monthlyDebt) =>
+      monthlyDebt.month_id.includes(selectedYear)
+    );
+
+  console.log(anualDebtArray);
+
+  const anualDebt =
+    anualDebtArray.length > 0 &&
+    anualDebtArray.reduce((acc, curr) => acc + parseFloat(curr.debt), 0);
+
+  console.log(monthlyDebtArray);
+
+  console.log(anualDebt);
+
+  const totalDebt =
+    monthlyDebtArray.length > 0 &&
+    monthlyDebtArray.reduce((acc, curr) => acc + parseFloat(curr.debt), 0);
+
+  const placesDebt = places.reduce(
+    (acc, curr) => acc + parseFloat(curr.pending_value),
+    0
+  );
+
+  function obtainMonthNumber(monthN) {
+    const date = new Date(`2030-${monthN}-01`);
+    const monthNumber = date
+      .toLocaleString("en-US", { month: "numeric" })
+      .padStart(2, "0");
+    return monthNumber;
+  }
+
+  const monthNumber = selectedMonth !== "" && obtainMonthNumber(selectedMonth);
+
+  useEffect(() => {
+    setReportContent("");
+    setReportType(0);
+  }, [selectedYear]);
+
+  const generatePDF = async () => {
+    const doc = new jsPDF();
+
+    let fontSize = 11;
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Punto central en el eje X
+    const centerX = pageWidth / 2;
+
+    // Posición de inicio del texto
+    function textStartX(textWidth) {
+      return centerX - textWidth / 2;
+    }
+    doc.setFontSize(11);
+    doc.text(
+      `${
+        reportType == ""
+          ? `Reporte Anual ${selectedYear}`
+          : `Reporte Mensual ${translateAbreviations(
+              selectedMonth
+            )} ${selectedYear}`
+      }`,
+      textStartX(
+        (doc.getStringUnitWidth(
+          `${
+            reportType == ""
+              ? `Reporte Anual ${selectedYear}`
+              : `Reporte Mensual ${translateAbreviations(
+                  selectedMonth
+                )} ${selectedYear}`
+          }`
+        ) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      15
+    );
+
+    doc.text(
+      "Cjto. Habitacional Casa Club Las Palmas",
+      textStartX(
+        (doc.getStringUnitWidth(`Cjto. Habitacional Casa Club Las Palmas`) *
+          fontSize) /
+          doc.internal.scaleFactor
+      ),
+      23
+    );
+
+    doc.text(
+      `Obtenido el ${new Date().toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })}`,
+      40,
+      40
+    );
+
+    reportType != "" &&
+      doc.autoTable({
+        head: [
+          [
+            {
+              content: `Valor por recuperar ${translateAbreviations(
+                selectedMonth
+              )} ${selectedYear}`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+            {
+              content: `Total por recuperar a la fecha`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+          ],
+        ],
+        body: [
+          [
+            {
+              content: `$${totalDebt.toFixed(2)}`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+            {
+              content: `$${placesDebt.toFixed(2)}`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+          ],
+        ],
+        theme: "plain",
+        margin: { left: 50, right: 50 },
+        startY: 50,
+        tableWidth: 100,
+        headStyles: {
+          halign: "center",
+          lineWidth: 0.2,
+          lineColor: [0, 0, 0],
+          fontSize: 7,
+        },
+        bodyStyles: {
+          halign: "center",
+          fontSize: 7,
+          lineWidth: 0.05,
+          lineColor: [0, 0, 0],
+        },
+      });
+
+    reportType == "" &&
+      doc.autoTable({
+        head: [
+          [
+            {
+              content: `Valor por recuperar año ${selectedYear}`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+            {
+              content: `Total por recuperar a la fecha`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+          ],
+        ],
+        body: [
+          [
+            {
+              content: `$${anualDebt.toFixed(2)}`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+            {
+              content: `$${placesDebt.toFixed(2)}`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+          ],
+        ],
+        theme: "plain",
+        margin: { left: 50, right: 50 },
+        startY: 50,
+        tableWidth: 100,
+        headStyles: {
+          halign: "center",
+          lineWidth: 0.2,
+          lineColor: [0, 0, 0],
+          fontSize: 7,
+        },
+        bodyStyles: {
+          halign: "center",
+          fontSize: 7,
+          lineWidth: 0.05,
+          lineColor: [0, 0, 0],
+        },
+      });
+
+    doc.text(
+      `Registro de deudas por casa`,
+      textStartX(
+        (doc.getStringUnitWidth(`Registro de deudas por casa`) * fontSize) /
+          doc.internal.scaleFactor
+      ),
+      75
+    );
+
+    reportType != "" &&
+      doc.autoTable({
+        head: [
+          [
+            {
+              content: `Inmueble`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+            {
+              content: `Propietario`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 5,
+            },
+            {
+              content: `Deuda mensual`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+            {
+              content: `Deuda extras`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+            {
+              content: `Total Mensual`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+            {
+              content: `Total`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+          ],
+        ],
+
+        body: places.map((place) => {
+          const monthlyDebt =
+            reportType != "" &&
+            place.months.find(
+              (month) =>
+                month.month == selectedMonth && month.month_year == selectedYear
+            ).MonthlyDebt.debt;
+          const extraDebt =
+            reportType != "" && place.extraPayments.length > 0
+              ? place.extraPayments.filter(
+                  (extraPayment) =>
+                    extraPayment.status == true &&
+                    extraPayment.date.substring(0, 4) === selectedYear &&
+                    extraPayment.date.substring(5, 7) === monthNumber
+                )
+              : 0;
+          console.log(extraDebt);
+          const extraDebtTotal =
+            extraDebt != 0
+              ? extraDebt.reduce((acc, curr) => acc + parseFloat(curr.value), 0)
+              : "0.00";
+
+          return [
+            {
+              content: `${place.place_name}`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+                cellWidth: 25,
+              },
+              colSpan: 3,
+            },
+            {
+              content: `${
+                place.neighbors.filter((neighbor) => neighbor.role_id === 1)
+                  .length > 0
+                  ? `${
+                      place.neighbors
+                        .filter((neighbor) => neighbor.role_id === 1)[0]
+                        .neighbor_name.split(" ")[0] || ""
+                    } ${
+                      place.neighbors
+                        .filter((neighbor) => neighbor.role_id === 1)[0]
+                        .neighbor_lastname.split(" ")[0] || ""
+                    }`
+                  : "N/A"
+              }`,
+              styles: {
+                halign: "left",
+                valign: "middle",
+                cellWidth: 30,
+              },
+              colSpan: 5,
+            },
+            {
+              content: `${monthlyDebt}`,
+              colSpan: 3,
+              cellWidth: 20,
+            },
+            {
+              content: `${parseFloat(extraDebtTotal).toFixed(2)}`,
+              colSpan: 3,
+              cellWidth: 20,
+            },
+            {
+              content: `${(
+                parseFloat(monthlyDebt) + parseFloat(extraDebtTotal)
+              ).toFixed(2)}`,
+              colSpan: 3,
+              cellWidth: 20,
+            },
+            {
+              content: `${place.pending_value}`,
+              colSpan: 3,
+              cellWidth: 20,
+            },
+          ];
+        }),
+        theme: "plain",
+        margin: { left: 38, right: 38 },
+        startY: 85,
+        tableWidth: 125,
+        headStyles: {
+          halign: "center",
+          lineWidth: 0.2,
+          lineColor: [0, 0, 0],
+          fontSize: 7,
+        },
+        bodyStyles: {
+          halign: "center",
+          fontSize: 7,
+          lineWidth: 0.05,
+          lineColor: [0, 0, 0],
+        },
+      });
+
+    reportType == "" &&
+      doc.autoTable({
+        head: [
+          [
+            {
+              content: `Inmueble`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+            {
+              content: `Propietario`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 5,
+            },
+            {
+              content: `Deuda anual`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+            {
+              content: `Deuda extras`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+            {
+              content: `Total Anual`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+            {
+              content: `Total`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+              },
+              colSpan: 3,
+            },
+          ],
+        ],
+
+        body: places.map((place) => {
+          const monthlyDebt =
+            reportType == "" &&
+            place.months
+              .filter((month) => month.month_year == selectedYear)
+              .reduce(
+                (acc, curr) => acc + parseFloat(curr.MonthlyDebt.debt),
+                0
+              );
+          const extraDebt =
+            reportType == "" && place.extraPayments.length > 0
+              ? place.extraPayments.filter(
+                  (extraPayment) =>
+                    extraPayment.status == true &&
+                    extraPayment.date.substring(0, 4) === selectedYear
+                )
+              : 0;
+          console.log(extraDebt);
+          const extraDebtTotal =
+            extraDebt != 0
+              ? extraDebt.reduce((acc, curr) => acc + parseFloat(curr.value), 0)
+              : "0.00";
+
+          return [
+            {
+              content: `${place.place_name}`,
+              styles: {
+                halign: "center",
+                valign: "middle",
+                cellWidth: 25,
+              },
+              colSpan: 3,
+            },
+            {
+              content: `${
+                place.neighbors.filter((neighbor) => neighbor.role_id === 1)
+                  .length > 0
+                  ? `${
+                      place.neighbors
+                        .filter((neighbor) => neighbor.role_id === 1)[0]
+                        .neighbor_name.split(" ")[0] || ""
+                    } ${
+                      place.neighbors
+                        .filter((neighbor) => neighbor.role_id === 1)[0]
+                        .neighbor_lastname.split(" ")[0] || ""
+                    }`
+                  : "N/A"
+              }`,
+              styles: {
+                halign: "left",
+                valign: "middle",
+                cellWidth: 30,
+              },
+              colSpan: 5,
+            },
+            {
+              content: `${parseFloat(monthlyDebt).toFixed(2)}`,
+              colSpan: 3,
+              cellWidth: 20,
+            },
+            {
+              content: `${parseFloat(extraDebtTotal).toFixed(2)}`,
+              colSpan: 3,
+              cellWidth: 20,
+            },
+            {
+              content: `${(
+                parseFloat(monthlyDebt) + parseFloat(extraDebtTotal)
+              ).toFixed(2)}`,
+              colSpan: 3,
+              cellWidth: 20,
+            },
+            {
+              content: `${place.pending_value}`,
+              colSpan: 3,
+              cellWidth: 20,
+            },
+          ];
+        }),
+        theme: "plain",
+        margin: { left: 38, right: 38 },
+        startY: 85,
+        tableWidth: 125,
+        headStyles: {
+          halign: "center",
+          lineWidth: 0.2,
+          lineColor: [0, 0, 0],
+          fontSize: 7,
+        },
+        bodyStyles: {
+          halign: "center",
+          fontSize: 7,
+          lineWidth: 0.05,
+          lineColor: [0, 0, 0],
+        },
+      });
+
+    doc.save(`Reporte_${selectedMonth}_${selectedYear}.pdf`);
+  };
 
   if (navigation.state === "loading") {
     return <Loader />;
@@ -567,6 +1156,92 @@ function Calendar() {
                       </tr>
                     </tbody>
                   </table>
+                </div>
+              )}
+              {selectedYear != "" && reportContent == "" && (
+                <div className=" p-10 w-full h-fit flex justify-center items-center">
+                  <button
+                    onClick={() => setReportContent(1)}
+                    className=" bg-gradient-to-b from-[#286868] to-[#339494] rounded-lg"
+                  >
+                    <h1 className=" p-3 text-center text-white text-base font-medium">
+                      Obtener reporte
+                    </h1>
+                  </button>
+                </div>
+              )}
+              {selectedYear != "" && reportContent == 1 && (
+                <div className=" m-10 w-full h-fit flex justify-center items-center">
+                  <div className=" block w-full">
+                    <div className=" flex justify-start w-full items-center">
+                      <button
+                        onClick={() => setReportContent("")}
+                        className=" p-3 bg-gradient-to-b from-[#852655] rounded-lg to-[#8f0e2a]"
+                      >
+                        <h1 className=" font-medium text-white">Cancelar</h1>
+                      </button>
+                    </div>
+                    <div className=" block mt-10">
+                      <div className=" mb-3 flex justify-start items-center">
+                        <h1 className=" text-center text-[#8f0e2a] text-base font-medium">
+                          Año:
+                        </h1>
+                        <select
+                          disabled
+                          className=" p-1 mx-2 rounded-lg border-[1px] border-[#339494]"
+                        >
+                          <option defaultValue value={0}>
+                            {selectedYear}
+                          </option>
+                        </select>
+                      </div>
+                      <div className=" mb-3 flex justify-start items-center">
+                        <h1 className=" text-center text-[#8f0e2a] text-base font-medium">
+                          Tipo:
+                        </h1>
+                        <select
+                          onChange={handleReportType}
+                          value={reportType}
+                          className=" p-1 mx-2 rounded-lg border-[1px] border-[#8f0e2a]"
+                        >
+                          <option defaultValue value="">
+                            Anual
+                          </option>
+                          <option value={1}>Mensual</option>
+                        </select>
+                      </div>
+                      {reportType == 1 && (
+                        <div className=" mb-3 flex justify-start items-center">
+                          <h1 className=" text-center text-[#8f0e2a] text-base font-medium">
+                            Mes:
+                          </h1>
+                          <select
+                            onChange={handleSelectedMonth}
+                            value={selectedMonth}
+                            className=" p-1 mx-2 rounded-lg border-[1px] border-[#8f0e2a]"
+                          >
+                            <option defaultValue value={""}>
+                              Selecciona un mes
+                            </option>
+                            {year.months.map((month) => (
+                              <option key={month.month_id} value={month.month}>
+                                {translateAbreviations(month.month)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                    <div className=" w-full flex justify-center items-center">
+                      <button
+                        disabled={reportType == 1 && selectedMonth == ""}
+                        onClick={() => generatePDF()}
+                        className=" text-white p-2 m-5 bg-gradient-to-b from-[#852655] rounded-lg to-[#8f0e2a]"
+                      >
+                        Obtener reporte
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

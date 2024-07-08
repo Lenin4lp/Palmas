@@ -18,6 +18,7 @@ import { NeighborPlace } from "./neighborPlace.model";
 import { Vehicle } from "./vehicle.model";
 import { v4 as uuidv4 } from "uuid";
 import { MonthlyDebt } from "./monthlyDebt.model";
+import { ExtraPayment } from "./extraPayment.model";
 
 @Table({
   tableName: "inmueble",
@@ -64,6 +65,9 @@ export class Place extends Model {
   @BelongsToMany(() => Month, () => MonthlyDebt)
   months!: Month[];
 
+  @HasMany(() => ExtraPayment)
+  extraPayments!: ExtraPayment[];
+
   @HasMany(() => Vehicle)
   vehicles!: Vehicle[];
 
@@ -88,6 +92,10 @@ export class Place extends Model {
     });
 
     await MonthlyDebt.destroy({
+      where: { place_id: place.place_id },
+    });
+
+    await ExtraPayment.destroy({
       where: { place_id: place.place_id },
     });
   }

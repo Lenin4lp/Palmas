@@ -16,6 +16,8 @@ import { MonthlyDebt } from "../models/monthlyDebt.model";
 import { Role } from "../models/userRole.model";
 import { ExtraPType } from "../models/extraPType.model";
 import { ExtraPayment } from "../models/extraPayment.model";
+import { ExtraPPayment } from "../models/extraPPayment.model";
+import { AccountState } from "../models/accounState.model";
 
 export const connection = new Sequelize({
   dialect: "mysql",
@@ -41,6 +43,8 @@ export const connection = new Sequelize({
     VehicleType,
     ExtraPType,
     ExtraPayment,
+    ExtraPPayment,
+    AccountState,
   ],
   sync: { alter: true },
 });

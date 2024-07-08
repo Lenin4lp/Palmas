@@ -20,7 +20,7 @@ const SideBar = ({ children }) => {
           <div className=" absolute top-[5px] md:top-[20px] flex justify-centers items-center">
             <img
               className={` h-[25px] md:h-[40px] w-[25px] md:w-[40px] duration-500 hover:rotate-[360deg] hover:cursor-pointer`}
-              src="https://softdeveral.com/AliQuo/minilogo.png"
+              src="/minilogo.png"
               alt="logo"
             />
           </div>
